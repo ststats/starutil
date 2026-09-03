@@ -12,7 +12,7 @@ const puppeteer = require('puppeteer');
   await page.setViewport({ width: 1200, height: 1000 });
 
   // 3. 본인의 GitHub Pages 주소로 접속
-  const url = 'https://ststats.github.io/starutill/calendar.html'; 
+  const url = 'https://ststats.github.io/starutil/calendar.html'; 
   await page.goto(url, { waitUntil: 'networkidle2' });
 
   // 4. 로컬 스토리지에 토큰 주입 후 새로고침 (비공개 일정 데이터를 불러오기 위함)
