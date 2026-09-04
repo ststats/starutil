@@ -151,7 +151,6 @@
             box-sizing: border-box;
         }
         .weekly-cell:hover { background-color: var(--primary-light); }
-        .weekly-cell.selected { background-color: var(--primary-light); border: 2px solid var(--primary); }
         
         .weekly-day-number { 
             font-size: 15px; 
@@ -264,7 +263,6 @@
             box-sizing: border-box; 
         }
         .day-cell:hover { background-color: var(--primary-light); }
-        .day-cell.selected { background-color: var(--primary-light); border: 2px solid var(--primary); }
         .day-cell.other-month { background-color: #f8fafc; }
         .day-cell.other-month .day-number { color: #94a3b8; }
 
@@ -431,13 +429,14 @@
         </section>
 
         <aside class="sidebar">
-            <!-- 3. 관리자 연동 및 저장 -->
+            <!-- 3. 관리자 연동 및 전체 저장 (통합) -->
             <div class="box-panel">
-                <div class="panel-title">🔑 관리자 연동 및 저장</div>
+                <div class="panel-title">🔑 관리자 연동 및 데이터 저장</div>
                 <div class="form-row" style="margin-bottom: 0; display: flex; gap: 8px;">
                     <input type="password" id="githubToken" placeholder="GitHub 토큰 입력" style="flex: 1;">
                     <button class="btn-action" onclick="saveTokenLocally()" style="background-color: var(--text-heading); white-space: nowrap;">연동</button>
-                    <button class="btn-action" onclick="captureCalendar()" style="white-space: nowrap;">저장</button>
+                    <!-- 💡 이곳의 버튼 하나로 JSON과 PNG를 모두 한 번에 저장합니다. -->
+                    <button id="saveAllBtn" class="btn-action" onclick="saveAllToGithub()" style="white-space: nowrap;">저장</button>
                 </div>
             </div>
 
@@ -466,7 +465,7 @@
                 <div class="form-row" style="margin-bottom: 0;">
                     <input type="text" id="inputDetail" placeholder="상세내용 (오늘의 일정에만 표시)">
                 </div>
-                <button class="btn-primary" id="submitBtn" onclick="addOrUpdateSchedule()">일정 등록하기</button>
+                <button class="btn-primary" id="submitBtn" onclick="addOrUpdateSchedule()">일정 반영하기</button>
             </div>
 
             <!-- 5. 선택한 날짜 일정 (동적 전환) -->
@@ -480,7 +479,7 @@
     <script>
         let currentDate = new Date();
         let selectedDateStr = "";
-        let selectedType = "calendar"; // 'calendar' 또는 'weekly'
+        let selectedType = "calendar"; 
         let schedules = {}; 
         let weeklySchedules = {}; 
         let weeklyOffset = 0; 
@@ -542,38 +541,36 @@
             }
         };
 
+        // 💡 1. 순수 JSON 저장 함수 (자동 실행 X)
         const saveData = async () => {
             const token = document.getElementById('githubToken').value;
-            if(!token) return alert('GitHub 토큰을 입력하고 연동해주세요!');
+            if(!token) throw new Error("토큰 없음");
 
-            try {
-                const bundleData = { schedules, weeklySchedules };
-                const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(bundleData)))); 
-                
-                /* [skip ci] 태그가 확실히 적용되도록 설정 */
-                const payload = { message: '일정 데이터 업데이트 [skip ci]', content: contentBase64 };
-                if (dataFileSha) payload.sha = dataFileSha;
+            const bundleData = { schedules, weeklySchedules };
+            const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(bundleData)))); 
+            
+            // 깃허브 액션 디플로이가 확실히 무시되도록 커밋 메시지 고정
+            const payload = { message: '일정 데이터 업데이트 [skip ci]', content: contentBase64 };
+            if (dataFileSha) payload.sha = dataFileSha;
 
-                const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${DATA_FILE_PATH}`, {
-                    method: 'PUT',
-                    headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
+            const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${DATA_FILE_PATH}`, {
+                method: 'PUT',
+                headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
 
-                if (res.ok) {
-                    const data = await res.json();
-                    dataFileSha = data.content.sha; 
-                } else {
-                    alert('데이터 저장 실패!');
-                }
-            } catch (e) {
-                console.error(e);
+            if (res.ok) {
+                const data = await res.json();
+                dataFileSha = data.content.sha; 
+            } else {
+                throw new Error('데이터 저장 실패');
             }
         };
 
-        const captureCalendar = () => {
+        // 💡 2. 순수 이미지 캡처 및 저장 함수 (자동 실행 X)
+        const captureCalendar = async () => {
             const token = document.getElementById('githubToken').value;
-            if(!token) return alert('GitHub 토큰을 연동해주세요!');
+            if(!token) throw new Error("토큰 없음");
 
             const target = document.getElementById('calendarCaptureArea');
             const calInner = document.getElementById('calendarInner');
@@ -584,46 +581,61 @@
             target.style.width = '830px'; 
             calInner.style.overflow = 'visible'; 
 
-            html2canvas(target, { 
+            const canvas = await html2canvas(target, { 
                 scale: 2, 
                 useCORS: true,
                 windowWidth: 1290,
                 backgroundColor: "#f8fafc" 
-            }).then(async canvas => {
-                target.style.width = originalWidth;
-                calInner.style.overflow = originalCalOverflow;
-
-                const base64Image = canvas.toDataURL('image/png').split(',')[1]; 
-                
-                try {
-                    let imgSha = '';
-                    const getRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${IMG_FILE_PATH}`, {
-                        headers: { Authorization: `token ${token}` }
-                    });
-                    if(getRes.ok) {
-                        const data = await getRes.json();
-                        imgSha = data.sha;
-                    }
-
-                    const payload = { message: '캘린더 이미지 갱신', content: base64Image };
-                    if (imgSha) payload.sha = imgSha;
-
-                    const putRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${IMG_FILE_PATH}`, {
-                        method: 'PUT',
-                        headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-                    
-                    if (putRes.ok) {
-                        alert('✅ 이미지가 깃허브에 완벽하게 갱신되었습니다!');
-                    } else {
-                        alert('이미지 갱신 실패!');
-                    }
-                } catch(e) {
-                    console.error(e);
-                    alert("캡처 중 오류가 발생했습니다.");
-                }
             });
+            
+            target.style.width = originalWidth;
+            calInner.style.overflow = originalCalOverflow;
+
+            const base64Image = canvas.toDataURL('image/png').split(',')[1]; 
+            
+            let imgSha = '';
+            const getRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${IMG_FILE_PATH}`, {
+                headers: { Authorization: `token ${token}` }
+            });
+            if(getRes.ok) {
+                const data = await getRes.json();
+                imgSha = data.sha;
+            }
+
+            const payload = { message: '캘린더 이미지 갱신 [skip ci]', content: base64Image };
+            if (imgSha) payload.sha = imgSha;
+
+            const putRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${IMG_FILE_PATH}`, {
+                method: 'PUT',
+                headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            
+            if (!putRes.ok) {
+                throw new Error('이미지 갱신 실패');
+            }
+        };
+
+        // 💡 3. 수동 통합 저장 함수 (사용자가 사이드바 [저장] 버튼을 눌렀을 때만 실행)
+        const saveAllToGithub = async () => {
+            const token = document.getElementById('githubToken').value;
+            if(!token) return alert('GitHub 토큰을 먼저 입력하고 연동해주세요!');
+
+            const saveBtn = document.getElementById('saveAllBtn');
+            saveBtn.innerText = '저장중...';
+            saveBtn.disabled = true;
+
+            try {
+                await saveData();
+                await captureCalendar();
+                alert('✅ 캘린더 데이터와 이미지가 성공적으로 깃허브에 저장되었습니다!');
+            } catch (error) {
+                console.error(error);
+                alert('저장 중 오류가 발생했습니다.');
+            } finally {
+                saveBtn.innerText = '저장';
+                saveBtn.disabled = false;
+            }
         };
 
         const escapeHTML = (str) => {
@@ -664,10 +676,6 @@
                 
                 if (dateStr === todayStr) dayDiv.classList.add('today');
                 if (publicHolidays[dateStr]) dayDiv.classList.add('holiday');
-                
-                if (selectedType === 'calendar' && selectedDateStr === dateStr) {
-                    dayDiv.classList.add('selected');
-                }
                 
                 let dayHTML = `<span class="day-number">${i}</span>`;
 
@@ -741,12 +749,10 @@
                 targetStore[selectedDateStr].push({ id: Date.now(), time, person, desc, detail, color });
             }
 
-            saveData();       
-            
-            // 💡 등록/수정 완료 후 선택 상태를 완전히 비워주어 파란 테두리가 확실히 사라지게 함
-            selectedDateStr = "";
-            renderCalendar();
+            // 선택 상태 초기화
+            selectedDateStr = ""; 
             cancelEdit();
+            renderCalendar(); 
         };
 
         const enterEditMode = (dateStr, id, type = 'calendar') => {
@@ -787,7 +793,7 @@
             document.getElementById('selectedListTitle').innerText = (selectedType === 'weekly') ? `📅 선택한 날짜 김윤환 일정` : `📅 선택한 날짜 일정`;
             
             const submitBtn = document.getElementById('submitBtn');
-            submitBtn.innerText = '일정 등록하기';
+            submitBtn.innerText = '일정 반영하기';
             submitBtn.style.backgroundColor = 'var(--primary)';
             renderSelectedDateSchedules();
         };
@@ -811,7 +817,6 @@
             if (targetStore[dateStr].length === 0) delete targetStore[dateStr];
             
             renderCalendar();
-            saveData();
         };
 
         const renderTodaySchedules = () => {
@@ -860,9 +865,6 @@
                 
                 const cell = document.createElement('div');
                 cell.className = 'weekly-cell';
-                if (selectedType === 'weekly' && selectedDateStr === dateStr) {
-                    cell.classList.add('selected');
-                }
                 
                 let cellHTML = `<div class="weekly-day-number">${currentDay.getDate()}</div>`;
 
