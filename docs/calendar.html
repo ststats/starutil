@@ -122,10 +122,10 @@
         }
         .weekly-cell {
             background: var(--bg-panel);
-            min-height: 110px;
+            min-height: 130px;
             display: flex;
             flex-direction: column;
-            padding: 6px;
+            padding: 8px;
             cursor: pointer;
             border-right: 1px solid var(--border-light);
             border-bottom: 1px solid var(--border-light);
@@ -133,24 +133,23 @@
             box-sizing: border-box;
         }
         .weekly-cell:hover { background-color: var(--primary-light); }
-        .weekly-day-title { font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; text-align: center; }
+        .weekly-day-title { font-size: 15px; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-align: center; }
         .weekly-cell:nth-child(7n+1) .weekly-day-title { color: var(--sunday); }
         .weekly-cell:nth-child(7n) .weekly-day-title { color: var(--saturday); }
 
         .weekly-cell-event {
             border-radius: var(--radius-sm);
-            padding: 4px 5px;
-            margin-bottom: 3px;
+            padding: 5px 6px;
+            margin-bottom: 4px;
             font-weight: 500;
             display: flex;
             flex-direction: column;
-            gap: 1px;
+            gap: 2px;
             color: var(--text-heading);
             box-shadow: var(--shadow-card);
-            font-size: 12px;
         }
         .weekly-cell-top { display: flex; justify-content: space-between; align-items: center; font-weight: 600; white-space: nowrap; }
-        .weekly-event-desc { text-align: right; white-space: pre-wrap; word-break: break-all; margin-left: auto; line-height: 1.2; }
+        .weekly-event-desc { font-size: 13px; text-align: right; white-space: pre-wrap; word-break: break-all; margin-left: auto; line-height: 1.3; }
 
         /* 공통 헤더 네비게이션 스타일 */
         .header-nav-container {
@@ -166,7 +165,7 @@
             width: 28px;
             height: 28px;
             border-radius: 50%;
-            font-size: 14px;
+            font-size: 16px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -368,7 +367,7 @@
                         <div class="panel-title" style="margin-bottom: 0;">👨‍💻 김윤환 주간 일정</div>
                         <div class="header-nav-container">
                             <button class="header-nav-btn" onclick="changeWeeklyOffset(-1)">‹</button>
-                            <div id="weeklyTitle" class="header-badge" style="font-size: 16px;"></div>
+                            <div id="weeklyTitle" class="header-badge" style="font-size: 18px;"></div>
                             <button class="header-nav-btn" onclick="changeWeeklyOffset(1)">›</button>
                         </div>
                     </div>
@@ -380,9 +379,9 @@
                     <div class="calendar-header-area">
                         <div class="panel-title" style="margin-bottom: 0;">📅 이달의 일정</div>
                         <div class="header-nav-container">
-                            <button class="month-nav-btn" onclick="changeMonth(-1)">‹</button>
-                            <div id="monthTitle" class="month-badge"></div>
-                            <button class="month-nav-btn" onclick="changeMonth(1)">›</button>
+                            <button class="header-nav-btn" onclick="changeMonth(-1)">‹</button>
+                            <div id="monthTitle" class="header-badge"></div>
+                            <button class="header-nav-btn" onclick="changeMonth(1)">›</button>
                         </div>
                     </div>
                     <div class="calendar-inner" id="calendarInner">
@@ -458,7 +457,6 @@
         const IMG_FILE_PATH = 'docs/data/calendar.png';
         let dataFileSha = ''; 
 
-        // 공휴일 날짜 데이터 (텍스트 표시는 제거하고 빨간색 날짜 처리용으로만 활용)
         const publicHolidays = {
             "2024-01-01": true, "2024-02-09": true, "2024-02-10": true, "2024-02-11": true, "2024-02-12": true,
             "2024-03-01": true, "2024-04-10": true, "2024-05-05": true, "2024-05-06": true, "2024-05-15": true,
@@ -629,11 +627,7 @@
                 dayDiv.className = 'day-cell';
                 
                 if (dateStr === todayStr) dayDiv.classList.add('today');
-                
-                // 공휴일인 경우 holiday 클래스 추가 (날짜 숫자가 빨간색으로 표시됨)
-                if (publicHolidays[dateStr]) {
-                    dayDiv.classList.add('holiday');
-                }
+                if (publicHolidays[dateStr]) dayDiv.classList.add('holiday');
                 
                 let dayHTML = `<span class="day-number">${i}</span>`;
 
@@ -820,10 +814,12 @@
 
                 if (weeklySchedules[dateStr] && weeklySchedules[dateStr].length > 0) {
                     weeklySchedules[dateStr].forEach(item => {
-                        const timeHtml = item.time ? `<span style="font-size:11px; opacity:0.8;">${escapeHTML(item.time)}</span>` : '';
+                        const timeHtml = item.time ? `<span class="event-time">${escapeHTML(item.time)}</span>` : '';
+                        const personText = item.person ? `<span class="event-person">${escapeHTML(item.person)}</span>` : '';
+                        
                         cellHTML += `
                             <div class="weekly-cell-event" style="background-color: ${item.color || '#eff6ff'};">
-                                <div class="weekly-cell-top">${timeHtml}</div>
+                                <div class="weekly-cell-top">${timeHtml}${personText}</div>
                                 <div class="weekly-event-desc">${escapeHTML(item.desc)}</div>
                             </div>
                         `;
