@@ -151,6 +151,7 @@
             box-sizing: border-box;
         }
         .weekly-cell:hover { background-color: var(--primary-light); }
+        .weekly-cell.selected { background-color: var(--primary-light); border: 2px solid var(--primary); }
         
         .weekly-day-number { 
             font-size: 15px; 
@@ -439,7 +440,7 @@
                 </div>
             </div>
 
-            <!-- 4. 일정 추가 폼 -->
+            <!-- 4. 일정 추가 폼 (동적 전환) -->
             <div class="box-panel">
                 <div class="panel-title" id="formTitle">➕ [날짜선택] 일정 추가</div>
                 <input type="hidden" id="editScheduleId" value="">
@@ -467,9 +468,9 @@
                 <button class="btn-primary" id="submitBtn" onclick="addOrUpdateSchedule()">일정 등록하기</button>
             </div>
 
-            <!-- 5. 선택한 날짜 일정 -->
+            <!-- 5. 선택한 날짜 일정 (동적 전환) -->
             <div class="box-panel">
-                <div class="panel-title">📅 선택한 날짜 일정</div>
+                <div class="panel-title" id="selectedListTitle">📅 선택한 날짜 일정</div>
                 <div class="selected-list" id="selectedDateList"></div>
             </div>
         </aside>
@@ -478,6 +479,7 @@
     <script>
         let currentDate = new Date();
         let selectedDateStr = "";
+        let selectedType = "calendar"; // 'calendar' 또는 'weekly'
         let schedules = {}; 
         let weeklySchedules = {}; 
         let weeklyOffset = 0; 
@@ -677,7 +679,7 @@
                 }
 
                 dayDiv.innerHTML = dayHTML;
-                dayDiv.onclick = () => selectDate(dateStr);
+                dayDiv.onclick = () => selectDate(dateStr, 'calendar');
                 daysGrid.appendChild(dayDiv);
             }
 
@@ -702,14 +704,15 @@
             renderWeeklyGrid();
         };
 
-        const selectDate = (dateStr) => {
+        const selectDate = (dateStr, type = 'calendar') => {
             selectedDateStr = dateStr;
+            selectedType = type;
             cancelEdit(); 
             renderSelectedDateSchedules();
         };
 
         const addOrUpdateSchedule = () => {
-            if (!selectedDateStr) return alert('캘린더에서 날짜를 선택해주세요!');
+            if (!selectedDateStr) return alert('날짜를 선택해주세요!');
 
             const time = document.getElementById('inputTime').value.trim();
             const person = document.getElementById('inputPerson').value.trim();
@@ -720,14 +723,16 @@
 
             if (!desc && !time && !person) return alert('입력된 내용이 없습니다.');
 
-            if (!schedules[selectedDateStr]) schedules[selectedDateStr] = [];
+            const targetStore = (selectedType === 'weekly') ? weeklySchedules : schedules;
+
+            if (!targetStore[selectedDateStr]) targetStore[selectedDateStr] = [];
 
             if (editId) {
-                const item = schedules[selectedDateStr].find(i => i.id == editId);
+                const item = targetStore[selectedDateStr].find(i => i.id == editId);
                 if (item) Object.assign(item, { time, person, desc, detail, color });
                 cancelEdit();
             } else {
-                schedules[selectedDateStr].push({ id: Date.now(), time, person, desc, detail, color });
+                targetStore[selectedDateStr].push({ id: Date.now(), time, person, desc, detail, color });
             }
 
             renderCalendar(); 
@@ -735,9 +740,13 @@
             clearForm();
         };
 
-        const enterEditMode = (dateStr, id) => {
-            const item = schedules[dateStr]?.find(i => i.id === id);
+        const enterEditMode = (dateStr, id, type = 'calendar') => {
+            const targetStore = (type === 'weekly') ? weeklySchedules : schedules;
+            const item = targetStore[dateStr]?.find(i => i.id === id);
             if (!item) return;
+
+            selectedType = type;
+            selectedDateStr = dateStr;
 
             document.getElementById('editScheduleId').value = item.id;
             document.getElementById('inputTime').value = item.time || '';
@@ -752,15 +761,22 @@
             document.getElementById('inputDetail').value = item.detail || '';
             document.getElementById('inputColor').value = item.color || '#d1fae5';
 
-            document.getElementById('formTitle').innerText = `✏️ [${dateStr}] 일정 수정`;
+            const prefix = (type === 'weekly') ? '김윤환 ' : '';
+            document.getElementById('formTitle').innerText = `✏️ [${dateStr}] ${prefix}일정 수정`;
+            document.getElementById('selectedListTitle').innerText = (type === 'weekly') ? `📅 선택한 날짜 김윤환 일정` : `📅 선택한 날짜 일정`;
+
             const submitBtn = document.getElementById('submitBtn');
             submitBtn.innerText = '수정 완료하기';
             submitBtn.style.backgroundColor = 'var(--success)';
+            renderSelectedDateSchedules();
         };
 
         const cancelEdit = () => {
             clearForm();
-            document.getElementById('formTitle').innerText = `➕ [${selectedDateStr || '날짜선택'}] 일정 추가`;
+            const prefix = (selectedType === 'weekly') ? '김윤환 ' : '';
+            document.getElementById('formTitle').innerText = `➕ [${selectedDateStr || '날짜선택'}] ${prefix}일정 추가`;
+            document.getElementById('selectedListTitle').innerText = (selectedType === 'weekly') ? `📅 선택한 날짜 김윤환 일정` : `📅 선택한 날짜 일정`;
+            
             const submitBtn = document.getElementById('submitBtn');
             submitBtn.innerText = '일정 등록하기';
             submitBtn.style.backgroundColor = 'var(--primary)';
@@ -776,12 +792,13 @@
             document.getElementById('inputColor').value = '#d1fae5';
         };
 
-        const deleteSchedule = (dateStr, id) => {
+        const deleteSchedule = (dateStr, id, type = 'calendar') => {
             if (!confirm("일정을 삭제하시겠습니까?")) return;
             if (document.getElementById('editScheduleId').value == id) cancelEdit();
 
-            schedules[dateStr] = schedules[dateStr].filter(item => item.id !== id);
-            if (schedules[dateStr].length === 0) delete schedules[dateStr];
+            const targetStore = (type === 'weekly') ? weeklySchedules : schedules;
+            targetStore[dateStr] = targetStore[dateStr].filter(item => item.id !== id);
+            if (targetStore[dateStr].length === 0) delete targetStore[dateStr];
             
             renderCalendar();
             saveData();
@@ -833,6 +850,9 @@
                 
                 const cell = document.createElement('div');
                 cell.className = 'weekly-cell';
+                if (selectedType === 'weekly' && selectedDateStr === dateStr) {
+                    cell.classList.add('selected');
+                }
                 
                 let cellHTML = `<div class="weekly-day-number">${currentDay.getDate()}</div>`;
 
@@ -852,7 +872,7 @@
 
                 cell.innerHTML = cellHTML;
                 cell.onclick = () => {
-                    selectDate(dateStr);
+                    selectDate(dateStr, 'weekly');
                 };
                 grid.appendChild(cell);
             }
@@ -860,12 +880,21 @@
 
         const renderSelectedDateSchedules = () => {
             const container = document.getElementById('selectedDateList');
+            const titleEl = document.getElementById('selectedListTitle');
+            const formTitleEl = document.getElementById('formTitle');
+
             if (!selectedDateStr) {
                 container.innerHTML = `<div class="no-schedule">날짜를 클릭하세요.</div>`;
                 return;
             }
 
-            const daySchedules = schedules[selectedDateStr] || [];
+            const prefix = (selectedType === 'weekly') ? '김윤환 ' : '';
+            titleEl.innerText = `📅 선택한 날짜 ${prefix}일정`;
+            formTitleEl.innerText = `➕ [${selectedDateStr}] ${prefix}일정 추가`;
+
+            const targetStore = (selectedType === 'weekly') ? weeklySchedules : schedules;
+            const daySchedules = targetStore[selectedDateStr] || [];
+
             if (daySchedules.length === 0) {
                 container.innerHTML = `<div class="no-schedule">등록된 일정이 없습니다.</div>`;
                 return;
@@ -882,8 +911,8 @@
                             ${timeHtml} ${personHtml}
                             <span class="card-desc">${escapeHTML(item.desc)}</span>
                             <div class="btn-group">
-                                <button class="edit-btn" onclick="enterEditMode('${selectedDateStr}', ${item.id})">수정</button>
-                                <button class="delete-btn" onclick="deleteSchedule('${selectedDateStr}', ${item.id})">삭제</button>
+                                <button class="edit-btn" onclick="enterEditMode('${selectedDateStr}', ${item.id}, '${selectedType}')">수정</button>
+                                <button class="delete-btn" onclick="deleteSchedule('${selectedDateStr}', ${item.id}, '${selectedType}')">삭제</button>
                             </div>
                         </div>
                     </div>
@@ -900,7 +929,7 @@
         const init = () => {
             const today = new Date();
             const todayStr = getFormatDate(today.getFullYear(), today.getMonth() + 1, today.getDate());
-            selectDate(todayStr);
+            selectDate(todayStr, 'calendar');
 
             const savedToken = localStorage.getItem('gh_token');
             if (savedToken) {
