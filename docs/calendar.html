@@ -320,7 +320,7 @@
                     <button class="btn-action" onclick="captureCalendar()">저장</button>
                 </div>
 
-                    <div class="panel-title" id="formTitle"><span>➕</span> <span>[<span id="selectedDateText">날짜선택</span>] 일정 추가</span></div>
+                    <div class="panel-title" id="formTitle" style="margin-top: 24px;">➕ [날짜선택] 일정 추가</div>
                 <input type="hidden" id="editScheduleId" value="">
                 
                 <div class="form-row">
@@ -554,7 +554,6 @@
 
         const selectDate = (dateStr) => {
             selectedDateStr = dateStr;
-            document.getElementById('selectedDateText').innerText = dateStr;
             cancelEdit();
             renderSelectedDateSchedules();
         };
@@ -604,7 +603,7 @@
             document.getElementById('inputDetail').value = item.detail || '';
             document.getElementById('inputColor').value = item.color || '#d1fae5';
 
-            document.getElementById('formTitle').innerHTML = `<span>✏️</span> <span>[<span id="selectedDateText">${dateStr}</span>] 일정 수정</span>`;
+            document.getElementById('formTitle').innerText = `✏️ [${dateStr}] 일정 수정`;
             const submitBtn = document.getElementById('submitBtn');
             submitBtn.innerText = '수정 완료하기';
             submitBtn.style.backgroundColor = 'var(--success)';
@@ -612,7 +611,7 @@
 
         const cancelEdit = () => {
             clearForm();
-            document.getElementById('formTitle').innerHTML = `<span>➕</span> <span>[<span id="selectedDateText">${selectedDateStr || '날짜선택'}</span>] 일정 추가</span>`;
+            document.getElementById('formTitle').innerText = `➕ [${selectedDateStr || '날짜선택'}] 일정 추가`;
             const submitBtn = document.getElementById('submitBtn');
             submitBtn.innerText = '일정 등록하기';
             submitBtn.style.backgroundColor = 'var(--primary)';
