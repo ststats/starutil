@@ -264,6 +264,7 @@
             box-sizing: border-box; 
         }
         .day-cell:hover { background-color: var(--primary-light); }
+        .day-cell.selected { background-color: var(--primary-light); border: 2px solid var(--primary); }
         .day-cell.other-month { background-color: #f8fafc; }
         .day-cell.other-month .day-number { color: #94a3b8; }
 
@@ -548,6 +549,8 @@
             try {
                 const bundleData = { schedules, weeklySchedules };
                 const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(bundleData)))); 
+                
+                /* [skip ci] 태그가 확실히 적용되도록 설정 */
                 const payload = { message: '일정 데이터 업데이트 [skip ci]', content: contentBase64 };
                 if (dataFileSha) payload.sha = dataFileSha;
 
@@ -662,7 +665,6 @@
                 if (dateStr === todayStr) dayDiv.classList.add('today');
                 if (publicHolidays[dateStr]) dayDiv.classList.add('holiday');
                 
-                // 월간 캘린더 선택 상태 반영
                 if (selectedType === 'calendar' && selectedDateStr === dateStr) {
                     dayDiv.classList.add('selected');
                 }
@@ -739,10 +741,9 @@
                 targetStore[selectedDateStr].push({ id: Date.now(), time, person, desc, detail, color });
             }
 
-            renderCalendar(); 
             saveData();       
             
-            // 💡 등록/수정 완료 후 선택 상태 및 폼 완벽 초기화
+            // 💡 등록/수정 완료 후 선택 상태를 완전히 비워주어 파란 테두리가 확실히 사라지게 함
             selectedDateStr = "";
             renderCalendar();
             cancelEdit();
