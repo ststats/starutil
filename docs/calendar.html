@@ -185,7 +185,7 @@
         .day-cell.today .day-number { width: max-content; position: relative; z-index: 1; }
         .day-cell.today .day-number::after {
             content: ''; position: absolute; bottom: 1px; left: -2px; right: -2px; height: 8px;
-            background-color: rgba(59, 130, 246, 0.3); z-index: -1; border-radius: 2px;
+            background-color: rgba(250, 204, 21, 0.5); z-index: -1; border-radius: 2px;
         }
 
         /* 캘린더 내부 일정 셀 */
@@ -245,7 +245,13 @@
             outline: none; border-color: var(--primary); 
             background: var(--bg-panel); box-shadow: 0 0 0 3px var(--primary-light); 
         }
-        textarea { resize: vertical; min-height: 80px; }
+
+        textarea { 
+            resize: vertical; 
+            min-height: 80px; 
+            padding-top: 29px; 
+            padding-bottom: 29px;
+        }
 
         .selected-list { display: flex; flex-direction: column; gap: 12px; }
         .selected-card {
