@@ -164,6 +164,33 @@
             max-width: 770px; 
         }
         
+        .month-nav-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .month-nav-btn {
+            background: var(--bg-page);
+            border: 1px solid var(--border-dark);
+            color: var(--text-main);
+            width: 32px;
+            height: 32px;
+            border-radius: var(--radius-sm);
+            font-size: 15px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .month-nav-btn:hover {
+            background-color: var(--primary-light);
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+
         .month-badge {
             font-size: 20px;
             font-weight: 700;
@@ -246,7 +273,6 @@
             [2] 사이드바 디자인
         ============================== */
         
-        .month-control-box { display: flex; gap: 8px; margin-bottom: 24px; align-items: center; }
         button { cursor: pointer; font-family: inherit; transition: all 0.2s; border: none; }
         
         .btn-outline { 
@@ -349,7 +375,11 @@
                 <div class="box-panel">
                     <div class="calendar-header-area">
                         <div class="panel-title" style="margin-bottom: 0;">📅 이달의 일정</div>
-                        <div id="monthTitle" class="month-badge"></div>
+                        <div class="month-nav-container">
+                            <button class="month-nav-btn" onclick="changeMonth(-1)">&lt;</button>
+                            <div id="monthTitle" class="month-badge"></div>
+                            <button class="month-nav-btn" onclick="changeMonth(1)">&gt;</button>
+                        </div>
                     </div>
                     <div class="calendar-inner" id="calendarInner">
                         <div class="calendar-scroll-content">
@@ -365,24 +395,19 @@
         </section>
 
         <aside class="sidebar">
-            <!-- 3. 관리자 연동 -->
+            <!-- 3. 관리자 연동 및 저장 -->
             <div class="box-panel">
-                <div class="panel-title">🔑 관리자 연동</div>
-                <div class="form-row" style="margin-bottom: 0;">
-                    <input type="password" id="githubToken" placeholder="GitHub 토큰 입력">
-                    <button class="btn-action" onclick="saveTokenLocally()" style="background-color: var(--text-heading);">연동</button>
+                <div class="panel-title">🔑 관리자 연동 및 저장</div>
+                <div class="form-row" style="margin-bottom: 0; display: flex; gap: 8px;">
+                    <input type="password" id="githubToken" placeholder="GitHub 토큰 입력" style="flex: 1;">
+                    <button class="btn-action" onclick="saveTokenLocally()" style="background-color: var(--text-heading); white-space: nowrap;">연동</button>
+                    <button class="btn-action" onclick="captureCalendar()" style="white-space: nowrap;">저장</button>
                 </div>
             </div>
 
-            <!-- 4. 월 컨트롤 및 일정 추가 폼 -->
+            <!-- 4. 일정 추가 폼 -->
             <div class="box-panel">
-                <div class="month-control-box">
-                    <button class="btn-outline" onclick="changeMonth(-1)">◀ 이전달</button>
-                    <button class="btn-outline" onclick="changeMonth(1)">다음달 ▶</button>
-                    <button class="btn-action" onclick="captureCalendar()">저장</button>
-                </div>
-
-                <div class="panel-title" id="formTitle" style="margin-top: 24px;">➕ [날짜선택] 일정 추가</div>
+                <div class="panel-title" id="formTitle">➕ [날짜선택] 일정 추가</div>
                 <input type="hidden" id="editScheduleId" value="">
                 
                 <div class="form-row">
@@ -420,8 +445,8 @@
         let currentDate = new Date();
         let selectedDateStr = "";
         let schedules = {}; 
-        let weeklySchedules = {}; // 주간일정 데이터 독립 저장소 (날짜별 키 구조)
-        let weeklyOffset = 0; // 주간 캘린더 네비게이션용 오프셋
+        let weeklySchedules = {}; 
+        let weeklyOffset = 0; 
 
         const REPO_OWNER = 'ststats';
         const REPO_NAME = 'starutil';
@@ -450,7 +475,6 @@
                     const decoded = decodeURIComponent(escape(atob(data.content))); 
                     const parsed = JSON.parse(decoded);
                     
-                    // 기존 데이터 호환성 분기 처리
                     if (parsed.schedules) {
                         schedules = parsed.schedules;
                         weeklySchedules = parsed.weeklySchedules || {};
@@ -748,7 +772,6 @@
             }).join('');
         };
 
-        // 독립형 주간 캘린더 형태 렌더링 함수 (메인 캘린더와 데이터 공유하지 않음)
         const renderWeeklyGrid = () => {
             const grid = document.getElementById('weeklyGrid');
             grid.innerHTML = "";
@@ -782,11 +805,8 @@
                 }
 
                 cell.innerHTML = cellHTML;
-                // 주간 캘린더 셀 클릭 시 해당 날짜를 선택 상태로 두되, 주간전용 추가 모달이나 입력 처리 가능하도록 연결
                 cell.onclick = () => {
-                    // 주간 칸을 클릭했을 때 해당 날짜가 선택되도록 유도
                     selectDate(dateStr);
-                    // 원한다면 주간 일정을 곧바로 등록할 수 있게 formTitle 변경 가능
                 };
                 grid.appendChild(cell);
             }
