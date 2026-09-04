@@ -708,7 +708,7 @@
             selectedDateStr = dateStr;
             selectedType = type;
             cancelEdit(); 
-            renderSelectedDateSchedules();
+            renderCalendar(); // 선택 상태 변경을 캘린더와 주간 그리드에 모두 반영
         };
 
         const addOrUpdateSchedule = () => {
@@ -733,11 +733,11 @@
                 cancelEdit();
             } else {
                 targetStore[selectedDateStr].push({ id: Date.now(), time, person, desc, detail, color });
+                cancelEdit(); // 💡 등록 완료 후 선택 상태 유지/해제 및 폼 정상 리셋
             }
 
             renderCalendar(); 
             saveData();       
-            clearForm();
         };
 
         const enterEditMode = (dateStr, id, type = 'calendar') => {
@@ -768,7 +768,7 @@
             const submitBtn = document.getElementById('submitBtn');
             submitBtn.innerText = '수정 완료하기';
             submitBtn.style.backgroundColor = 'var(--success)';
-            renderSelectedDateSchedules();
+            renderCalendar();
         };
 
         const cancelEdit = () => {
@@ -780,6 +780,7 @@
             const submitBtn = document.getElementById('submitBtn');
             submitBtn.innerText = '일정 등록하기';
             submitBtn.style.backgroundColor = 'var(--primary)';
+            renderSelectedDateSchedules();
         };
 
         const clearForm = () => {
