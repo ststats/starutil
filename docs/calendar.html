@@ -111,7 +111,7 @@
         .today-card .card-person { font-size: 15px; }
         .today-card .card-desc { font-size: 15px; }
 
-        /* 주간 캘린더 미니 스타일 (월간 캘린더와 동일한 요일 헤더 및 격자 구조 적용) */
+        /* 주간 캘린더 미니 스타일 */
         .weekly-weekdays { 
             display: grid; 
             grid-template-columns: repeat(7, 110px); 
@@ -385,13 +385,13 @@
                     <div class="today-list" id="todayList"></div>
                 </div>
 
-                <!-- 1.5 김윤환 주간 일정 (월간 캘린더와 동일한 타이틀, 구분선, 요일 헤더 및 날짜숫자 구조 적용) -->
+                <!-- 1.5 김윤환 일정 -->
                 <div class="box-panel">
                     <div class="calendar-header-area">
-                        <div class="panel-title" style="margin-bottom: 0;">👨‍💻 김윤환 주간 일정</div>
+                        <div class="panel-title" style="margin-bottom: 0;">👨‍💻 김윤환 일정</div>
                         <div class="header-nav-container">
                             <button class="header-nav-btn" onclick="changeWeeklyOffset(-1)">‹</button>
-                            <div id="weeklyTitle" class="header-badge"></div>
+                            <div class="header-badge" style="width: 0px; overflow: hidden; opacity: 0; visibility: hidden;"></div>
                             <button class="header-nav-btn" onclick="changeWeeklyOffset(1)">›</button>
                         </div>
                     </div>
@@ -826,11 +826,6 @@
             const startOfWeek = new Date(now);
             startOfWeek.setDate(now.getDate() - now.getDay() + (weeklyOffset * 7));
 
-            const endOfWeek = new Date(startOfWeek);
-            endOfWeek.setDate(startOfWeek.getDate() + 6);
-
-            document.getElementById('weeklyTitle').innerText = `${startOfWeek.getMonth() + 1}월 ${startOfWeek.getDate()}일 - ${endOfWeek.getMonth() + 1}월 ${endOfWeek.getDate()}일`;
-
             for (let i = 0; i < 7; i++) {
                 const currentDay = new Date(startOfWeek);
                 currentDay.setDate(startOfWeek.getDate() + i);
@@ -839,7 +834,6 @@
                 const cell = document.createElement('div');
                 cell.className = 'weekly-cell';
                 
-                // 캘린더 칸 안에는 날짜숫자만 정확히 표기
                 let cellHTML = `<div class="weekly-day-number">${currentDay.getDate()}</div>`;
 
                 if (weeklySchedules[dateStr] && weeklySchedules[dateStr].length > 0) {
