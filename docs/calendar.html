@@ -98,7 +98,7 @@
         }
 
         /* 오늘의 일정 리스트 */
-        .today-list { display: flex; flex-direction: column; gap: 12px; min-height: 140px; }
+        .today-list { display: flex; flex-direction: column; gap: 12px; }
         .today-card {
             background: var(--bg-panel); border-radius: var(--radius-md); padding: 16px; 
             border: 1px solid var(--border-light); display: flex; flex-direction: column; gap: 8px; 
@@ -401,7 +401,7 @@
 
             try {
                 const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(schedules)))); 
-                const payload = { message: '일정 데이터 업데이트', content: contentBase64 };
+                const payload = { message: '일정 데이터 업데이트 [skip ci]', content: contentBase64 };
                 if (dataFileSha) payload.sha = dataFileSha;
 
                 const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${DATA_FILE_PATH}`, {
