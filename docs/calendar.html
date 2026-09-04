@@ -152,26 +152,14 @@
         .weekly-cell-top { display: flex; justify-content: space-between; align-items: center; font-weight: 600; white-space: nowrap; }
         .weekly-event-desc { text-align: right; white-space: pre-wrap; word-break: break-all; margin-left: auto; line-height: 1.2; }
 
-        /* 월간 캘린더 영역 */
-        .calendar-header-area {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin: 0 auto 24px auto;
-            padding-bottom: 16px;
-            border-bottom: 2px solid var(--border-light);
-            width: 100%;
-            max-width: 770px; 
-        }
-        
-        .month-nav-container {
+        /* 공통 헤더 네비게이션 스타일 */
+        .header-nav-container {
             display: flex;
             align-items: center;
             gap: 14px;
         }
 
-        /* 💡 은은하고 세련된 아이콘 버튼 스타일 */
-        .month-nav-btn {
+        .header-nav-btn {
             background: transparent;
             border: none;
             color: var(--text-muted);
@@ -185,12 +173,12 @@
             cursor: pointer;
             transition: all 0.2s ease;
         }
-        .month-nav-btn:hover {
+        .header-nav-btn:hover {
             background-color: var(--border-light);
             color: var(--text-heading);
         }
 
-        .month-badge {
+        .header-badge {
             font-size: 20px;
             font-weight: 700;
             color: var(--text-heading);
@@ -198,6 +186,18 @@
             padding: 0;
             box-shadow: none;
             letter-spacing: normal;
+        }
+
+        /* 월간 캘린더 영역 */
+        .calendar-header-area {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 0 auto 24px auto;
+            padding-bottom: 16px;
+            border-bottom: 2px solid var(--border-light);
+            width: 100%;
+            max-width: 770px; 
         }
 
         .calendar-inner { 
@@ -243,7 +243,11 @@
         .day-cell.other-month .day-number { color: #94a3b8; }
 
         .day-number { font-size: 15px; font-weight: 600; color: var(--text-heading); margin-bottom: 6px; line-height: 1.4; }
-        .day-cell:nth-child(7n+1) .day-number { color: var(--sunday); }
+        
+        /* 일요일 및 공휴일 날짜 숫자 빨간색 표시 */
+        .day-cell:nth-child(7n+1) .day-number,
+        .day-cell.holiday .day-number { color: var(--sunday); }
+        
         .day-cell:nth-child(7n) .day-number { color: var(--saturday); }
 
         .day-cell.today .day-number { width: max-content; position: relative; z-index: 1; }
@@ -362,9 +366,10 @@
                 <div class="box-panel">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                         <div class="panel-title" style="margin-bottom: 0;">👨‍💻 김윤환 주간 일정</div>
-                        <div style="display: flex; gap: 6px;">
-                            <button class="btn-outline" style="padding: 6px 12px; font-size: 13px;" onclick="changeWeeklyOffset(-1)">◀ 이전주</button>
-                            <button class="btn-outline" style="padding: 6px 12px; font-size: 13px;" onclick="changeWeeklyOffset(1)">다음주 ▶</button>
+                        <div class="header-nav-container">
+                            <button class="header-nav-btn" onclick="changeWeeklyOffset(-1)">‹</button>
+                            <div id="weeklyTitle" class="header-badge" style="font-size: 16px;"></div>
+                            <button class="header-nav-btn" onclick="changeWeeklyOffset(1)">›</button>
                         </div>
                     </div>
                     <div class="weekly-calendar-grid" id="weeklyGrid"></div>
@@ -374,7 +379,7 @@
                 <div class="box-panel">
                     <div class="calendar-header-area">
                         <div class="panel-title" style="margin-bottom: 0;">📅 이달의 일정</div>
-                        <div class="month-nav-container">
+                        <div class="header-nav-container">
                             <button class="month-nav-btn" onclick="changeMonth(-1)">‹</button>
                             <div id="monthTitle" class="month-badge"></div>
                             <button class="month-nav-btn" onclick="changeMonth(1)">›</button>
@@ -452,6 +457,18 @@
         const DATA_FILE_PATH = 'docs/data/calendar.json';
         const IMG_FILE_PATH = 'docs/data/calendar.png';
         let dataFileSha = ''; 
+
+        // 공휴일 날짜 데이터 (텍스트 표시는 제거하고 빨간색 날짜 처리용으로만 활용)
+        const publicHolidays = {
+            "2024-01-01": true, "2024-02-09": true, "2024-02-10": true, "2024-02-11": true, "2024-02-12": true,
+            "2024-03-01": true, "2024-04-10": true, "2024-05-05": true, "2024-05-06": true, "2024-05-15": true,
+            "2024-06-06": true, "2024-08-15": true, "2024-09-16": true, "2024-09-17": true, "2024-09-18": true,
+            "2024-10-03": true, "2024-10-09": true, "2024-12-25": true,
+            "2025-01-01": true, "2025-01-28": true, "2025-01-29": true, "2025-01-30": true, "2025-03-01": true, "2025-03-03": true,
+            "2025-05-05": true, "2025-05-06": true, "2025-06-06": true, "2025-08-15": true, "2025-10-03": true, "2025-10-05": true, "2025-10-06": true, "2025-10-07": true, "2025-10-08": true, "2025-10-09": true, "2025-12-25": true,
+            "2026-01-01": true, "2026-02-16": true, "2026-02-17": true, "2026-02-18": true, "2026-03-01": true, "2026-03-02": true,
+            "2026-05-05": true, "2026-05-24": true, "2026-05-25": true, "2026-06-06": true, "2026-08-15": true, "2026-09-24": true, "2026-09-25": true, "2026-09-26": true, "2026-09-28": true, "2026-10-03": true, "2026-10-09": true, "2026-12-25": true
+        };
 
         const saveTokenLocally = () => {
             const token = document.getElementById('githubToken').value.trim();
@@ -612,6 +629,11 @@
                 dayDiv.className = 'day-cell';
                 
                 if (dateStr === todayStr) dayDiv.classList.add('today');
+                
+                // 공휴일인 경우 holiday 클래스 추가 (날짜 숫자가 빨간색으로 표시됨)
+                if (publicHolidays[dateStr]) {
+                    dayDiv.classList.add('holiday');
+                }
                 
                 let dayHTML = `<span class="day-number">${i}</span>`;
 
@@ -778,6 +800,11 @@
             const now = new Date();
             const startOfWeek = new Date(now);
             startOfWeek.setDate(now.getDate() - now.getDay() + (weeklyOffset * 7));
+
+            const endOfWeek = new Date(startOfWeek);
+            endOfWeek.setDate(startOfWeek.getDate() + 6);
+
+            document.getElementById('weeklyTitle').innerText = `${startOfWeek.getMonth() + 1}월 ${startOfWeek.getDate()}일 - ${endOfWeek.getMonth() + 1}월 ${endOfWeek.getDate()}일`;
 
             const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
 
