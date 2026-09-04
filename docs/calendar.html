@@ -139,8 +139,6 @@
         .day-cell.other-month { background-color: #f8fafc; }
         .day-cell.other-month .day-number { color: #94a3b8; }
 
-        /* 💡 시각적 하이라이트를 완전히 제거하여 선택 시에도 UI 변동 없음 */
-        
         .day-number { font-size: 15px; font-weight: 600; color: var(--text-heading); margin-bottom: 6px; line-height: 1.4; }
         .day-cell:nth-child(7n+1) .day-number, .day-cell.holiday .day-number { color: var(--sunday); }
         .day-cell:nth-child(7n) .day-number { color: var(--saturday); }
@@ -151,7 +149,7 @@
             background-color: rgba(250, 204, 21, 0.5); z-index: -1; border-radius: 2px;
         }
 
-        /* 공통 이벤트 셀 디자인 */
+        /* 이벤트 셀 디자인 */
         .cell-event {
             border-radius: var(--radius-sm); padding: 5px 6px; margin-bottom: 4px; font-weight: 500; 
             display: flex; flex-direction: column; gap: 2px; color: var(--text-heading); box-shadow: var(--shadow-card);
@@ -219,13 +217,12 @@
                     <div class="today-list" id="todayList"></div>
                 </div>
 
-                <!-- 1.5 김윤환 일정 (통합 최적화) -->
+                <!-- 1.5 김윤환 일정 -->
                 <div class="box-panel">
                     <div class="calendar-header-area">
                         <div class="panel-title" style="margin-bottom: 0;">👨‍💻 김윤환 일정</div>
                         <div class="header-nav-container">
                             <button class="header-nav-btn" onclick="changeWeeklyOffset(-1)">‹</button>
-                            <!-- 균형을 맞추기 위한 투명 뱃지 영역 -->
                             <div class="header-badge" style="width: 0px; overflow: hidden; opacity: 0; visibility: hidden;"></div>
                             <button class="header-nav-btn" onclick="changeWeeklyOffset(1)">›</button>
                         </div>
@@ -235,7 +232,6 @@
                             <div class="weekdays">
                                 <div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div>
                             </div>
-                            <!-- 월간 캘린더와 동일한 days-grid 클래스 재사용 -->
                             <div class="days-grid" id="weeklyGrid"></div>
                         </div>
                     </div>
@@ -265,13 +261,13 @@
         </section>
 
         <aside class="sidebar">
-            <!-- 3. 관리자 연동 및 저장 -->
+            <!-- 3. 관리자 연동 및 전체 통합 저장 -->
             <div class="box-panel">
                 <div class="panel-title">🔑 관리자 연동 및 데이터 저장</div>
                 <div class="form-row" style="margin-bottom: 0; display: flex; gap: 8px;">
                     <input type="password" id="githubToken" placeholder="GitHub 토큰 입력" style="flex: 1;">
                     <button class="btn-action" onclick="saveTokenLocally()" style="background-color: var(--text-heading); white-space: nowrap;">연동</button>
-                    <!-- 데이터 및 이미지 동시 저장 -->
+                    <!-- 💡 단일 커밋 통합 저장 버튼 -->
                     <button id="saveAllBtn" class="btn-action" onclick="saveAllToGithub()" style="white-space: nowrap;">저장</button>
                 </div>
             </div>
@@ -324,7 +320,6 @@
         const REPO_NAME = 'starutil';
         const DATA_FILE_PATH = 'docs/data/calendar.json';
         const IMG_FILE_PATH = 'docs/data/calendar.png';
-        let dataFileSha = ''; 
 
         const publicHolidays = {
             "2024-01-01": true, "2024-02-09": true, "2024-02-10": true, "2024-02-11": true, "2024-02-12": true,
@@ -375,106 +370,111 @@
                     } else {
                         schedules = parsed;
                     }
-
-                    dataFileSha = data.sha;
                     renderCalendar();
                 } else if (res.status === 404) {
                     renderCalendar();
-                } else {
-                    alert("데이터를 불러오지 못했습니다. 토큰 권한을 확인하세요.");
                 }
             } catch (e) {
                 console.error(e);
             }
         };
 
-        /* 💡 1. 깃허브 JSON 저장 전용 함수 (오직 통합 저장 버튼 클릭 시에만 실행) */
-        const saveData = async () => {
-            const token = document.getElementById('githubToken').value;
-            if(!token) throw new Error("토큰 없음");
-
-            const bundleData = { schedules, weeklySchedules };
-            const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(bundleData)))); 
-            
-            const payload = { message: '일정 데이터 업데이트 [skip ci]', content: contentBase64 };
-            if (dataFileSha) payload.sha = dataFileSha;
-
-            const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${DATA_FILE_PATH}`, {
-                method: 'PUT',
-                headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-
-            if (res.ok) {
-                const data = await res.json();
-                dataFileSha = data.content.sha; 
-            } else {
-                throw new Error('데이터 저장 실패');
-            }
-        };
-
-        /* 💡 2. 깃허브 PNG 저장 전용 함수 */
-        const captureCalendar = async () => {
-            const token = document.getElementById('githubToken').value;
-            if(!token) throw new Error("토큰 없음");
-
-            const target = document.getElementById('calendarCaptureArea');
-            const calInner = document.getElementById('calendarInner');
-            
-            const originalWidth = target.style.width;
-            const originalCalOverflow = calInner.style.overflow;
-            
-            target.style.width = '830px'; 
-            calInner.style.overflow = 'visible'; 
-
-            const canvas = await html2canvas(target, { 
-                scale: 2, 
-                useCORS: true,
-                windowWidth: 1290,
-                backgroundColor: "#f8fafc" 
-            });
-            
-            target.style.width = originalWidth;
-            calInner.style.overflow = originalCalOverflow;
-
-            const base64Image = canvas.toDataURL('image/png').split(',')[1]; 
-            
-            let imgSha = '';
-            const getRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${IMG_FILE_PATH}`, {
-                headers: { Authorization: `token ${token}` }
-            });
-            if(getRes.ok) {
-                const data = await getRes.json();
-                imgSha = data.sha;
-            }
-
-            const payload = { message: '캘린더 이미지 갱신 [skip ci]', content: base64Image };
-            if (imgSha) payload.sha = imgSha;
-
-            const putRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${IMG_FILE_PATH}`, {
-                method: 'PUT',
-                headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-            
-            if (!putRes.ok) {
-                throw new Error('이미지 갱신 실패');
-            }
-        };
-
-        /* 💡 3. 통합 저장 호출 함수 (유저가 버튼을 직접 누를 때만 동작) */
+        /* 💡 단일 커밋 통합 저장: 두 번 디플로이 도는 현상을 막기 위해 Git Data API로 두 파일을 하나로 묶어 커밋함 */
         const saveAllToGithub = async () => {
             const token = document.getElementById('githubToken').value;
             if(!token) return alert('GitHub 토큰을 먼저 입력하고 연동해주세요!');
 
             const saveBtn = document.getElementById('saveAllBtn');
-            saveBtn.innerText = '저장중...';
+            saveBtn.innerText = '통합 저장중...';
             saveBtn.disabled = true;
 
             try {
-                await saveData();
-                await captureCalendar();
-                alert('✅ 캘린더 데이터와 이미지가 성공적으로 깃허브에 보관되었습니다!');
+                // 1. JSON 텍스트 준비
+                const bundleData = { schedules, weeklySchedules };
+                const jsonContent = JSON.stringify(bundleData, null, 2);
+
+                // 2. 이미지 캡처 준비
+                const target = document.getElementById('calendarCaptureArea');
+                const calInner = document.getElementById('calendarInner');
+                const originalWidth = target.style.width;
+                const originalCalOverflow = calInner.style.overflow;
+                
+                target.style.width = '830px'; 
+                calInner.style.overflow = 'visible'; 
+
+                const canvas = await html2canvas(target, { 
+                    scale: 2, useCORS: true, windowWidth: 1290, backgroundColor: "#f8fafc" 
+                });
+                
+                target.style.width = originalWidth;
+                calInner.style.overflow = originalCalOverflow;
+                const base64Image = canvas.toDataURL('image/png').split(',')[1]; 
+
+                // 3. GitHub Git Database API 호출
+                const headers = { Authorization: `token ${token}`, 'Content-Type': 'application/json' };
+                const repoUrl = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}`;
+
+                // 브랜치 정보 불러오기
+                const repoRes = await fetch(repoUrl, { headers });
+                if(!repoRes.ok) throw new Error('저장소 정보를 불러올 수 없습니다.');
+                const defaultBranch = (await repoRes.json()).default_branch || 'main';
+
+                // 최신 커밋 SHA 가져오기
+                const refRes = await fetch(`${repoUrl}/git/refs/heads/${defaultBranch}`, { headers });
+                const refData = await refRes.json();
+                const latestCommitSha = refData.object.sha;
+
+                // 이미지 Blob 생성
+                const imgBlobRes = await fetch(`${repoUrl}/git/blobs`, {
+                    method: 'POST', headers,
+                    body: JSON.stringify({ content: base64Image, encoding: 'base64' })
+                });
+                const imgBlobSha = (await imgBlobRes.json()).sha;
+
+                // JSON Blob 생성
+                const jsonBlobRes = await fetch(`${repoUrl}/git/blobs`, {
+                    method: 'POST', headers,
+                    body: JSON.stringify({ content: jsonContent, encoding: 'utf-8' })
+                });
+                const jsonBlobSha = (await jsonBlobRes.json()).sha;
+
+                // 베이스 트리 정보 가져오기
+                const commitRes = await fetch(`${repoUrl}/git/commits/${latestCommitSha}`, { headers });
+                const baseTreeSha = (await commitRes.json()).tree.sha;
+
+                // 두 파일(Blob)을 묶은 새 트리 생성
+                const treeRes = await fetch(`${repoUrl}/git/trees`, {
+                    method: 'POST', headers,
+                    body: JSON.stringify({
+                        base_tree: baseTreeSha,
+                        tree: [
+                            { path: DATA_FILE_PATH, mode: '100644', type: 'blob', sha: jsonBlobSha },
+                            { path: IMG_FILE_PATH, mode: '100644', type: 'blob', sha: imgBlobSha }
+                        ]
+                    })
+                });
+                const newTreeSha = (await treeRes.json()).sha;
+
+                // 새로운 커밋 생성
+                const newCommitRes = await fetch(`${repoUrl}/git/commits`, {
+                    method: 'POST', headers,
+                    body: JSON.stringify({
+                        message: '✅ 캘린더 데이터 및 이미지 통합 업데이트',
+                        tree: newTreeSha,
+                        parents: [latestCommitSha]
+                    })
+                });
+                const newCommitSha = (await newCommitRes.json()).sha;
+
+                // 브랜치 Ref 업데이트 (이 시점에 딱 1번만 디플로이 트리거됨)
+                const updateRefRes = await fetch(`${repoUrl}/git/refs/heads/${defaultBranch}`, {
+                    method: 'PATCH', headers,
+                    body: JSON.stringify({ sha: newCommitSha })
+                });
+
+                if (!updateRefRes.ok) throw new Error('브랜치 업데이트 실패');
+                alert('✅ 데이터와 이미지가 하나로 묶여 성공적으로 저장되었습니다! (디플로이 1회 실행)');
+
             } catch (error) {
                 console.error(error);
                 alert('저장 중 오류가 발생했습니다: ' + error.message);
@@ -484,7 +484,7 @@
             }
         };
 
-        /* 💡 4. 셀 내부 이벤트 HTML 생성 최적화 헬퍼 함수 */
+        /* 셀 내부 일정 HTML 생성 헬퍼 */
         const getEventHTML = (item) => {
             const timeHtml = item.time ? `<span class="event-time">${escapeHTML(item.time)}</span>` : '';
             const personText = item.person ? `<span class="event-person">${escapeHTML(item.person)}</span>` : '';
@@ -562,7 +562,7 @@
                 const dateStr = getFormatDate(currentDay.getFullYear(), currentDay.getMonth() + 1, currentDay.getDate());
                 
                 const cell = document.createElement('div');
-                cell.className = 'day-cell'; // 중복되던 CSS 제거하고 공통 클래스 사용
+                cell.className = 'day-cell'; 
                 
                 let cellHTML = `<span class="day-number">${currentDay.getDate()}</span>`;
 
@@ -594,7 +594,7 @@
             selectedDateStr = dateStr;
             selectedType = type;
             cancelEdit(); 
-            renderSelectedDateSchedules();
+            renderSelectedDateSchedules(); // 클릭 시 UI 갱신 (파란 테두리는 없음)
         };
 
         const addOrUpdateSchedule = () => {
@@ -620,9 +620,9 @@
                 targetStore[selectedDateStr].push({ id: Date.now(), time, person, desc, detail, color });
             }
 
-            // 💡 UX 최적화: 등록 후 날짜를 비우지 않고, 작성 폼만 리셋시킨 후 캘린더 화면 즉시 업데이트
-            cancelEdit();
+            // 등록 후 즉시 화면에만 렌더링하고, 깃허브 전송(디플로이)은 발생하지 않음
             renderCalendar(); 
+            cancelEdit();
         };
 
         const enterEditMode = (dateStr, id, type = 'calendar') => {
@@ -653,8 +653,6 @@
             const submitBtn = document.getElementById('submitBtn');
             submitBtn.innerText = '수정 완료하기';
             submitBtn.style.backgroundColor = 'var(--success)';
-            
-            renderSelectedDateSchedules();
         };
 
         const cancelEdit = () => {
@@ -666,6 +664,7 @@
             const submitBtn = document.getElementById('submitBtn');
             submitBtn.innerText = '일정 반영하기';
             submitBtn.style.backgroundColor = 'var(--primary)';
+            renderSelectedDateSchedules();
         };
 
         const clearForm = () => {
@@ -687,6 +686,7 @@
             if (targetStore[dateStr].length === 0) delete targetStore[dateStr];
             
             renderCalendar();
+            renderSelectedDateSchedules();
         };
 
         const renderTodaySchedules = () => {
