@@ -111,7 +111,23 @@
         .today-card .card-person { font-size: 15px; }
         .today-card .card-desc { font-size: 15px; }
 
-        /* 주간 캘린더 미니 스타일 (일~토 가로 7열 구조) */
+        /* 주간 캘린더 미니 스타일 (월간 캘린더와 동일한 요일 헤더 및 격자 구조 적용) */
+        .weekly-weekdays { 
+            display: grid; 
+            grid-template-columns: repeat(7, 110px); 
+            text-align: center; 
+            font-size: 15px; 
+            font-weight: 600; 
+            color: var(--text-muted); 
+            margin-bottom: 12px; 
+            box-sizing: border-box;
+            width: 770px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .weekly-weekdays div:first-child { color: var(--sunday); } 
+        .weekly-weekdays div:last-child { color: var(--saturday); } 
+
         .weekly-calendar-grid {
             display: grid;
             grid-template-columns: repeat(7, 110px);
@@ -136,16 +152,15 @@
         }
         .weekly-cell:hover { background-color: var(--primary-light); }
         
-        /* 월간 캘린더 날짜(day-number)와 정확히 일치하는 스타일 (font-size: 15px, font-weight: 600) */
-        .weekly-day-title { 
+        .weekly-day-number { 
             font-size: 15px; 
             font-weight: 600; 
             color: var(--text-heading); 
             margin-bottom: 6px; 
             line-height: 1.4; 
         }
-        .weekly-cell:nth-child(7n+1) .weekly-day-title { color: var(--sunday); }
-        .weekly-cell:nth-child(7n) .weekly-day-title { color: var(--saturday); }
+        .weekly-cell:nth-child(7n+1) .weekly-day-number { color: var(--sunday); }
+        .weekly-cell:nth-child(7n) .weekly-day-number { color: var(--saturday); }
 
         .weekly-cell-event {
             border-radius: var(--radius-sm);
@@ -370,18 +385,21 @@
                     <div class="today-list" id="todayList"></div>
                 </div>
 
-                <!-- 1.5 김윤환 주간 일정 -->
+                <!-- 1.5 김윤환 주간 일정 (월간 캘린더와 동일한 타이틀, 구분선, 요일 헤더 및 날짜숫자 구조 적용) -->
                 <div class="box-panel">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; width: 770px; margin-left: auto; margin-right: auto;">
+                    <div class="calendar-header-area">
                         <div class="panel-title" style="margin-bottom: 0;">👨‍💻 김윤환 주간 일정</div>
                         <div class="header-nav-container">
                             <button class="header-nav-btn" onclick="changeWeeklyOffset(-1)">‹</button>
-                            <div id="weeklyTitle" class="header-badge" style="font-size: 18px;"></div>
+                            <div id="weeklyTitle" class="header-badge"></div>
                             <button class="header-nav-btn" onclick="changeWeeklyOffset(1)">›</button>
                         </div>
                     </div>
                     <div class="calendar-inner">
                         <div class="calendar-scroll-content">
+                            <div class="weekly-weekdays">
+                                <div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div>
+                            </div>
                             <div class="weekly-calendar-grid" id="weeklyGrid"></div>
                         </div>
                     </div>
@@ -431,7 +449,6 @@
                     <input type="text" id="inputPerson" placeholder="타이틀 (예: 미팅)">
                 </div>
                 <div class="form-row">
-                    <!-- 색상 선택창과 간략내용 칸 위치 서로 변경 -->
                     <select id="inputColor">
                         <option value="#ffe4e6">🔴 빨강</option>
                         <option value="#ffedd5">🟠 주황</option>
@@ -814,8 +831,6 @@
 
             document.getElementById('weeklyTitle').innerText = `${startOfWeek.getMonth() + 1}월 ${startOfWeek.getDate()}일 - ${endOfWeek.getMonth() + 1}월 ${endOfWeek.getDate()}일`;
 
-            const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
-
             for (let i = 0; i < 7; i++) {
                 const currentDay = new Date(startOfWeek);
                 currentDay.setDate(startOfWeek.getDate() + i);
@@ -824,7 +839,8 @@
                 const cell = document.createElement('div');
                 cell.className = 'weekly-cell';
                 
-                let cellHTML = `<div class="weekly-day-title">${dayNames[i]} ${currentDay.getDate()}</div>`;
+                // 캘린더 칸 안에는 날짜숫자만 정확히 표기
+                let cellHTML = `<div class="weekly-day-number">${currentDay.getDate()}</div>`;
 
                 if (weeklySchedules[dateStr] && weeklySchedules[dateStr].length > 0) {
                     weeklySchedules[dateStr].forEach(item => {
