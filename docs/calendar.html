@@ -167,28 +167,27 @@
         .month-nav-container {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 14px;
         }
 
+        /* 💡 은은하고 세련된 아이콘 버튼 스타일 */
         .month-nav-btn {
-            background: var(--bg-page);
-            border: 1px solid var(--border-dark);
-            color: var(--text-main);
-            width: 32px;
-            height: 32px;
-            border-radius: var(--radius-sm);
-            font-size: 15px;
-            font-weight: 700;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            font-size: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.2s ease;
         }
         .month-nav-btn:hover {
-            background-color: var(--primary-light);
-            color: var(--primary);
-            border-color: var(--primary);
+            background-color: var(--border-light);
+            color: var(--text-heading);
         }
 
         .month-badge {
@@ -359,7 +358,7 @@
                     <div class="today-list" id="todayList"></div>
                 </div>
 
-                <!-- 1.5 김윤환 주간 일정 (독립형 주간 캘린더 형태) -->
+                <!-- 1.5 김윤환 주간 일정 -->
                 <div class="box-panel">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                         <div class="panel-title" style="margin-bottom: 0;">👨‍💻 김윤환 주간 일정</div>
@@ -376,9 +375,9 @@
                     <div class="calendar-header-area">
                         <div class="panel-title" style="margin-bottom: 0;">📅 이달의 일정</div>
                         <div class="month-nav-container">
-                            <button class="month-nav-btn" onclick="changeMonth(-1)">&lt;</button>
+                            <button class="month-nav-btn" onclick="changeMonth(-1)">‹</button>
                             <div id="monthTitle" class="month-badge"></div>
-                            <button class="month-nav-btn" onclick="changeMonth(1)">&gt;</button>
+                            <button class="month-nav-btn" onclick="changeMonth(1)">›</button>
                         </div>
                     </div>
                     <div class="calendar-inner" id="calendarInner">
