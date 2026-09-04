@@ -75,7 +75,7 @@
             max-width: 830px;
         }
 
-        /* 패널 타이틀: 왼쪽 및 오른쪽 모두 20px */
+        /* 패널 타이틀 */
         .left-area .panel-title,
         .sidebar .panel-title { 
             font-size: 20px; font-weight: 700; color: var(--text-heading); 
@@ -97,21 +97,21 @@
             border-radius: var(--radius-xl);
         }
 
-        /* 오늘의 일정 리스트 */
+        /* 오늘의 일정 리스트 (min-height 삭제하여 자동 높이 적용) */
         .today-list { display: flex; flex-direction: column; gap: 12px; }
         .today-card {
             background: var(--bg-panel); border-radius: var(--radius-md); padding: 16px; 
             border: 1px solid var(--border-light); display: flex; flex-direction: column; gap: 8px; 
             box-shadow: var(--shadow-card);
         }
-        /* 오늘의 일정 카드 및 안내문구: 15px */
+        
         .no-schedule { font-size: 15px; color: var(--text-muted); text-align: center; padding: 20px 0; width: 100%; }
         .today-card .card-main { font-size: 15px; }
         .today-card .card-time { font-size: 15px; }
         .today-card .card-person { font-size: 15px; }
         .today-card .card-desc { font-size: 15px; }
 
-        /* 월간 캘린더 영역 (110px * 7열 = 770px 기준) */
+        /* 월간 캘린더 영역 */
         .calendar-header-area {
             display: flex;
             justify-content: space-between;
@@ -123,7 +123,6 @@
             max-width: 770px; 
         }
         
-        /* 이달의 일정 월 타이틀: 20px */
         .month-badge {
             font-size: 20px;
             font-weight: 700;
@@ -148,7 +147,6 @@
             box-sizing: border-box;
         }
 
-        /* 요일 텍스트: 15px */
         .weekdays { 
             display: grid; grid-template-columns: repeat(7, 110px); 
             text-align: center; font-size: 15px; font-weight: 600; 
@@ -177,12 +175,13 @@
         .day-cell.other-month { background-color: #f8fafc; }
         .day-cell.other-month .day-number { color: #94a3b8; }
 
-        /* 캘린더 날짜 숫자: 15px */
         .day-number { font-size: 15px; font-weight: 600; color: var(--text-heading); margin-bottom: 6px; line-height: 1.4; }
         .day-cell:nth-child(7n+1) .day-number { color: var(--sunday); }
         .day-cell:nth-child(7n) .day-number { color: var(--saturday); }
 
         .day-cell.today .day-number { width: max-content; position: relative; z-index: 1; }
+        
+        /* 오늘 날짜 형광펜: 노란색 계열 적용 */
         .day-cell.today .day-number::after {
             content: ''; position: absolute; bottom: 1px; left: -2px; right: -2px; height: 8px;
             background-color: rgba(250, 204, 21, 0.5); z-index: -1; border-radius: 2px;
@@ -201,10 +200,8 @@
             box-shadow: var(--shadow-card);
         }
         .cell-top { display: flex; justify-content: space-between; align-items: center; font-weight: 600; white-space: nowrap; }
-        /* 일정 시간 및 타이틀 이름: 13px */
         .event-time { opacity: 0.8; font-size: 13px; }
         .event-person { font-weight: 700; font-size: 13px; margin-left: auto; text-align: right; }
-        /* 일정 내용: 13px */
         .event-desc { font-size: 13px; text-align: right; white-space: pre-wrap; word-break: break-all; margin-left: auto; line-height: 1.3; }
 
         /* ==============================
@@ -215,7 +212,6 @@
         .month-control-box { display: flex; gap: 8px; margin-bottom: 24px; align-items: center; }
         button { cursor: pointer; font-family: inherit; transition: all 0.2s; border: none; }
         
-        /* 버튼류: 15px */
         .btn-outline { 
             flex: 1; background: var(--bg-panel); color: var(--text-main); 
             border: 1px solid var(--border-dark); padding: 10px 0; 
@@ -235,7 +231,7 @@
         .btn-primary:hover { background: var(--primary-hover); }
 
         .form-row { display: flex; gap: 10px; margin-bottom: 12px; }
-        /* 입력창 및 선택창: 15px */
+        
         input, select, textarea {
             width: 100%; padding: 12px; background: var(--bg-page); 
             border: 1px solid var(--border-light); color: var(--text-heading); 
@@ -245,8 +241,14 @@
             outline: none; border-color: var(--primary); 
             background: var(--bg-panel); box-shadow: 0 0 0 3px var(--primary-light); 
         }
-
-        textarea { resize: vertical; min-height: 46px; }
+        
+        /* 텍스트 입력창 설정: 고정 높이 1줄 및 수동 크기조절 제거 */
+        textarea { 
+            resize: none; 
+            height: 46px; 
+            overflow: hidden; 
+            line-height: 1.2;
+        }
 
         .selected-list { display: flex; flex-direction: column; gap: 12px; }
         .selected-card {
@@ -254,7 +256,6 @@
             border: 1px solid var(--border-light); display: flex; flex-direction: column; gap: 10px; 
             box-shadow: var(--shadow-card);
         }
-        /* 선택한 날짜 일정 카드 내용: 15px */
         .card-main { display: flex; align-items: center; gap: 10px; font-size: 15px; }
         .card-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
         .card-time { color: var(--text-muted); font-weight: 600; font-size: 15px; } 
@@ -262,7 +263,6 @@
         .card-desc { color: var(--text-main); font-size: 15px; flex-grow: 1; font-weight: 500; } 
         
         .btn-group { display: flex; gap: 8px; margin-left: auto; flex-shrink: 0; }
-        /* 수정 / 삭제 버튼: 15px */
         .edit-btn { background: none; color: var(--primary); font-size: 15px; font-weight: 600; padding: 4px; }
         .edit-btn:hover { color: var(--primary-hover); text-decoration: underline; }
         .delete-btn { background: none; color: var(--danger); font-size: 15px; font-weight: 600; padding: 4px; }
@@ -402,6 +402,7 @@
 
             try {
                 const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(schedules)))); 
+                // 액션 두번 실행 방지를 위해 [skip ci] 추가
                 const payload = { message: '일정 데이터 업데이트 [skip ci]', content: contentBase64 };
                 if (dataFileSha) payload.sha = dataFileSha;
 
@@ -592,7 +593,14 @@
             document.getElementById('editScheduleId').value = item.id;
             document.getElementById('inputTime').value = item.time || '';
             document.getElementById('inputPerson').value = item.person || '';
-            document.getElementById('inputDesc').value = item.desc || '';
+            
+            const inputDesc = document.getElementById('inputDesc');
+            inputDesc.value = item.desc || '';
+            
+            // 편집 모드 진입 시 텍스트 내용에 맞게 높이 자동 재조정
+            inputDesc.style.height = '46px';
+            inputDesc.style.height = inputDesc.scrollHeight + 'px';
+
             document.getElementById('inputDetail').value = item.detail || '';
             document.getElementById('inputColor').value = item.color || '#d1fae5';
 
@@ -615,6 +623,7 @@
             document.getElementById('inputTime').value = '';
             document.getElementById('inputPerson').value = '';
             document.getElementById('inputDesc').value = '';
+            document.getElementById('inputDesc').style.height = '46px'; // 폼 초기화 시 텍스트에어리어 1줄로 복구
             document.getElementById('inputDetail').value = '';
             document.getElementById('inputColor').value = '#d1fae5';
         };
@@ -693,6 +702,13 @@
                 `;
             }).join('');
         };
+
+        // --- 텍스트 자동 높이 조절 이벤트 리스너 ---
+        const textareaEl = document.getElementById('inputDesc');
+        textareaEl.addEventListener('input', function() {
+            this.style.height = '46px'; 
+            this.style.height = this.scrollHeight + 'px'; 
+        });
 
         const init = () => {
             const today = new Date();
