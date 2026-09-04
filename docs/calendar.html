@@ -67,7 +67,7 @@
         /* 공통 패널 스타일 */
         .box-panel {
             background: var(--bg-panel); 
-            padding: 24px 18px; /* 통일된 위아래 여백 */
+            padding: 24px 18px;
             border-radius: var(--radius-xl); 
             box-shadow: var(--shadow-panel); 
             border: 1px solid var(--border-light);
@@ -75,7 +75,6 @@
             max-width: 830px;
         }
 
-        /* 패널 타이틀: 불필요한 flex와 gap 속성 제거 */
         .left-area .panel-title,
         .sidebar .panel-title { 
             font-size: 20px; font-weight: 700; color: var(--text-heading); 
@@ -97,10 +96,9 @@
             border-radius: var(--radius-xl);
         }
 
-        /* 오늘의 일정 리스트 */
+        /* 오늘의 일정 / 주간 일정 리스트 */
         .today-list { display: flex; flex-direction: column; gap: 12px; }
         
-        /* 오늘의 일정 카드 */
         .today-card {
             background: var(--bg-panel); border-radius: var(--radius-md); padding: 12px 16px; 
             border: 1px solid var(--border-light); display: flex; flex-direction: column; gap: 10px; 
@@ -181,14 +179,16 @@
         .day-cell:nth-child(7n+1) .day-number { color: var(--sunday); }
         .day-cell:nth-child(7n) .day-number { color: var(--saturday); }
 
+        /* 공휴일 디자인 */
+        .day-cell.holiday .day-number { color: var(--danger) !important; }
+        .holiday-name { font-size: 11px; color: var(--danger); font-weight: 600; margin-top: -4px; margin-bottom: 4px; line-height: 1.2; word-break: keep-all; }
+
         .day-cell.today .day-number { width: max-content; position: relative; z-index: 1; }
-        /* 오늘 날짜 형광펜: 노란색 계열 */
         .day-cell.today .day-number::after {
             content: ''; position: absolute; bottom: 1px; left: -2px; right: -2px; height: 8px;
             background-color: rgba(250, 204, 21, 0.5); z-index: -1; border-radius: 2px;
         }
 
-        /* 캘린더 내부 일정 셀 */
         .cell-event {
             border-radius: var(--radius-sm); 
             padding: 5px 6px; 
@@ -231,29 +231,41 @@
         }
         .btn-primary:hover { background: var(--primary-hover); }
 
-        .form-row { display: flex; gap: 10px; margin-bottom: 12px; }
+        .form-row { display: flex; gap: 10px; margin-bottom: 12px; align-items: flex-start; }
         
+        /* 💡 모든 입력창(input, select, textarea) 높이 및 패딩 일치시키기 */
         input, select, textarea {
-            width: 100%; padding: 12px; background: var(--bg-page); 
-            border: 1px solid var(--border-light); color: var(--text-heading); 
-            border-radius: var(--radius-md); font-size: 15px; font-family: inherit; transition: all 0.2s;
+            width: 100%; 
+            height: 46px; /* 모든 입력창 높이를 정확히 46px로 통일 */
+            padding: 0 12px; /* 세로 패딩을 제거하고 좌우 패딩만 줘서 완벽한 수직 정렬 및 높이 유지 */
+            background: var(--bg-page); 
+            border: 1px solid var(--border-light); 
+            color: var(--text-heading); 
+            border-radius: var(--radius-md); 
+            font-size: 15px; 
+            font-family: inherit; 
+            transition: all 0.2s;
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
         }
+
         input:focus, textarea:focus, select:focus { 
             outline: none; border-color: var(--primary); 
             background: var(--bg-panel); box-shadow: 0 0 0 3px var(--primary-light); 
         }
         
-        /* 텍스트 입력창 설정: 고정 높이 1줄 및 수동 크기조절 제거 */
+        /* textarea는 글이 길어지면 아래로 늘어나야 하므로 height 제어 해제 */
         textarea { 
             resize: none; 
             height: 46px; 
+            padding-top: 12px; /* 텍스트에어리어만 글자 상단 정렬을 위해 상단 패딩 부여 */
             overflow: hidden; 
-            line-height: 1.2;
+            line-height: 1.2; 
         }
 
         .selected-list { display: flex; flex-direction: column; gap: 12px; }
         
-        /* 선택한 날짜 일정 카드 */
         .selected-card {
             background: var(--bg-panel); border-radius: var(--radius-md); padding: 12px 16px; 
             border: 1px solid var(--border-light); display: flex; flex-direction: column; gap: 10px; 
@@ -268,7 +280,6 @@
         
         .btn-group { display: flex; gap: 8px; margin-left: auto; flex-shrink: 0; }
         
-        /* 수정 삭제 버튼 padding 0 4px로 카드 높이 영향 제거 */
         .edit-btn { background: none; color: var(--primary); font-size: 15px; font-weight: 600; padding: 0 4px; }
         .edit-btn:hover { color: var(--primary-hover); text-decoration: underline; }
         .delete-btn { background: none; color: var(--danger); font-size: 15px; font-weight: 600; padding: 0 4px; }
@@ -285,6 +296,12 @@
                 <div class="box-panel">
                     <div class="panel-title">⚡ 오늘의 일정</div>
                     <div class="today-list" id="todayList"></div>
+                </div>
+
+                <!-- 1.5 김윤환 주간 일정 -->
+                <div class="box-panel">
+                    <div class="panel-title">👨‍💻 김윤환 주간 일정</div>
+                    <div class="today-list" id="weeklyList"></div>
                 </div>
 
                 <!-- 2. 월간 캘린더 -->
@@ -334,15 +351,15 @@
                 <div class="form-row">
                     <textarea id="inputDesc" placeholder="간략내용 (줄바꿈 가능)"></textarea>
                     <select id="inputColor">
-                    <option value="#ffe4e6">🔴 빨강</option>
-                    <option value="#ffedd5">🟠 주황</option>
-                    <option value="#fef3c7">🟡 노랑</option>
-                    <option value="#d1fae5" selected>🟢 초록</option>
-                    <option value="#dbeafe">🔵 파랑</option>
-                    <option value="#e0e7ff">🟤 남색</option>
-                    <option value="#f3e8ff">🟣 보라</option>
-                    <option value="#f1f5f9">⚪ 회색</option>
-                </select>
+                        <option value="#ffe4e6">🔴 빨강</option>
+                        <option value="#ffedd5">🟠 주황</option>
+                        <option value="#fef3c7">🟡 노랑</option>
+                        <option value="#d1fae5" selected>🟢 초록</option>
+                        <option value="#dbeafe">🔵 파랑</option>
+                        <option value="#e0e7ff">🟤 남색</option>
+                        <option value="#f3e8ff">🟣 보라</option>
+                        <option value="#f1f5f9">⚪ 회색</option>
+                    </select>
                 </div>
                 <div class="form-row" style="margin-bottom: 0;">
                     <input type="text" id="inputDetail" placeholder="상세내용 (오늘의 일정에만 표시)">
@@ -368,6 +385,17 @@
         const DATA_FILE_PATH = 'docs/data/calendar.json';
         const IMG_FILE_PATH = 'docs/data/calendar.png';
         let dataFileSha = ''; 
+
+        const publicHolidays = {
+            "2024-01-01": "새해 첫날", "2024-02-09": "설날 연휴", "2024-02-10": "설날", "2024-02-11": "설날 연휴", "2024-02-12": "대체공휴일",
+            "2024-03-01": "삼일절", "2024-04-10": "국회의원 선거", "2024-05-05": "어린이날", "2024-05-06": "대체공휴일", "2024-05-15": "부처님오신날",
+            "2024-06-06": "현충일", "2024-08-15": "광복절", "2024-09-16": "추석 연휴", "2024-09-17": "추석", "2024-09-18": "추석 연휴",
+            "2024-10-03": "개천절", "2024-10-09": "한글날", "2024-12-25": "기독탄신일",
+            "2025-01-01": "새해 첫날", "2025-01-28": "설날 연휴", "2025-01-29": "설날", "2025-01-30": "설날 연휴", "2025-03-01": "삼일절", "2025-03-03": "대체공휴일",
+            "2025-05-05": "어린이날", "2025-05-06": "부처님오신날", "2025-06-06": "현충일", "2025-08-15": "광복절", "2025-10-03": "개천절", "2025-10-05": "추석 연휴", "2025-10-06": "추석", "2025-10-07": "추석 연휴", "2025-10-08": "대체공휴일", "2025-10-09": "한글날", "2025-12-25": "기독탄신일",
+            "2026-01-01": "새해 첫날", "2026-02-16": "설날 연휴", "2026-02-17": "설날", "2026-02-18": "설날 연휴", "2026-03-01": "삼일절", "2026-03-02": "대체공휴일",
+            "2026-05-05": "어린이날", "2026-05-24": "부처님오신날", "2026-05-25": "대체공휴일", "2026-06-06": "현충일", "2026-08-15": "광복절", "2026-09-24": "추석 연휴", "2026-09-25": "추석", "2026-09-26": "추석 연휴", "2026-09-28": "대체공휴일", "2026-10-03": "개천절", "2026-10-09": "한글날", "2026-12-25": "기독탄신일"
+        };
 
         const saveTokenLocally = () => {
             const token = document.getElementById('githubToken').value.trim();
@@ -407,7 +435,6 @@
 
             try {
                 const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(schedules)))); 
-                // 액션 두번 실행 방지를 위해 [skip ci] 추가
                 const payload = { message: '일정 데이터 업데이트 [skip ci]', content: contentBase64 };
                 if (dataFileSha) payload.sha = dataFileSha;
 
@@ -523,6 +550,11 @@
                 
                 let dayHTML = `<span class="day-number">${i}</span>`;
 
+                if (publicHolidays[dateStr]) {
+                    dayDiv.classList.add('holiday');
+                    dayHTML += `<div class="holiday-name">${publicHolidays[dateStr]}</div>`;
+                }
+
                 if (schedules[dateStr] && schedules[dateStr].length > 0) {
                     schedules[dateStr].forEach(item => {
                         const timeHtml = item.time ? `<span class="event-time">${escapeHTML(item.time)}</span>` : '';
@@ -549,6 +581,7 @@
             }
 
             renderTodaySchedules();
+            renderKimWeeklySchedules();
             renderSelectedDateSchedules();
         };
 
@@ -601,7 +634,6 @@
             const inputDesc = document.getElementById('inputDesc');
             inputDesc.value = item.desc || '';
             
-            // 편집 모드 진입 시 텍스트 내용에 맞게 높이 자동 재조정
             inputDesc.style.height = '46px';
             inputDesc.style.height = inputDesc.scrollHeight + 'px';
 
@@ -627,7 +659,7 @@
             document.getElementById('inputTime').value = '';
             document.getElementById('inputPerson').value = '';
             document.getElementById('inputDesc').value = '';
-            document.getElementById('inputDesc').style.height = '46px'; // 폼 초기화 시 텍스트에어리어 1줄로 복구
+            document.getElementById('inputDesc').style.height = '46px';
             document.getElementById('inputDetail').value = '';
             document.getElementById('inputColor').value = '#d1fae5';
         };
@@ -674,6 +706,61 @@
             }).join('');
         };
 
+        const renderKimWeeklySchedules = () => {
+            const container = document.getElementById('weeklyList');
+            
+            const now = new Date();
+            const startOfWeek = new Date(now);
+            startOfWeek.setDate(now.getDate() - now.getDay()); 
+            
+            let weeklyItems = [];
+            const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+
+            for (let i = 0; i < 7; i++) {
+                const currentDay = new Date(startOfWeek);
+                currentDay.setDate(startOfWeek.getDate() + i);
+                const dateStr = getFormatDate(currentDay.getFullYear(), currentDay.getMonth() + 1, currentDay.getDate());
+                
+                if (schedules[dateStr]) {
+                    schedules[dateStr].forEach(item => {
+                        weeklyItems.push({
+                            ...item,
+                            dateStr: dateStr,
+                            dayName: dayNames[i]
+                        });
+                    });
+                }
+            }
+
+            weeklyItems.sort((a, b) => {
+                if (a.dateStr !== b.dateStr) return a.dateStr.localeCompare(b.dateStr);
+                return (a.time || "").localeCompare(b.time || "");
+            });
+
+            if (weeklyItems.length === 0) {
+                container.innerHTML = `<div class="no-schedule">이번 주 등록된 일정이 없습니다.</div>`;
+                return;
+            }
+            
+            container.innerHTML = weeklyItems.map(item => {
+                const timeHtml = item.time ? `<span class="card-time">${escapeHTML(item.time)}</span>` : '';
+                const personHtml = item.person ? `<span class="card-person">${escapeHTML(item.person)}</span>` : '';
+                const detailHtml = item.detail ? `<div style="color: var(--text-muted); font-size: 15px; padding-left: 22px;">↳ ${escapeHTML(item.detail)}</div>` : '';
+
+                return `
+                    <div class="today-card">
+                        <div class="card-main">
+                            <div class="card-dot" style="background-color: ${item.color || '#eff6ff'};"></div>
+                            <span style="font-weight: 700; color: var(--primary); font-size: 14px;">[${item.dayName}]</span>
+                            ${timeHtml} ${personHtml}
+                            <span class="card-desc">${escapeHTML(item.desc)}</span>
+                        </div>
+                        ${detailHtml}
+                    </div>
+                `;
+            }).join('');
+        };
+
         const renderSelectedDateSchedules = () => {
             const container = document.getElementById('selectedDateList');
             if (!selectedDateStr) {
@@ -707,7 +794,6 @@
             }).join('');
         };
 
-        // --- 텍스트 자동 높이 조절 이벤트 리스너 ---
         const textareaEl = document.getElementById('inputDesc');
         textareaEl.addEventListener('input', function() {
             this.style.height = '46px'; 
