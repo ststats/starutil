@@ -662,6 +662,11 @@
                 if (dateStr === todayStr) dayDiv.classList.add('today');
                 if (publicHolidays[dateStr]) dayDiv.classList.add('holiday');
                 
+                // 월간 캘린더 선택 상태 반영
+                if (selectedType === 'calendar' && selectedDateStr === dateStr) {
+                    dayDiv.classList.add('selected');
+                }
+                
                 let dayHTML = `<span class="day-number">${i}</span>`;
 
                 if (schedules[dateStr] && schedules[dateStr].length > 0) {
@@ -708,7 +713,7 @@
             selectedDateStr = dateStr;
             selectedType = type;
             cancelEdit(); 
-            renderCalendar(); // 선택 상태 변경을 캘린더와 주간 그리드에 모두 반영
+            renderCalendar(); 
         };
 
         const addOrUpdateSchedule = () => {
@@ -730,14 +735,17 @@
             if (editId) {
                 const item = targetStore[selectedDateStr].find(i => i.id == editId);
                 if (item) Object.assign(item, { time, person, desc, detail, color });
-                cancelEdit();
             } else {
                 targetStore[selectedDateStr].push({ id: Date.now(), time, person, desc, detail, color });
-                cancelEdit(); // 💡 등록 완료 후 선택 상태 유지/해제 및 폼 정상 리셋
             }
 
             renderCalendar(); 
             saveData();       
+            
+            // 💡 등록/수정 완료 후 선택 상태 및 폼 완벽 초기화
+            selectedDateStr = "";
+            renderCalendar();
+            cancelEdit();
         };
 
         const enterEditMode = (dateStr, id, type = 'calendar') => {
@@ -886,6 +894,7 @@
 
             if (!selectedDateStr) {
                 container.innerHTML = `<div class="no-schedule">날짜를 클릭하세요.</div>`;
+                formTitleEl.innerText = `➕ [날짜선택] 일정 추가`;
                 return;
             }
 
