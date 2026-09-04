@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>스타일 캘린더 일정표</title>
+    <title>일정표</title>
     <!-- Pretendard 폰트 -->
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
     <!-- html2canvas 라이브러리 -->
@@ -279,7 +279,7 @@
                 
                 <div class="form-row">
                     <input type="text" id="inputTime" placeholder="시간 (예: 19:00)">
-                    <input type="text" id="inputPerson" placeholder="타이틀 (예: 미팅)">
+                    <input type="text" id="inputPerson" placeholder="타이틀">
                 </div>
                 <div class="form-row">
                     <select id="inputColor">
@@ -473,7 +473,7 @@
                 });
 
                 if (!updateRefRes.ok) throw new Error('브랜치 업데이트 실패');
-                alert('✅ 데이터와 이미지가 하나로 묶여 성공적으로 저장되었습니다! (디플로이 1회 실행)');
+                alert('✅ 성공적으로 저장되었습니다!');
 
             } catch (error) {
                 console.error(error);
