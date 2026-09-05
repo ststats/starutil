@@ -3,16 +3,17 @@
     let calSelectedDateStr = "";
     let calSchedules = {};
     const CAL_DATA_URL = 'data/calendar.json';
-    
-    const calPublicHolidays = {
-        "2024-01-01": true, "2024-02-09": true, "2024-02-10": true, "2024-02-11": true, "2024-02-12": true,
-        "2024-03-01": true, "2024-04-10": true, "2024-05-05": true, "2024-05-06": true, "2024-05-15": true,
-        "2024-06-06": true, "2024-08-15": true, "2024-09-16": true, "2024-09-17": true, "2024-09-18": true,
-        "2024-10-03": true, "2024-10-09": true, "2024-12-25": true,
-        "2025-01-01": true, "2025-01-28": true, "2025-01-29": true, "2025-01-30": true, "2025-03-01": true, "2025-03-03": true,
-        "2025-05-05": true, "2025-05-06": true, "2025-06-06": true, "2025-08-15": true, "2025-10-03": true, "2025-10-05": true, "2025-10-06": true, "2025-10-07": true, "2025-10-08": true, "2025-10-09": true, "2025-12-25": true,
-        "2026-01-01": true, "2026-02-16": true, "2026-02-17": true, "2026-02-18": true, "2026-03-01": true, "2026-03-02": true,
-        "2026-05-05": true, "2026-05-24": true, "2026-05-25": true, "2026-06-06": true, "2026-08-15": true, "2026-09-24": true, "2026-09-25": true, "2026-09-26": true, "2026-09-28": true, "2026-10-03": true, "2026-10-09": true, "2026-12-25": true
+
+    // 공휴일 목록은 해마다 바뀌므로 코드에 박아두지 않고 별도 JSON(holidays.json)에서
+    // fetch해온다 - 새해 공휴일을 추가할 때 코드를 안 건드리고 그 파일만 갱신하면 된다.
+    let calPublicHolidays = {};
+    const loadPublicHolidays = async () => {
+        try {
+            const res = await fetch('holidays.json', { cache: 'no-store' });
+            if (res.ok) calPublicHolidays = await res.json();
+        } catch (e) {
+            console.error('공휴일 데이터를 불러오지 못했습니다:', e);
+        }
     };
     
     const calEscapeHTML = (str) => {
@@ -26,9 +27,12 @@
     
     const calLoadPublicData = async () => {
         try {
-            const res = await fetch(CAL_DATA_URL, { cache: 'no-store' });
-            if (res.ok) {
-                const parsed = await res.json();
+            const [scheduleRes] = await Promise.all([
+                fetch(CAL_DATA_URL, { cache: 'no-store' }),
+                loadPublicHolidays(),
+            ]);
+            if (scheduleRes.ok) {
+                const parsed = await scheduleRes.json();
                 calSchedules = parsed.schedules || parsed;
             }
         } catch (e) {
