@@ -11,6 +11,10 @@
 
 두 순번이 시트 입력 순서상 서로 대응한다는 가정 하에 동작하는 임시방편이며,
 '매치 목록'/'매치 전적' 시트에 정식 회차 컬럼이 추가되면 이 로직은 필요 없어진다.
+
+* '형식'은 이제 '매치 전적' 시트에 자체 컬럼으로 들어오므로, 라운드에 값이 있으면
+  그대로 신뢰해서 쓴다. 매치와 매칭해 형식을 채우는 건 그 값이 비어 있는
+  (컬럼 추가 이전의) 과거 데이터를 위한 fallback으로만 남겨둔다.
 """
 
 
@@ -23,7 +27,8 @@ def _extract_round_num(round_str):
 
 def link_rounds_to_matches(matches, rounds):
     """matches, rounds(dict 리스트)를 받아 각 항목에 '_match_key'를 붙이고,
-    라운드에는 대응하는 매치의 '형식'도 채워서 (matches_copy, rounds_copy)로 반환한다."""
+    라운드에 '형식'이 비어 있으면 대응하는 매치의 '형식'으로 채워서
+    (matches_copy, rounds_copy)로 반환한다. 라운드에 '형식'이 이미 있으면 그대로 둔다."""
     matches = [dict(m) for m in matches]
     rounds = [dict(r) for r in rounds]
 
@@ -53,7 +58,12 @@ def link_rounds_to_matches(matches, rounds):
 
         m_key = f"{key[0]}__{key[1]}__{seq}"
         r['_match_key'] = m_key
-        matched = match_by_key.get(m_key)
-        r['형식'] = matched.get('형식', '') if matched else ''
+
+        # 라운드 자체에 형식 값이 없을 때만 매치에서 유추해서 채운다 (fallback)
+        existing_fmt = str(r.get('형식', '')).strip()
+        if not existing_fmt:
+            matched = match_by_key.get(m_key)
+            r['형식'] = matched.get('형식', '') if matched else ''
 
     return matches, rounds
+
