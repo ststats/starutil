@@ -127,7 +127,9 @@
                     <div class="m-opp-team">${escapeHTML(m['상대팀'])}</div>
                     <div class="m-score">${m['세트 결과'] || '-'}</div>
                     <div class="m-res">${badgeHtml}</div>
-                    <div class="m-arrow">▼</div>
+                    <div class="m-arrow">
+                        <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </div>
                 </div>
                 <div class="collapse" id="${collapseId}">
                     <div class="px-4 py-2" style="background-color:#fcfcfd; border-top:1px dashed #eaedf2;">
