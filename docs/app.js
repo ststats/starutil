@@ -297,9 +297,8 @@
         container.innerHTML = `<div class="live-broadcast-grid">${liveList.map(({ member: m, live }) => {
             const { broad, broadStart } = live;
             const soopId = m['SOOP ID'];
-            const viewerText = broad.current_sum_viewer != null ? broad.current_sum_viewer.toLocaleString('ko-KR') + '명 시청' : '';
-            const elapsedText = formatLiveElapsed(broadStart);
-            const metaText = [viewerText, elapsedText].filter(Boolean).join(' · ');
+            const viewerText = broad.current_sum_viewer != null ? broad.current_sum_viewer.toLocaleString('ko-KR') + '명' : '-';
+            const elapsedText = formatLiveElapsed(broadStart) || '-';
 
             return `
             <a class="live-broadcast-card" href="https://play.sooplive.co.kr/${encodeURIComponent(soopId)}" target="_blank" rel="noopener">
@@ -308,11 +307,16 @@
                     <span class="live-badge">LIVE</span>
                 </div>
                 <div class="live-card-body">
-                    ${avatarHtml(soopId, 'live-card-avatar')}
-                    <div class="live-card-info">
-                        <div class="live-card-name">${escapeHTML(m['이름'])}</div>
-                        <div class="live-card-title">${escapeHTML(broad.broad_title || '')}</div>
-                        <div class="live-card-meta">${escapeHTML(metaText)}</div>
+                    <div class="live-card-title">${escapeHTML(broad.broad_title || '')}</div>
+                    <div class="live-card-meta-row">
+                        <div class="live-card-who">
+                            ${avatarHtml(soopId, 'live-card-avatar')}
+                            <span class="live-card-name">${escapeHTML(m['이름'])}</span>
+                        </div>
+                        <div class="live-card-stats">
+                            <div class="live-card-viewers">${escapeHTML(viewerText)}</div>
+                            <div class="live-card-elapsed">${escapeHTML(elapsedText)}</div>
+                        </div>
                     </div>
                 </div>
             </a>`;
