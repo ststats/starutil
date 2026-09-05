@@ -21,7 +21,7 @@
             <a class="nav-item" data-page="members" onclick="switchPage('members')">멤버</a>
             <a class="nav-item" data-page="stats" onclick="switchPage('stats')">전적</a>
             <a class="nav-item" data-page="synergy" onclick="switchPage('synergy')">시너지표</a>
-            <a class="nav-item" onclick="alert('도구 메뉴는 준비중입니다.')">도구</a>
+            <a class="nav-item" data-page="tools" onclick="switchPage('tools')">도구</a>
         </div>
     </div>
 </div>
@@ -109,6 +109,38 @@
         </div>
     </div>
     <div class="text-center text-muted mt-2" id="synergy-updated" style="font-size:11px;"></div>
+</div>
+
+<!-- 도구 페이지: 외부 링크 카드 모음 -->
+<div id="page-tools" class="page-section container">
+    <div class="section-title">도구</div>
+    <div class="tool-grid">
+        <a class="tool-card" href="https://calm-hoxy.vercel.app/" target="_blank" rel="noopener">
+            <span class="tool-card-ext">↗</span>
+            <div class="tool-card-icon">혹</div>
+            <div class="tool-card-name">혹시</div>
+        </a>
+        <a class="tool-card" href="https://prena.io/brain/" target="_blank" rel="noopener">
+            <span class="tool-card-ext">↗</span>
+            <div class="tool-card-icon">암</div>
+            <div class="tool-card-name">암다리</div>
+        </a>
+        <a class="tool-card" href="https://lazygyu.github.io/roulette/" target="_blank" rel="noopener">
+            <span class="tool-card-ext">↗</span>
+            <div class="tool-card-icon">핀</div>
+            <div class="tool-card-name">핀볼</div>
+        </a>
+        <a class="tool-card" href="https://search.naver.com/search.naver?where=nexearch&query=%EC%82%AC%EB%8B%A4%EB%A6%AC%EA%B2%8C%EC%9E%84" target="_blank" rel="noopener">
+            <span class="tool-card-ext">↗</span>
+            <div class="tool-card-icon">네</div>
+            <div class="tool-card-name">네이버 사다리</div>
+        </a>
+        <a class="tool-card" href="https://ygosu.com/board/pan_monstarz" target="_blank" rel="noopener">
+            <span class="tool-card-ext">↗</span>
+            <div class="tool-card-icon">스</div>
+            <div class="tool-card-name">스대게</div>
+        </a>
+    </div>
 </div>
 
 <!-- 전적 페이지 -->
