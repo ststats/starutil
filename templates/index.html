@@ -16,6 +16,7 @@
             --color-primary: #2979ff;
             --color-win: #0066ff;
             --color-lose: #f03e3e;
+            --color-draw: #868e96; /* 무승부 회색 추가 */
         }
         body { font-family: 'Pretendard', sans-serif; background-color: var(--color-bg); color: var(--color-text-main); }
         a { text-decoration: none; color: inherit; cursor: pointer; }
@@ -69,6 +70,7 @@
         .match-badge { display: inline-block; width: 44px; text-align: center; font-size: 11px; font-weight: 800; padding: 4px 0; border-radius: 4px; color: #fff; }
         .badge-win { background-color: var(--color-win); }
         .badge-lose { background-color: var(--color-lose); }
+        .badge-draw { background-color: var(--color-draw); } /* DRAW 뱃지 속성 추가 */
 
         /* 개인 사이드바 */
         .sidebar-list { border: 1px solid var(--color-border); border-radius: 10px; background: #fff; overflow: hidden; }
@@ -154,7 +156,6 @@
                     <button class="btn-clean" onclick="openTeamMatchModal('전체')">전체보기</button>
                 </div>
                 <div class="clean-card flex-grow-0 p-0 overflow-hidden" style="border-radius: 10px;">
-                    <!-- 간격 압축을 위해 상하 패딩 최적화 -->
                     <div style="padding: 12px 10px;" id="team-recent-list"></div>
                 </div>
             </div>
@@ -166,7 +167,7 @@
     <!-- ========================================== -->
     <div id="view-indiv-stat" style="display: none;">
         <div class="row g-4">
-            <!-- 좌측 사이드바 (확실한 3구역 분리) -->
+            <!-- 좌측 사이드바 -->
             <div class="col-md-3">
                 <div class="sidebar-list mb-3">
                     <div class="sidebar-header">종합 통계</div>
@@ -368,6 +369,7 @@
         renderTeamMatchesList('team-recent-list', '전체', 10);
     }
 
+    // DRAW 뱃지 반영한 렌더러 (팀)
     function renderTeamMatchesList(containerId, format, limit) {
         const filtered = format === '전체' ? dbMatches : dbMatches.filter(m => m['형식'] === format);
         const sliced = limit ? filtered.slice(0, limit) : filtered;
@@ -375,17 +377,22 @@
             document.getElementById(containerId).innerHTML = '<div class="text-center text-muted py-3">경기 기록이 없습니다.</div>';
             return;
         }
-        const html = sliced.map(m => `
+        const html = sliced.map(m => {
+            let resText = m['최종 결과'] || m['최근 결과'] || '';
+            let badgeHtml = '<span class="match-badge badge-lose">LOSE</span>';
+            if (resText === '승') badgeHtml = '<span class="match-badge badge-win">WIN</span>';
+            else if (resText === '무' || resText === '무승부') badgeHtml = '<span class="match-badge badge-draw">DRAW</span>';
+
+            return `
             <div class="match-row">
                 <div class="m-date">${m['날짜'] ? m['날짜'].split(' ')[0].substring(2) : ''}</div>
                 <div class="m-type"><span class="tag-badge">${m['형식']}</span></div>
                 <div class="m-opp-team">${m['상대팀']}</div>
                 <div class="m-score">${m['세트 결과'] || '-'}</div>
-                <div class="m-res">
-                    ${m['최근 결과'] === '승' || m['최종 결과'] === '승' ? '<span class="match-badge badge-win">WIN</span>' : '<span class="match-badge badge-lose">LOSE</span>'}
-                </div>
+                <div class="m-res">${badgeHtml}</div>
             </div>
-        `).join('');
+            `;
+        }).join('');
         document.getElementById(containerId).innerHTML = html;
     }
 
@@ -441,6 +448,7 @@
         document.getElementById('statContent').style.display = 'block';
 
         document.querySelectorAll('.player-item').forEach(el => el.classList.remove('active'));
+        document.getElementById('side-btn-summary').classList.remove('active');
         const sideItem = document.getElementById(`side-player-${name}`);
         if(sideItem) sideItem.classList.add('active');
 
@@ -472,6 +480,7 @@
         renderIndivMatchesList('indiv-recent-list', format, 10);
     }
 
+    // DRAW 뱃지 반영한 렌더러 (개인)
     function renderIndivMatchesList(containerId, format, limit) {
         let filtered = dbRounds.filter(m => m['우리 선수'] === currentPlayer);
         if (format !== '전체') filtered = filtered.filter(m => m['형식'] === format);
@@ -482,17 +491,22 @@
             return;
         }
 
-        const html = sliced.map(m => `
+        const html = sliced.map(m => {
+            let resText = m['결과'] || '';
+            let badgeHtml = '<span class="match-badge badge-lose">LOSE</span>';
+            if (resText === '승') badgeHtml = '<span class="match-badge badge-win">WIN</span>';
+            else if (resText === '무' || resText === '무승부') badgeHtml = '<span class="match-badge badge-draw">DRAW</span>';
+
+            return `
             <div class="match-row">
                 <div class="m-date">${m['날짜'] ? m['날짜'].split(' ')[0].substring(2) : ''}</div>
                 <div class="m-type"><span class="tag-badge">${m['형식']}</span></div>
                 <div class="m-opp-indiv">${m['상대팀']} <span style="font-weight:normal;color:#7a828e;">/ ${m['상대 선수']}(${m['상대 종족']})</span></div>
                 <div class="m-map">${m['맵'] || '-'}</div>
-                <div class="m-res">
-                    ${m['결과'] === '승' ? '<span class="match-badge badge-win">WIN</span>' : '<span class="match-badge badge-lose">LOSE</span>'}
-                </div>
+                <div class="m-res">${badgeHtml}</div>
             </div>
-        `).join('');
+            `;
+        }).join('');
         document.getElementById(containerId).innerHTML = html;
     }
 
