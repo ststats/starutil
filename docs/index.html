@@ -3,574 +3,1034 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>스타크래프트 전적 검색</title>
-    <!-- Bootstrap 5 CSS -->
+    <title>캄몬스타즈 (Kammon Stars)</title>
+    <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Pretendard 폰트 -->
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
     <style>
-        :root {
-            --bg-body: #f4f5f7;
-            --bg-card: #ffffff;
-            --text-main: #111111;
-            --text-muted: #777777;
-            --border-color: #ebebeb;
-            --race-z: #673ab7; /* 저그 보라색 */
-            --race-t: #1976d2; /* 테란 파란색 */
-            --race-p: #fbc02d; /* 토스 노란색 */
-        }
-        body { font-family: 'Pretendard', sans-serif; background-color: var(--bg-body); color: var(--text-main); }
-        a { text-decoration: none; color: inherit; }
-        ul { list-style: none; padding: 0; margin: 0; }
+        body { font-family: 'Pretendard', sans-serif; background-color: #f8f9fa; color: #212529; }
+        
+        /* 상단 네비게이션 (GNB) */
+        .navbar-custom { background-color: #111; padding: 0 20px; border-bottom: 3px solid #ff4757; }
+        .navbar-brand { font-size: 24px; font-weight: 900; color: #fff !important; letter-spacing: -1px; }
+        .nav-pills .nav-link { color: #aaa; font-weight: 600; padding: 20px 25px; border-radius: 0; }
+        .nav-pills .nav-link.active { background-color: transparent; color: #ff4757; border-bottom: 3px solid #ff4757; }
+        .nav-pills .nav-link:hover { color: #fff; }
 
-        /* 네비게이션 바 (상단) */
-        .top-navbar { background-color: #fff; border-bottom: 1px solid var(--border-color); padding: 0 20px; height: 60px; display: flex; align-items: center; justify-content: space-between; }
-        .top-navbar .logo { font-size: 20px; font-weight: 900; letter-spacing: -1px; margin-right: 30px; }
-        .top-navbar .nav-links a { margin-right: 20px; font-size: 15px; font-weight: 600; color: #555; }
-        .top-navbar .nav-links a:hover { color: #000; }
+        /* 페이지 컨테이너 */
+        .page-section { display: none; padding: 40px 0; }
+        .page-section.active { display: block; animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* 검색 & 필터 바 */
-        .filter-bar { background-color: #fff; border-radius: 12px; border: 1px solid var(--border-color); padding: 15px 20px; margin: 20px 0; display: flex; align-items: center; gap: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
-        .main-search-input { border: 1px solid #ddd; background-color: #f9f9f9; padding: 10px 15px; border-radius: 8px; width: 300px; outline: none; }
-        .crew-filters span { margin-right: 15px; font-size: 14px; color: var(--text-muted); cursor: pointer; font-weight: 600; }
-        .crew-filters span.active { color: #fff; background-color: #333; padding: 4px 12px; border-radius: 20px; }
+        /* 홈 - 로고 및 방송 */
+        .hero-logo-box { width: 100%; max-width: 900px; height: 250px; background-color: #2f3542; margin: 0 auto; display: flex; align-items: center; justify-content: center; border-radius: 16px; color: #fff; font-size: 2rem; font-weight: 900; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .stream-card { border: none; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); transition: transform 0.2s; }
+        .stream-card:hover { transform: translateY(-5px); }
+        .stream-thumb { width: 100%; height: 180px; background-color: #ddd; display: flex; align-items: center; justify-content: center; position: relative; }
+        .live-badge { position: absolute; top: 10px; left: 10px; background-color: red; color: white; font-size: 11px; font-weight: bold; padding: 3px 8px; border-radius: 4px; }
 
-        /* 공통 카드 스타일 */
-        .stat-card { background-color: var(--bg-card); border-radius: 12px; border: 1px solid var(--border-color); padding: 25px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
+        /* 멤버 카드 */
+        .member-card { text-align: center; background: #fff; border-radius: 16px; padding: 30px 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid #eee; margin-bottom: 20px; }
+        .member-pic { width: 100px; height: 100px; border-radius: 50%; background-color: #e9ecef; margin: 0 auto 15px auto; display: flex; align-items: center; justify-content: center; font-size: 30px; }
+        .tier-badge { background-color: #2ed573; color: #fff; font-size: 12px; padding: 4px 10px; border-radius: 20px; font-weight: 700; margin-bottom: 10px; display: inline-block; }
 
-        /* 사이드바 (플레이어 리스트) */
-        .sidebar-box { height: calc(100vh - 180px); overflow-y: auto; background-color: transparent; }
-        .player-item { padding: 10px 15px; cursor: pointer; border-radius: 8px; display: flex; align-items: center; margin-bottom: 2px; }
-        .player-item:hover, .player-item.active { background-color: #eaeef2; }
-        .race-icon { width: 22px; height: 22px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; color: white; margin-right: 12px; }
-        .bg-Z { background-color: var(--race-z); }
-        .bg-T { background-color: var(--race-t); }
-        .bg-P { background-color: var(--race-p); }
-
-        /* 프로필 영역 */
-        .profile-pic { width: 80px; height: 80px; border-radius: 50%; background-color: #ddd; margin-right: 20px; }
-        .profile-name { font-size: 30px; font-weight: 900; margin-bottom: 5px; letter-spacing: -1px; }
-        .badge-tag { background-color: #f1f3f5; color: #495057; font-size: 12px; padding: 4px 10px; border-radius: 6px; font-weight: 600; margin-right: 5px; }
-
-        /* 우측 요약 통계 영역 */
-        .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .summary-item { margin-bottom: 15px; }
-        .summary-title { font-size: 12px; color: var(--text-muted); margin-bottom: 2px; font-weight: 600; }
-        .summary-value { font-size: 26px; font-weight: 900; line-height: 1.1; }
-        .summary-sub { font-size: 12px; color: #999; margin-top: 2px; }
-
-        /* 종족별 도넛 차트 (CSS Only) */
-        .donut-container { display: flex; justify-content: space-around; text-align: center; margin-top: 10px; }
-        .donut { width: 110px; height: 110px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px auto; position: relative; background: #eee; }
-        .donut::before { content: ""; width: 85px; height: 85px; background: #fff; border-radius: 50%; position: absolute; }
-        .donut-text { position: relative; font-size: 18px; font-weight: 800; }
-        .donut-label { font-size: 13px; font-weight: 600; color: #555; }
-        .donut-sub { font-size: 12px; color: #999; }
+        /* 전적 페이지 레이아웃 (이전 코드 압축) */
+        .sidebar { background: #fff; height: calc(100vh - 70px); overflow-y: auto; border-right: 1px solid #dee2e6; }
+        .player-item { padding: 12px 20px; cursor: pointer; border-bottom: 1px solid #f8f9fa; }
+        .player-item:hover, .player-item.active { background-color: #f1f3f5; }
+        .stat-box { background: #fff; border: 1px solid #dee2e6; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
     </style>
 </head>
 <body>
 
-<!-- 1. 상단 네비게이션 바 -->
-<div class="top-navbar">
-    <div class="d-flex align-items-center">
-        <div class="logo">ONE K 스타일</div>
-        <div class="nav-links d-none d-md-flex">
-            <a href="#">라이브</a><a href="#">일정</a><a href="#">멤버</a>
-            <a href="#" style="border-bottom: 3px solid #000; padding-bottom: 18px;">전적·분석</a>
+<!-- 상단 GNB (글로벌 네비게이션 바) -->
+<nav class="navbar navbar-custom sticky-top">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">🏆 캄몬스타즈</a>
+        <!-- 부트스트랩 nav-pills를 사용한 탭 메뉴 -->
+        <ul class="nav nav-pills" id="mainMenu">
+            <li class="nav-item"><a class="nav-link active" onclick="switchPage('home')">홈</a></li>
+            <li class="nav-item"><a class="nav-link" onclick="switchPage('schedule')">일정</a></li>
+            <li class="nav-item"><a class="nav-link" onclick="switchPage('members')">멤버</a></li>
+            <li class="nav-item"><a class="nav-link" onclick="switchPage('stats')">전적</a></li>
+        </ul>
+    </div>
+</nav>
+
+<!-- 1. 홈 페이지 -->
+<div id="page-home" class="page-section active container">
+    <div class="hero-logo-box mb-5">
+        <!-- 나중에 진짜 이미지 태그 <img src="..."> 로 교체하시면 됩니다 -->
+        KAMMON STARS LOGO
+    </div>
+    
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="fw-bold m-0">🔴 라이브 방송 중인 멤버</h4>
+        <span class="text-muted">SOOP (아프리카TV) 연동 예정</span>
+    </div>
+
+    <div class="row g-4">
+        <!-- 임시 라이브 방송 카드 -->
+        <div class="col-md-4 col-lg-3">
+            <div class="stream-card">
+                <div class="stream-thumb">
+                    <span class="live-badge">LIVE</span>
+                    썸네일
+                </div>
+                <div class="p-3">
+                    <h6 class="fw-bold mb-1">김윤환 방송국</h6>
+                    <p class="text-muted fs-6 m-0">스타크래프트 연습 중...</p>
+                </div>
+            </div>
         </div>
+        <!-- (동일한 카드를 여러 개 넣을 수 있습니다) -->
     </div>
 </div>
 
-<div class="container-fluid px-4">
-    <!-- 2. 검색 및 필터 바 -->
-    <div class="filter-bar">
-        <input type="text" class="main-search-input" id="searchInput" placeholder="🔍 선수 검색" onkeyup="filterPlayers()">
-        <div class="crew-filters d-none d-md-block">
-            <span class="active">전체 시즌</span>
-            <span>시즌 1</span>
-            <span>시즌 2</span>
-            <!-- 나중에 파이썬에서 크루 목록을 가져와서 뿌려줄 수 있는 자리입니다 -->
-        </div>
+<!-- 2. 일정 페이지 -->
+<div id="page-schedule" class="page-section container text-center">
+    <div class="py-5 my-5">
+        <h1 class="display-1 text-muted mb-4">📅</h1>
+        <h3 class="fw-bold">경기 일정을 준비 중입니다.</h3>
+        <p class="text-secondary">추후 구글 캘린더나 일정 테이블이 들어갈 자리입니다.</p>
+    </div>
+</div>
+
+<!-- 3. 멤버 페이지 -->
+<div id="page-members" class="page-section container">
+    <div class="mb-5 text-center">
+        <h2 class="fw-bold">TEAM ROSTER</h2>
+        <p class="text-secondary">캄몬스타즈를 빛내는 멤버들입니다.</p>
     </div>
 
-    <!-- 3. 메인 그리드 레이아웃 -->
-    <div class="row g-4">
-        
-        <!-- 좌측: 플레이어 리스트 -->
-        <div class="col-lg-2">
-            <div class="sidebar-box" id="playerList">
+    <!-- 파이썬에서 정렬해서 넘겨준 members_list를 활용하여 그룹핑 -->
+    
+        <h4 class="fw-bold mb-3 border-bottom pb-2">감독진</h4>
+        <div class="row g-4 mb-5">
+            
                 
-                <!-- onclick 이벤트로 선수 데이터를 우측에 뿌려줍니다 -->
+                <div class="col-6 col-md-3 col-lg-2">
+                    <div class="member-card">
+                        <div class="member-pic">👤</div>
+                        
+                        <div class="tier-badge bg-dark">감독</div>
+                        
+                        <h5 class="fw-bold m-0">김윤환</h5>
+                        <div class="text-muted mt-1" style="font-size:12px;">저그</div>
+                    </div>
+                </div>
+                
+            
+                
+                <div class="col-6 col-md-3 col-lg-2">
+                    <div class="member-card">
+                        <div class="member-pic">👤</div>
+                        
+                        <div class="tier-badge bg-dark">감독</div>
+                        
+                        <h5 class="fw-bold m-0">이경민</h5>
+                        <div class="text-muted mt-1" style="font-size:12px;">프로토스</div>
+                    </div>
+                </div>
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+        </div>
+    
+        <h4 class="fw-bold mb-3 border-bottom pb-2">코치진</h4>
+        <div class="row g-4 mb-5">
+            
+                
+            
+                
+            
+                
+                <div class="col-6 col-md-3 col-lg-2">
+                    <div class="member-card">
+                        <div class="member-pic">👤</div>
+                        
+                        <div class="tier-badge bg-dark">코치</div>
+                        
+                        <h5 class="fw-bold m-0">수입뿌드</h5>
+                        <div class="text-muted mt-1" style="font-size:12px;">프로토스</div>
+                    </div>
+                </div>
+                
+            
+                
+                <div class="col-6 col-md-3 col-lg-2">
+                    <div class="member-card">
+                        <div class="member-pic">👤</div>
+                        
+                        <div class="tier-badge bg-dark">코치</div>
+                        
+                        <h5 class="fw-bold m-0">황병영</h5>
+                        <div class="text-muted mt-1" style="font-size:12px;">테란</div>
+                    </div>
+                </div>
+                
+            
+                
+                <div class="col-6 col-md-3 col-lg-2">
+                    <div class="member-card">
+                        <div class="member-pic">👤</div>
+                        
+                        <div class="tier-badge bg-dark">코치</div>
+                        
+                        <h5 class="fw-bold m-0">조일장</h5>
+                        <div class="text-muted mt-1" style="font-size:12px;">저그</div>
+                    </div>
+                </div>
+                
+            
+                
+                <div class="col-6 col-md-3 col-lg-2">
+                    <div class="member-card">
+                        <div class="member-pic">👤</div>
+                        
+                        <div class="tier-badge bg-dark">코치</div>
+                        
+                        <h5 class="fw-bold m-0">변현제</h5>
+                        <div class="text-muted mt-1" style="font-size:12px;">프로토스</div>
+                    </div>
+                </div>
+                
+            
+                
+                <div class="col-6 col-md-3 col-lg-2">
+                    <div class="member-card">
+                        <div class="member-pic">👤</div>
+                        
+                        <div class="tier-badge bg-dark">코치</div>
+                        
+                        <h5 class="fw-bold m-0">김민철</h5>
+                        <div class="text-muted mt-1" style="font-size:12px;">저그</div>
+                    </div>
+                </div>
+                
+            
+                
+                <div class="col-6 col-md-3 col-lg-2">
+                    <div class="member-card">
+                        <div class="member-pic">👤</div>
+                        
+                        <div class="tier-badge bg-dark">코치</div>
+                        
+                        <h5 class="fw-bold m-0">파도튜브</h5>
+                        <div class="text-muted mt-1" style="font-size:12px;">프로토스</div>
+                    </div>
+                </div>
+                
+            
+                
+                <div class="col-6 col-md-3 col-lg-2">
+                    <div class="member-card">
+                        <div class="member-pic">👤</div>
+                        
+                        <div class="tier-badge bg-dark">코치</div>
+                        
+                        <h5 class="fw-bold m-0">지동원</h5>
+                        <div class="text-muted mt-1" style="font-size:12px;">테란</div>
+                    </div>
+                </div>
+                
+            
+                
+                <div class="col-6 col-md-3 col-lg-2">
+                    <div class="member-card">
+                        <div class="member-pic">👤</div>
+                        
+                        <div class="tier-badge bg-dark">코치</div>
+                        
+                        <h5 class="fw-bold m-0">배성흠</h5>
+                        <div class="text-muted mt-1" style="font-size:12px;">저그</div>
+                    </div>
+                </div>
+                
+            
+                
+                <div class="col-6 col-md-3 col-lg-2">
+                    <div class="member-card">
+                        <div class="member-pic">👤</div>
+                        
+                        <div class="tier-badge bg-dark">코치</div>
+                        
+                        <h5 class="fw-bold m-0">몽군</h5>
+                        <div class="text-muted mt-1" style="font-size:12px;">테란</div>
+                    </div>
+                </div>
+                
+            
+                
+                <div class="col-6 col-md-3 col-lg-2">
+                    <div class="member-card">
+                        <div class="member-pic">👤</div>
+                        
+                        <div class="tier-badge bg-dark">코치</div>
+                        
+                        <h5 class="fw-bold m-0">박준오</h5>
+                        <div class="text-muted mt-1" style="font-size:12px;">저그</div>
+                    </div>
+                </div>
+                
+            
+                
+                <div class="col-6 col-md-3 col-lg-2">
+                    <div class="member-card">
+                        <div class="member-pic">👤</div>
+                        
+                        <div class="tier-badge bg-dark">코치</div>
+                        
+                        <h5 class="fw-bold m-0">박수범</h5>
+                        <div class="text-muted mt-1" style="font-size:12px;">프로토스</div>
+                    </div>
+                </div>
+                
+            
+                
+                <div class="col-6 col-md-3 col-lg-2">
+                    <div class="member-card">
+                        <div class="member-pic">👤</div>
+                        
+                        <div class="tier-badge bg-dark">코치</div>
+                        
+                        <h5 class="fw-bold m-0">사테</h5>
+                        <div class="text-muted mt-1" style="font-size:12px;">테란</div>
+                    </div>
+                </div>
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+        </div>
+    
+        <h4 class="fw-bold mb-3 border-bottom pb-2">선수진</h4>
+        <div class="row g-4 mb-5">
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+                <div class="col-6 col-md-3 col-lg-2">
+                    <div class="member-card">
+                        <div class="member-pic">👤</div>
+                        
+                        <div class="tier-badge">2 티어</div>
+                        
+                        <h5 class="fw-bold m-0">세나</h5>
+                        <div class="text-muted mt-1" style="font-size:12px;">저그</div>
+                    </div>
+                </div>
+                
+            
+                
+                <div class="col-6 col-md-3 col-lg-2">
+                    <div class="member-card">
+                        <div class="member-pic">👤</div>
+                        
+                        <div class="tier-badge">2 티어</div>
+                        
+                        <h5 class="fw-bold m-0">남덕선</h5>
+                        <div class="text-muted mt-1" style="font-size:12px;">저그</div>
+                    </div>
+                </div>
+                
+            
+                
+                <div class="col-6 col-md-3 col-lg-2">
+                    <div class="member-card">
+                        <div class="member-pic">👤</div>
+                        
+                        <div class="tier-badge">3 티어</div>
+                        
+                        <h5 class="fw-bold m-0">디임</h5>
+                        <div class="text-muted mt-1" style="font-size:12px;">프로토스</div>
+                    </div>
+                </div>
+                
+            
+                
+                <div class="col-6 col-md-3 col-lg-2">
+                    <div class="member-card">
+                        <div class="member-pic">👤</div>
+                        
+                        <div class="tier-badge">3 티어</div>
+                        
+                        <h5 class="fw-bold m-0">다예</h5>
+                        <div class="text-muted mt-1" style="font-size:12px;">저그</div>
+                    </div>
+                </div>
+                
+            
+                
+                <div class="col-6 col-md-3 col-lg-2">
+                    <div class="member-card">
+                        <div class="member-pic">👤</div>
+                        
+                        <div class="tier-badge">3 티어</div>
+                        
+                        <h5 class="fw-bold m-0">지두두</h5>
+                        <div class="text-muted mt-1" style="font-size:12px;">테란</div>
+                    </div>
+                </div>
+                
+            
+                
+                <div class="col-6 col-md-3 col-lg-2">
+                    <div class="member-card">
+                        <div class="member-pic">👤</div>
+                        
+                        <div class="tier-badge">4 티어</div>
+                        
+                        <h5 class="fw-bold m-0">앵지</h5>
+                        <div class="text-muted mt-1" style="font-size:12px;">저그</div>
+                    </div>
+                </div>
+                
+            
+                
+                <div class="col-6 col-md-3 col-lg-2">
+                    <div class="member-card">
+                        <div class="member-pic">👤</div>
+                        
+                        <div class="tier-badge">4 티어</div>
+                        
+                        <h5 class="fw-bold m-0">토마토</h5>
+                        <div class="text-muted mt-1" style="font-size:12px;">프로토스</div>
+                    </div>
+                </div>
+                
+            
+                
+                <div class="col-6 col-md-3 col-lg-2">
+                    <div class="member-card">
+                        <div class="member-pic">👤</div>
+                        
+                        <div class="tier-badge">4 티어</div>
+                        
+                        <h5 class="fw-bold m-0">두디</h5>
+                        <div class="text-muted mt-1" style="font-size:12px;">저그</div>
+                    </div>
+                </div>
+                
+            
+                
+                <div class="col-6 col-md-3 col-lg-2">
+                    <div class="member-card">
+                        <div class="member-pic">👤</div>
+                        
+                        <div class="tier-badge">4 티어</div>
+                        
+                        <h5 class="fw-bold m-0">햇살</h5>
+                        <div class="text-muted mt-1" style="font-size:12px;">테란</div>
+                    </div>
+                </div>
+                
+            
+                
+                <div class="col-6 col-md-3 col-lg-2">
+                    <div class="member-card">
+                        <div class="member-pic">👤</div>
+                        
+                        <div class="tier-badge">4 티어</div>
+                        
+                        <h5 class="fw-bold m-0">찌킹</h5>
+                        <div class="text-muted mt-1" style="font-size:12px;">저그</div>
+                    </div>
+                </div>
+                
+            
+                
+                <div class="col-6 col-md-3 col-lg-2">
+                    <div class="member-card">
+                        <div class="member-pic">👤</div>
+                        
+                        <div class="tier-badge">5 티어</div>
+                        
+                        <h5 class="fw-bold m-0">졈니</h5>
+                        <div class="text-muted mt-1" style="font-size:12px;">프로토스</div>
+                    </div>
+                </div>
+                
+            
+                
+                <div class="col-6 col-md-3 col-lg-2">
+                    <div class="member-card">
+                        <div class="member-pic">👤</div>
+                        
+                        <div class="tier-badge">5 티어</div>
+                        
+                        <h5 class="fw-bold m-0">강덕구</h5>
+                        <div class="text-muted mt-1" style="font-size:12px;">테란</div>
+                    </div>
+                </div>
+                
+            
+                
+                <div class="col-6 col-md-3 col-lg-2">
+                    <div class="member-card">
+                        <div class="member-pic">👤</div>
+                        
+                        <div class="tier-badge">5 티어</div>
+                        
+                        <h5 class="fw-bold m-0">주하랑</h5>
+                        <div class="text-muted mt-1" style="font-size:12px;">프로토스</div>
+                    </div>
+                </div>
+                
+            
+                
+                <div class="col-6 col-md-3 col-lg-2">
+                    <div class="member-card">
+                        <div class="member-pic">👤</div>
+                        
+                        <div class="tier-badge">5 티어</div>
+                        
+                        <h5 class="fw-bold m-0">소주양</h5>
+                        <div class="text-muted mt-1" style="font-size:12px;">테란</div>
+                    </div>
+                </div>
+                
+            
+                
+                <div class="col-6 col-md-3 col-lg-2">
+                    <div class="member-card">
+                        <div class="member-pic">👤</div>
+                        
+                        <div class="tier-badge">6 티어</div>
+                        
+                        <h5 class="fw-bold m-0">비타밍</h5>
+                        <div class="text-muted mt-1" style="font-size:12px;">테란</div>
+                    </div>
+                </div>
+                
+            
+                
+                <div class="col-6 col-md-3 col-lg-2">
+                    <div class="member-card">
+                        <div class="member-pic">👤</div>
+                        
+                        <div class="tier-badge">7 티어</div>
+                        
+                        <h5 class="fw-bold m-0">모리</h5>
+                        <div class="text-muted mt-1" style="font-size:12px;">테란</div>
+                    </div>
+                </div>
+                
+            
+                
+                <div class="col-6 col-md-3 col-lg-2">
+                    <div class="member-card">
+                        <div class="member-pic">👤</div>
+                        
+                        <div class="tier-badge">7 티어</div>
+                        
+                        <h5 class="fw-bold m-0">치리</h5>
+                        <div class="text-muted mt-1" style="font-size:12px;">저그</div>
+                    </div>
+                </div>
+                
+            
+                
+                <div class="col-6 col-md-3 col-lg-2">
+                    <div class="member-card">
+                        <div class="member-pic">👤</div>
+                        
+                        <div class="tier-badge">7 티어</div>
+                        
+                        <h5 class="fw-bold m-0">먼진</h5>
+                        <div class="text-muted mt-1" style="font-size:12px;">저그</div>
+                    </div>
+                </div>
+                
+            
+                
+                <div class="col-6 col-md-3 col-lg-2">
+                    <div class="member-card">
+                        <div class="member-pic">👤</div>
+                        
+                        <div class="tier-badge">7 티어</div>
+                        
+                        <h5 class="fw-bold m-0">아리송이</h5>
+                        <div class="text-muted mt-1" style="font-size:12px;">프로토스</div>
+                    </div>
+                </div>
+                
+            
+                
+                <div class="col-6 col-md-3 col-lg-2">
+                    <div class="member-card">
+                        <div class="member-pic">👤</div>
+                        
+                        <div class="tier-badge">베이비 티어</div>
+                        
+                        <h5 class="fw-bold m-0">낭니</h5>
+                        <div class="text-muted mt-1" style="font-size:12px;">저그</div>
+                    </div>
+                </div>
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+                
+            
+        </div>
+    
+</div>
+
+<!-- 4. 전적 페이지 (이전에 만든 대시보드) -->
+<div id="page-stats" class="page-section" style="padding: 0; max-width: 100%;">
+    <div class="row g-0">
+        <!-- 좌측 메뉴 -->
+        <div class="col-md-3 col-lg-2 sidebar">
+            <div class="p-3 border-bottom bg-light">
+                <input type="text" id="searchInput" class="form-control" placeholder="🔍 선수 검색" onkeyup="filterPlayers()">
+            </div>
+            <div id="playerList">
+                
                 <div class="player-item" onclick="selectPlayer('강덕구')">
-                    <div class="race-icon bg-P" id="badge-강덕구">P</div> 
                     <span class="fw-bold player-name-text">강덕구</span>
                 </div>
                 
-                <!-- onclick 이벤트로 선수 데이터를 우측에 뿌려줍니다 -->
                 <div class="player-item" onclick="selectPlayer('김민철')">
-                    <div class="race-icon bg-P" id="badge-김민철">P</div> 
                     <span class="fw-bold player-name-text">김민철</span>
                 </div>
                 
-                <!-- onclick 이벤트로 선수 데이터를 우측에 뿌려줍니다 -->
                 <div class="player-item" onclick="selectPlayer('김윤환')">
-                    <div class="race-icon bg-P" id="badge-김윤환">P</div> 
                     <span class="fw-bold player-name-text">김윤환</span>
                 </div>
                 
-                <!-- onclick 이벤트로 선수 데이터를 우측에 뿌려줍니다 -->
                 <div class="player-item" onclick="selectPlayer('남덕선')">
-                    <div class="race-icon bg-P" id="badge-남덕선">P</div> 
                     <span class="fw-bold player-name-text">남덕선</span>
                 </div>
                 
-                <!-- onclick 이벤트로 선수 데이터를 우측에 뿌려줍니다 -->
                 <div class="player-item" onclick="selectPlayer('낭니')">
-                    <div class="race-icon bg-P" id="badge-낭니">P</div> 
                     <span class="fw-bold player-name-text">낭니</span>
                 </div>
                 
-                <!-- onclick 이벤트로 선수 데이터를 우측에 뿌려줍니다 -->
                 <div class="player-item" onclick="selectPlayer('다예')">
-                    <div class="race-icon bg-P" id="badge-다예">P</div> 
                     <span class="fw-bold player-name-text">다예</span>
                 </div>
                 
-                <!-- onclick 이벤트로 선수 데이터를 우측에 뿌려줍니다 -->
                 <div class="player-item" onclick="selectPlayer('두디')">
-                    <div class="race-icon bg-P" id="badge-두디">P</div> 
                     <span class="fw-bold player-name-text">두디</span>
                 </div>
                 
-                <!-- onclick 이벤트로 선수 데이터를 우측에 뿌려줍니다 -->
                 <div class="player-item" onclick="selectPlayer('디임')">
-                    <div class="race-icon bg-P" id="badge-디임">P</div> 
                     <span class="fw-bold player-name-text">디임</span>
                 </div>
                 
-                <!-- onclick 이벤트로 선수 데이터를 우측에 뿌려줍니다 -->
                 <div class="player-item" onclick="selectPlayer('막내현진')">
-                    <div class="race-icon bg-P" id="badge-막내현진">P</div> 
                     <span class="fw-bold player-name-text">막내현진</span>
                 </div>
                 
-                <!-- onclick 이벤트로 선수 데이터를 우측에 뿌려줍니다 -->
                 <div class="player-item" onclick="selectPlayer('먼진')">
-                    <div class="race-icon bg-P" id="badge-먼진">P</div> 
                     <span class="fw-bold player-name-text">먼진</span>
                 </div>
                 
-                <!-- onclick 이벤트로 선수 데이터를 우측에 뿌려줍니다 -->
                 <div class="player-item" onclick="selectPlayer('모리')">
-                    <div class="race-icon bg-P" id="badge-모리">P</div> 
                     <span class="fw-bold player-name-text">모리</span>
                 </div>
                 
-                <!-- onclick 이벤트로 선수 데이터를 우측에 뿌려줍니다 -->
                 <div class="player-item" onclick="selectPlayer('몽군')">
-                    <div class="race-icon bg-P" id="badge-몽군">P</div> 
                     <span class="fw-bold player-name-text">몽군</span>
                 </div>
                 
-                <!-- onclick 이벤트로 선수 데이터를 우측에 뿌려줍니다 -->
                 <div class="player-item" onclick="selectPlayer('박수범')">
-                    <div class="race-icon bg-P" id="badge-박수범">P</div> 
                     <span class="fw-bold player-name-text">박수범</span>
                 </div>
                 
-                <!-- onclick 이벤트로 선수 데이터를 우측에 뿌려줍니다 -->
                 <div class="player-item" onclick="selectPlayer('박준오')">
-                    <div class="race-icon bg-P" id="badge-박준오">P</div> 
                     <span class="fw-bold player-name-text">박준오</span>
                 </div>
                 
-                <!-- onclick 이벤트로 선수 데이터를 우측에 뿌려줍니다 -->
                 <div class="player-item" onclick="selectPlayer('박쭈이')">
-                    <div class="race-icon bg-P" id="badge-박쭈이">P</div> 
                     <span class="fw-bold player-name-text">박쭈이</span>
                 </div>
                 
-                <!-- onclick 이벤트로 선수 데이터를 우측에 뿌려줍니다 -->
                 <div class="player-item" onclick="selectPlayer('배성흠')">
-                    <div class="race-icon bg-P" id="badge-배성흠">P</div> 
                     <span class="fw-bold player-name-text">배성흠</span>
                 </div>
                 
-                <!-- onclick 이벤트로 선수 데이터를 우측에 뿌려줍니다 -->
                 <div class="player-item" onclick="selectPlayer('변현제')">
-                    <div class="race-icon bg-P" id="badge-변현제">P</div> 
                     <span class="fw-bold player-name-text">변현제</span>
                 </div>
                 
-                <!-- onclick 이벤트로 선수 데이터를 우측에 뿌려줍니다 -->
                 <div class="player-item" onclick="selectPlayer('비타밍')">
-                    <div class="race-icon bg-P" id="badge-비타밍">P</div> 
                     <span class="fw-bold player-name-text">비타밍</span>
                 </div>
                 
-                <!-- onclick 이벤트로 선수 데이터를 우측에 뿌려줍니다 -->
                 <div class="player-item" onclick="selectPlayer('사테')">
-                    <div class="race-icon bg-P" id="badge-사테">P</div> 
                     <span class="fw-bold player-name-text">사테</span>
                 </div>
                 
-                <!-- onclick 이벤트로 선수 데이터를 우측에 뿌려줍니다 -->
                 <div class="player-item" onclick="selectPlayer('세나')">
-                    <div class="race-icon bg-P" id="badge-세나">P</div> 
                     <span class="fw-bold player-name-text">세나</span>
                 </div>
                 
-                <!-- onclick 이벤트로 선수 데이터를 우측에 뿌려줍니다 -->
                 <div class="player-item" onclick="selectPlayer('소주양')">
-                    <div class="race-icon bg-P" id="badge-소주양">P</div> 
                     <span class="fw-bold player-name-text">소주양</span>
                 </div>
                 
-                <!-- onclick 이벤트로 선수 데이터를 우측에 뿌려줍니다 -->
                 <div class="player-item" onclick="selectPlayer('수입뿌드')">
-                    <div class="race-icon bg-P" id="badge-수입뿌드">P</div> 
                     <span class="fw-bold player-name-text">수입뿌드</span>
                 </div>
                 
-                <!-- onclick 이벤트로 선수 데이터를 우측에 뿌려줍니다 -->
                 <div class="player-item" onclick="selectPlayer('아리송이')">
-                    <div class="race-icon bg-P" id="badge-아리송이">P</div> 
                     <span class="fw-bold player-name-text">아리송이</span>
                 </div>
                 
-                <!-- onclick 이벤트로 선수 데이터를 우측에 뿌려줍니다 -->
                 <div class="player-item" onclick="selectPlayer('앵지')">
-                    <div class="race-icon bg-P" id="badge-앵지">P</div> 
                     <span class="fw-bold player-name-text">앵지</span>
                 </div>
                 
-                <!-- onclick 이벤트로 선수 데이터를 우측에 뿌려줍니다 -->
                 <div class="player-item" onclick="selectPlayer('이경민')">
-                    <div class="race-icon bg-P" id="badge-이경민">P</div> 
                     <span class="fw-bold player-name-text">이경민</span>
                 </div>
                 
-                <!-- onclick 이벤트로 선수 데이터를 우측에 뿌려줍니다 -->
                 <div class="player-item" onclick="selectPlayer('임조이')">
-                    <div class="race-icon bg-P" id="badge-임조이">P</div> 
                     <span class="fw-bold player-name-text">임조이</span>
                 </div>
                 
-                <!-- onclick 이벤트로 선수 데이터를 우측에 뿌려줍니다 -->
                 <div class="player-item" onclick="selectPlayer('정윤종')">
-                    <div class="race-icon bg-P" id="badge-정윤종">P</div> 
                     <span class="fw-bold player-name-text">정윤종</span>
                 </div>
                 
-                <!-- onclick 이벤트로 선수 데이터를 우측에 뿌려줍니다 -->
                 <div class="player-item" onclick="selectPlayer('졈니')">
-                    <div class="race-icon bg-P" id="badge-졈니">P</div> 
                     <span class="fw-bold player-name-text">졈니</span>
                 </div>
                 
-                <!-- onclick 이벤트로 선수 데이터를 우측에 뿌려줍니다 -->
                 <div class="player-item" onclick="selectPlayer('조일장')">
-                    <div class="race-icon bg-P" id="badge-조일장">P</div> 
                     <span class="fw-bold player-name-text">조일장</span>
                 </div>
                 
-                <!-- onclick 이벤트로 선수 데이터를 우측에 뿌려줍니다 -->
                 <div class="player-item" onclick="selectPlayer('주하랑')">
-                    <div class="race-icon bg-P" id="badge-주하랑">P</div> 
                     <span class="fw-bold player-name-text">주하랑</span>
                 </div>
                 
-                <!-- onclick 이벤트로 선수 데이터를 우측에 뿌려줍니다 -->
                 <div class="player-item" onclick="selectPlayer('지동원')">
-                    <div class="race-icon bg-P" id="badge-지동원">P</div> 
                     <span class="fw-bold player-name-text">지동원</span>
                 </div>
                 
-                <!-- onclick 이벤트로 선수 데이터를 우측에 뿌려줍니다 -->
                 <div class="player-item" onclick="selectPlayer('지두두')">
-                    <div class="race-icon bg-P" id="badge-지두두">P</div> 
                     <span class="fw-bold player-name-text">지두두</span>
                 </div>
                 
-                <!-- onclick 이벤트로 선수 데이터를 우측에 뿌려줍니다 -->
                 <div class="player-item" onclick="selectPlayer('진땅콩')">
-                    <div class="race-icon bg-P" id="badge-진땅콩">P</div> 
                     <span class="fw-bold player-name-text">진땅콩</span>
                 </div>
                 
-                <!-- onclick 이벤트로 선수 데이터를 우측에 뿌려줍니다 -->
                 <div class="player-item" onclick="selectPlayer('찌킹')">
-                    <div class="race-icon bg-P" id="badge-찌킹">P</div> 
                     <span class="fw-bold player-name-text">찌킹</span>
                 </div>
                 
-                <!-- onclick 이벤트로 선수 데이터를 우측에 뿌려줍니다 -->
                 <div class="player-item" onclick="selectPlayer('치리')">
-                    <div class="race-icon bg-P" id="badge-치리">P</div> 
                     <span class="fw-bold player-name-text">치리</span>
                 </div>
                 
-                <!-- onclick 이벤트로 선수 데이터를 우측에 뿌려줍니다 -->
                 <div class="player-item" onclick="selectPlayer('클템')">
-                    <div class="race-icon bg-P" id="badge-클템">P</div> 
                     <span class="fw-bold player-name-text">클템</span>
                 </div>
                 
-                <!-- onclick 이벤트로 선수 데이터를 우측에 뿌려줍니다 -->
                 <div class="player-item" onclick="selectPlayer('토마토')">
-                    <div class="race-icon bg-P" id="badge-토마토">P</div> 
                     <span class="fw-bold player-name-text">토마토</span>
                 </div>
                 
-                <!-- onclick 이벤트로 선수 데이터를 우측에 뿌려줍니다 -->
                 <div class="player-item" onclick="selectPlayer('파도튜브')">
-                    <div class="race-icon bg-P" id="badge-파도튜브">P</div> 
                     <span class="fw-bold player-name-text">파도튜브</span>
                 </div>
                 
-                <!-- onclick 이벤트로 선수 데이터를 우측에 뿌려줍니다 -->
                 <div class="player-item" onclick="selectPlayer('한쪼니')">
-                    <div class="race-icon bg-P" id="badge-한쪼니">P</div> 
                     <span class="fw-bold player-name-text">한쪼니</span>
                 </div>
                 
-                <!-- onclick 이벤트로 선수 데이터를 우측에 뿌려줍니다 -->
                 <div class="player-item" onclick="selectPlayer('햇살')">
-                    <div class="race-icon bg-P" id="badge-햇살">P</div> 
                     <span class="fw-bold player-name-text">햇살</span>
                 </div>
                 
-                <!-- onclick 이벤트로 선수 데이터를 우측에 뿌려줍니다 -->
                 <div class="player-item" onclick="selectPlayer('황병영')">
-                    <div class="race-icon bg-P" id="badge-황병영">P</div> 
                     <span class="fw-bold player-name-text">황병영</span>
                 </div>
                 
-                <!-- onclick 이벤트로 선수 데이터를 우측에 뿌려줍니다 -->
                 <div class="player-item" onclick="selectPlayer('효짱')">
-                    <div class="race-icon bg-P" id="badge-효짱">P</div> 
                     <span class="fw-bold player-name-text">효짱</span>
                 </div>
                 
             </div>
         </div>
-
-        <!-- 중앙: 프로필 및 디테일 통계 -->
-        <div class="col-lg-7" id="mainDashboard" style="display: none;">
-            
-            <!-- 상단: 프로필 카드 -->
-            <div class="stat-card">
-                <div class="d-flex align-items-center border-bottom pb-4 mb-4">
-                    <div class="profile-pic"></div>
-                    <div>
-                        <div class="profile-name" id="p-name">이름</div>
-                        <div class="d-flex align-items-center mt-1">
-                            <span class="badge-tag" style="background-color: #673ab7; color: white;" id="p-race-tag">Zerg</span>
-                            <span class="badge-tag">통합 전적 대시보드</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- 탭 흉내내기 -->
-                <div class="d-flex gap-2">
-                    <button class="btn btn-sm btn-dark rounded-pill px-3">전체</button>
-                    <button class="btn btn-sm btn-light border rounded-pill px-3">대회</button>
-                    <button class="btn btn-sm btn-light border rounded-pill px-3">대학대전</button>
-                    <button class="btn btn-sm btn-light border rounded-pill px-3">CK/미니</button>
-                </div>
+        
+        <!-- 우측 전적 대시보드 -->
+        <div class="col-md-9 col-lg-10 p-4 bg-light" id="mainDashboard" style="height: calc(100vh - 70px); overflow-y: auto;">
+            <div id="welcomeScreen" class="text-center py-5 mt-5">
+                <h3 class="text-muted fw-bold">👈 좌측에서 선수를 선택해 전적을 확인하세요!</h3>
             </div>
 
-            <!-- 하단: 종족전 승률 (도넛 차트) -->
-            <div class="stat-card">
-                <h6 class="fw-bold mb-4">종족전 스탯</h6>
-                <div class="donut-container">
-                    
-                    <!-- vs Protoss -->
-                    <div>
-                        <!-- background 스타일을 JS로 조작해서 차트를 채웁니다 -->
-                        <div class="donut" id="donut-p" style="background: conic-gradient(var(--race-p) 0%, #eee 0);">
-                            <span class="donut-text" id="rate-p">0%</span>
+            <div id="statContent" style="display: none;">
+                <h2 class="fw-bold mb-4" id="p-name">이름</h2>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="stat-box">
+                            <h5 class="fw-bold mb-3">형식별 전적</h5>
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item d-flex justify-content-between"><span class="text-muted">대회</span> <strong id="p-fmt-1">-</strong></li>
+                                <li class="list-group-item d-flex justify-content-between"><span class="text-muted">대학</span> <strong id="p-fmt-2">-</strong></li>
+                                <li class="list-group-item d-flex justify-content-between"><span class="text-muted">미니/CK</span> <strong id="p-fmt-3">-</strong></li>
+                            </ul>
                         </div>
-                        <div class="donut-label">vs Protoss</div>
-                        <div class="donut-sub" id="wl-p">0승 0패</div>
                     </div>
-
-                    <!-- vs Terran -->
-                    <div>
-                        <div class="donut" id="donut-t" style="background: conic-gradient(var(--race-t) 0%, #eee 0);">
-                            <span class="donut-text" id="rate-t">0%</span>
+                    <div class="col-md-6">
+                        <div class="stat-box">
+                            <h5 class="fw-bold mb-3">종족전 전적</h5>
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item d-flex justify-content-between text-primary"><span>VS 테란</span> <strong id="p-race-t">-</strong></li>
+                                <li class="list-group-item d-flex justify-content-between" style="color: purple;"><span>VS 저그</span> <strong id="p-race-z">-</strong></li>
+                                <li class="list-group-item d-flex justify-content-between text-warning"><span>VS 토스</span> <strong id="p-race-p">-</strong></li>
+                            </ul>
                         </div>
-                        <div class="donut-label">vs Terran</div>
-                        <div class="donut-sub" id="wl-t">0승 0패</div>
                     </div>
-
-                    <!-- vs Zerg -->
-                    <div>
-                        <div class="donut" id="donut-z" style="background: conic-gradient(var(--race-z) 0%, #eee 0);">
-                            <span class="donut-text" id="rate-z">0%</span>
-                        </div>
-                        <div class="donut-label">vs Zerg</div>
-                        <div class="donut-sub" id="wl-z">0승 0패</div>
-                    </div>
-
-                </div>
-            </div>
-            
-            <!-- 추가: 맵 & 상대 스탯 가로 배치 -->
-            <div class="row g-3">
-                <div class="col-md-6">
-                    <div class="stat-card h-100">
-                        <h6 class="fw-bold mb-3 border-bottom pb-2">주력 맵 TOP 3</h6>
-                        <div id="p-maps" class="text-secondary fs-6" style="line-height: 1.8;">데이터 없음</div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="stat-card h-100">
-                        <h6 class="fw-bold mb-3 border-bottom pb-2">주요 상대 TOP 3</h6>
-                        <div id="p-opps" class="text-secondary fs-6" style="line-height: 1.8;">데이터 없음</div>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
-        <!-- 우측: 요약 스탯 -->
-        <div class="col-lg-3" id="rightDashboard" style="display: none;">
-            <div class="stat-card">
-                <div class="summary-grid">
-                    
-                    <div class="summary-item">
-                        <div class="summary-title">총 전적</div>
-                        <div class="summary-value" id="p-total-games">0</div>
-                        <div class="summary-sub" id="p-total-wl">0-0</div>
-                    </div>
-                    
-                    <div class="summary-item">
-                        <div class="summary-title">전체 승률</div>
-                        <div class="summary-value" id="p-total-rate">0%</div>
-                        <div class="summary-sub text-primary fw-bold" id="p-fmt-1">대회: -</div>
-                    </div>
-
-                    <div class="summary-item">
-                        <div class="summary-title">대학대전</div>
-                        <div class="summary-value" style="font-size: 20px;" id="p-fmt-2-rate">0%</div>
-                        <div class="summary-sub" id="p-fmt-2">0승 0패</div>
-                    </div>
-
-                    <div class="summary-item">
-                        <div class="summary-title">CK / 미니</div>
-                        <div class="summary-value" style="font-size: 20px;" id="p-fmt-3-rate">0%</div>
-                        <div class="summary-sub" id="p-fmt-3">0승 0패</div>
-                    </div>
-                    
                 </div>
             </div>
         </div>
-
-        <!-- 초기 안내 화면 -->
-        <div class="col-lg-10" id="welcomeScreen">
-            <div class="stat-card d-flex align-items-center justify-content-center" style="height: 60vh;">
-                <div class="text-center text-muted">
-                    <h3 class="fw-bold mb-3">👈 좌측에서 선수를 선택해주세요</h3>
-                    <p>선택한 선수의 통계가 이곳에 나타납니다.</p>
-                </div>
-            </div>
-        </div>
-
     </div>
 </div>
 
+<!-- 스크립트 영역 -->
 <script>
-    // 파이썬 Jinja2가 넘겨준 데이터
-    const playersData = [{"CK \uc804\uc801": "0\uc2b9 1\ud328 (0.0%)", "\ub300\ud559 \uc804\uc801": "0\uc2b9 2\ud328 (0.0%)", "\ub300\ud68c \uc804\uc801": "-", "\ub9f5 \uc804\uc801": "\ud3f4\ub9ac\ud3ec\uc774\ub4dc(0\uc2b92\ud328) \u00b7 \ub77c\ub370\uc628(0\uc2b91\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "-", "\uc0c1\ub300\uc804\uc801": "\uac15\uc0c8\uc774(0\uc2b91\ud328) \u00b7 \ubfcc\ub9ac(0\uc2b91\ud328) \u00b7 \uc8fc\uc11c\ub9ac(0\uc2b91\ud328)", "\uc774\ub984": "\uac15\ub355\uad6c", "\uc800\uadf8\uc804 \uc804\uc801": "-", "\ud14c\ub780\uc804 \uc804\uc801": "-", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "0\uc2b9 3\ud328 (0.0%)"}, {"CK \uc804\uc801": "1\uc2b9 0\ud328 (100.0%)", "\ub300\ud559 \uc804\uc801": "-", "\ub300\ud68c \uc804\uc801": "0\uc2b9 2\ud328 (0.0%)", "\ub9f5 \uc804\uc801": "\uc624\ub514\uc138\uc774(1\uc2b91\ud328) \u00b7 \uc544\uc774\uc62c\ub85c\uc2a4(0\uc2b91\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "-", "\uc0c1\ub300\uc804\uc801": "\uae40\uc724\ud658(1\uc2b90\ud328) \u00b7 \uc7a5\uc724\ucca0(0\uc2b91\ud328) \u00b7 \ucd5c\ud638\uc120(0\uc2b91\ud328)", "\uc774\ub984": "\uae40\ubbfc\ucca0", "\uc800\uadf8\uc804 \uc804\uc801": "1\uc2b9 0\ud328 (100.0%)", "\ud14c\ub780\uc804 \uc804\uc801": "0\uc2b9 1\ud328 (0.0%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "0\uc2b9 1\ud328 (0.0%)"}, {"CK \uc804\uc801": "16\uc2b9 14\ud328 (53.3%)", "\ub300\ud559 \uc804\uc801": "-", "\ub300\ud68c \uc804\uc801": "-", "\ub9f5 \uc804\uc801": "\ub179\uc544\uc6c3(4\uc2b92\ud328) \u00b7 \ub370\uc790\ubdf0(5\uc2b91\ud328) \u00b7 \ub77c\ub370\uc628(1\uc2b93\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "6\uc2b9 4\ud328 (60.0%)", "\uc0c1\ub300\uc804\uc801": "\uc9c0\ub3d9\uc6d0(4\uc2b93\ud328) \u00b7 \ub9cc\ub450\ud638\uc131(3\uc2b91\ud328) \u00b7 \uc724\uc218\ucca0(2\uc2b92\ud328)", "\uc774\ub984": "\uae40\uc724\ud658", "\uc800\uadf8\uc804 \uc804\uc801": "1\uc2b9 0\ud328 (100.0%)", "\ud14c\ub780\uc804 \uc804\uc801": "11\uc2b9 7\ud328 (61.1%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "10\uc2b9 11\ud328 (47.6%)"}, {"CK \uc804\uc801": "4\uc2b9 2\ud328 (66.7%)", "\ub300\ud559 \uc804\uc801": "-", "\ub300\ud68c \uc804\uc801": "1\uc2b9 0\ud328 (100.0%)", "\ub9f5 \uc804\uc801": "\ub77c\ub370\uc628(2\uc2b95\ud328) \u00b7 \uc560\ud2f0\ud29c\ub4dc(2\uc2b93\ud328) \u00b7 \uc624\ub514\uc138\uc774(3\uc2b90\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "5\uc2b9 8\ud328 (38.5%)", "\uc0c1\ub300\uc804\uc801": "\ud558\ube14\ub9ac(3\uc2b93\ud328) \u00b7 \ud788\uc5c9(1\uc2b93\ud328) \u00b7 \uce74\ud788\ub9ac(3\uc2b90\ud328)", "\uc774\ub984": "\ub0a8\ub355\uc120", "\uc800\uadf8\uc804 \uc804\uc801": "7\uc2b9 4\ud328 (63.6%)", "\ud14c\ub780\uc804 \uc804\uc801": "2\uc2b9 5\ud328 (28.6%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "1\uc2b9 1\ud328 (50.0%)"}, {"CK \uc804\uc801": "1\uc2b9 1\ud328 (50.0%)", "\ub300\ud559 \uc804\uc801": "-", "\ub300\ud68c \uc804\uc801": "-", "\ub9f5 \uc804\uc801": "\ud3f4\ub9ac\ud3ec\uc774\ub4dc(1\uc2b91\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "-", "\uc0c1\ub300\uc804\uc801": "\ud558\uc724(1\uc2b91\ud328)", "\uc774\ub984": "\ub0ad\ub2c8", "\uc800\uadf8\uc804 \uc804\uc801": "-", "\ud14c\ub780\uc804 \uc804\uc801": "-", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "1\uc2b9 1\ud328 (50.0%)"}, {"CK \uc804\uc801": "3\uc2b9 2\ud328 (60.0%)", "\ub300\ud559 \uc804\uc801": "-", "\ub300\ud68c \uc804\uc801": "9\uc2b9 7\ud328 (56.2%)", "\ub9f5 \uc804\uc801": "\ub77c\ub370\uc628(8\uc2b98\ud328) \u00b7 \ub370\uc790\ubdf0(6\uc2b93\ud328) \u00b7 \uc774\ud074\ub9bd\uc2a4(4\uc2b95\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "10\uc2b9 15\ud328 (40.0%)", "\uc0c1\ub300\uc804\uc801": "\uae30\ub098(3\uc2b96\ud328) \u00b7 \uad6c\ubcf4\ub77c(4\uc2b91\ud328) \u00b7 \ub69c\ubbf8(3\uc2b91\ud328)", "\uc774\ub984": "\ub2e4\uc608", "\uc800\uadf8\uc804 \uc804\uc801": "1\uc2b9 3\ud328 (25.0%)", "\ud14c\ub780\uc804 \uc804\uc801": "7\uc2b9 6\ud328 (53.8%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "14\uc2b9 15\ud328 (48.3%)"}, {"CK \uc804\uc801": "2\uc2b9 2\ud328 (50.0%)", "\ub300\ud559 \uc804\uc801": "1\uc2b9 0\ud328 (100.0%)", "\ub300\ud68c \uc804\uc801": "0\uc2b9 1\ud328 (0.0%)", "\ub9f5 \uc804\uc801": "\ud3f4\ub9ac\ud3ec\uc774\ub4dc(5\uc2b92\ud328) \u00b7 \ub370\uc790\ubdf0(2\uc2b93\ud328) \u00b7 \ub179\uc544\uc6c3(1\uc2b93\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "6\uc2b9 8\ud328 (42.9%)", "\uc0c1\ub300\uc804\uc801": "\uc624\uc870\uc740(3\uc2b90\ud328) \u00b7 \ucd5c\ub3c4\ub791(1\uc2b91\ud328) \u00b7 \ube75\ub9ac\ub098(0\uc2b92\ud328)", "\uc774\ub984": "\ub450\ub514", "\uc800\uadf8\uc804 \uc804\uc801": "3\uc2b9 2\ud328 (60.0%)", "\ud14c\ub780\uc804 \uc804\uc801": "5\uc2b9 4\ud328 (55.6%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "1\uc2b9 5\ud328 (16.7%)"}, {"CK \uc804\uc801": "0\uc2b9 1\ud328 (0.0%)", "\ub300\ud559 \uc804\uc801": "1\uc2b9 1\ud328 (50.0%)", "\ub300\ud68c \uc804\uc801": "3\uc2b9 1\ud328 (75.0%)", "\ub9f5 \uc804\uc801": "\ud3f4\ub9ac\ud3ec\uc774\ub4dc(3\uc2b96\ud328) \u00b7 \ubc84\ubbf8\uc5b4(3\uc2b95\ud328) \u00b7 \ub77c\ub370\uc628(3\uc2b93\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "8\uc2b9 11\ud328 (42.1%)", "\uc0c1\ub300\uc804\uc801": "\ubaa8\uafc0\ubaac(2\uc2b94\ud328) \u00b7 \uce74\ud788\ub9ac(2\uc2b94\ud328) \u00b7 \ub7ed\ub728(2\uc2b91\ud328)", "\uc774\ub984": "\ub514\uc784", "\uc800\uadf8\uc804 \uc804\uc801": "8\uc2b9 8\ud328 (50.0%)", "\ud14c\ub780\uc804 \uc804\uc801": "3\uc2b9 5\ud328 (37.5%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "1\uc2b9 1\ud328 (50.0%)"}, {"CK \uc804\uc801": "3\uc2b9 2\ud328 (60.0%)", "\ub300\ud559 \uc804\uc801": "0\uc2b9 2\ud328 (0.0%)", "\ub300\ud68c \uc804\uc801": "2\uc2b9 2\ud328 (50.0%)", "\ub9f5 \uc804\uc801": "\ub77c\ub370\uc628(2\uc2b97\ud328) \u00b7 \ud3f4\ub9ac\ud3ec\uc774\ub4dc(3\uc2b94\ud328) \u00b7 \ub370\uc790\ubdf0(1\uc2b93\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "2\uc2b9 11\ud328 (15.4%)", "\uc0c1\ub300\uc804\uc801": "\uc624\ub9ac\uafcd(1\uc2b92\ud328) \u00b7 \uc7c8\ub2cc(0\uc2b93\ud328) \u00b7 \ub098\ub2a5\ud1a0\ub07c(0\uc2b92\ud328)", "\uc774\ub984": "\ub9c9\ub0b4\ud604\uc9c4", "\uc800\uadf8\uc804 \uc804\uc801": "4\uc2b9 9\ud328 (30.8%)", "\ud14c\ub780\uc804 \uc804\uc801": "1\uc2b9 6\ud328 (14.3%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "2\uc2b9 2\ud328 (50.0%)"}, {"CK \uc804\uc801": "7\uc2b9 9\ud328 (43.8%)", "\ub300\ud559 \uc804\uc801": "3\uc2b9 2\ud328 (60.0%)", "\ub300\ud68c \uc804\uc801": "3\uc2b9 1\ud328 (75.0%)", "\ub9f5 \uc804\uc801": "\ub179\uc544\uc6c3(8\uc2b97\ud328) \u00b7 \ub77c\ub370\uc628(8\uc2b94\ud328) \u00b7 \ud3f4\ub9ac\ud3ec\uc774\ub4dc(5\uc2b96\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "15\uc2b9 13\ud328 (53.6%)", "\uc0c1\ub300\uc804\uc801": "\uc218\ub2c8\uc591(2\uc2b94\ud328) \u00b7 \uc740\uc11c(2\uc2b93\ud328) \u00b7 \ud587\ucc38\uc0c8(0\uc2b95\ud328)", "\uc774\ub984": "\uba3c\uc9c4", "\uc800\uadf8\uc804 \uc804\uc801": "9\uc2b9 1\ud328 (90.0%)", "\ud14c\ub780\uc804 \uc804\uc801": "8\uc2b9 10\ud328 (44.4%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "11\uc2b9 14\ud328 (44.0%)"}, {"CK \uc804\uc801": "5\uc2b9 6\ud328 (45.5%)", "\ub300\ud559 \uc804\uc801": "1\uc2b9 4\ud328 (20.0%)", "\ub300\ud68c \uc804\uc801": "3\uc2b9 7\ud328 (30.0%)", "\ub9f5 \uc804\uc801": "\ub77c\ub370\uc628(10\uc2b99\ud328) \u00b7 \ud3f4\ub9ac\ud3ec\uc774\ub4dc(9\uc2b97\ud328) \u00b7 \ub370\uc790\ubdf0(7\uc2b96\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "32\uc2b9 15\ud328 (68.1%)", "\uc0c1\ub300\uc804\uc801": "\ubdf0\ub7ec(5\uc2b91\ud328) \u00b7 \uae40\ucc44\uc774(2\uc2b93\ud328) \u00b7 \uc58c\ucb48(4\uc2b91\ud328)", "\uc774\ub984": "\ubaa8\ub9ac", "\uc800\uadf8\uc804 \uc804\uc801": "21\uc2b9 10\ud328 (67.7%)", "\ud14c\ub780\uc804 \uc804\uc801": "3\uc2b9 3\ud328 (50.0%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "17\uc2b9 19\ud328 (47.2%)"}, {"CK \uc804\uc801": "6\uc2b9 4\ud328 (60.0%)", "\ub300\ud559 \uc804\uc801": "1\uc2b9 1\ud328 (50.0%)", "\ub300\ud68c \uc804\uc801": "1\uc2b9 0\ud328 (100.0%)", "\ub9f5 \uc804\uc801": "\ub370\uc790\ubdf0(2\uc2b92\ud328) \u00b7 \ub77c\ub370\uc628(4\uc2b90\ud328) \u00b7 \uc774\ud074\ub9bd\uc2a4(0\uc2b92\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "1\uc2b9 1\ud328 (50.0%)", "\uc0c1\ub300\uc804\uc801": "\uae40\uc724\uc911(3\uc2b92\ud328) \u00b7 \ubc15\uc900\uc624(2\uc2b90\ud328) \u00b7 \uc6d0\uc120\uc7ac(1\uc2b91\ud328)", "\uc774\ub984": "\ubabd\uad70", "\uc800\uadf8\uc804 \uc804\uc801": "3\uc2b9 2\ud328 (60.0%)", "\ud14c\ub780\uc804 \uc804\uc801": "1\uc2b9 0\ud328 (100.0%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "5\uc2b9 4\ud328 (55.6%)"}, {"CK \uc804\uc801": "6\uc2b9 7\ud328 (46.2%)", "\ub300\ud559 \uc804\uc801": "-", "\ub300\ud68c \uc804\uc801": "-", "\ub9f5 \uc804\uc801": "\ub3c4\ubbf8\ub124\uc774\ud130(0\uc2b92\ud328) \u00b7 \uc81c\uc778\ub3c4(2\uc2b90\ud328) \u00b7 \ud3f4\uc2a4\ud0c0(2\uc2b90\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "-", "\uc0c1\ub300\uc804\uc801": "\ubc15\uc131\uade0(0\uc2b93\ud328) \u00b7 \uc9c0\ub3d9\uc6d0(2\uc2b91\ud328) \u00b7 \uad6c\uc131\ud6c8(1\uc2b90\ud328)", "\uc774\ub984": "\ubc15\uc218\ubc94", "\uc800\uadf8\uc804 \uc804\uc801": "1\uc2b9 2\ud328 (33.3%)", "\ud14c\ub780\uc804 \uc804\uc801": "4\uc2b9 4\ud328 (50.0%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "1\uc2b9 1\ud328 (50.0%)"}, {"CK \uc804\uc801": "9\uc2b9 10\ud328 (47.4%)", "\ub300\ud559 \uc804\uc801": "-", "\ub300\ud68c \uc804\uc801": "1\uc2b9 0\ud328 (100.0%)", "\ub9f5 \uc804\uc801": "\uba54\ud2b8\ub85c\ud3f4\ub9ac\uc2a4(2\uc2b93\ud328) \u00b7 \ub179\uc544\uc6c3(1\uc2b92\ud328) \u00b7 \ub77c\ub370\uc628(3\uc2b90\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "0\uc2b9 1\ud328 (0.0%)", "\uc0c1\ub300\uc804\uc801": "\uc724\uc6a9\ud0dc(2\uc2b91\ud328) \u00b7 \uc0ac\ud14c(1\uc2b91\ud328) \u00b7 \ubc15\uc218\ubc94(2\uc2b90\ud328)", "\uc774\ub984": "\ubc15\uc900\uc624", "\uc800\uadf8\uc804 \uc804\uc801": "1\uc2b9 0\ud328 (100.0%)", "\ud14c\ub780\uc804 \uc804\uc801": "3\uc2b9 5\ud328 (37.5%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "6\uc2b9 6\ud328 (50.0%)"}, {"CK \uc804\uc801": "1\uc2b9 1\ud328 (50.0%)", "\ub300\ud559 \uc804\uc801": "-", "\ub300\ud68c \uc804\uc801": "-", "\ub9f5 \uc804\uc801": "\ud3f4\ub9ac\ud3ec\uc774\ub4dc(1\uc2b91\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "-", "\uc0c1\ub300\uc804\uc801": "\uc6b0\uc9c8(1\uc2b90\ud328) \u00b7 \uc9c4\ub545\ucf69(0\uc2b91\ud328)", "\uc774\ub984": "\ubc15\ucb48\uc774", "\uc800\uadf8\uc804 \uc804\uc801": "-", "\ud14c\ub780\uc804 \uc804\uc801": "-", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "1\uc2b9 1\ud328 (50.0%)"}, {"CK \uc804\uc801": "3\uc2b9 5\ud328 (37.5%)", "\ub300\ud559 \uc804\uc801": "-", "\ub300\ud68c \uc804\uc801": "-", "\ub9f5 \uc804\uc801": "\ub179\uc544\uc6c3(2\uc2b91\ud328) \u00b7 \ub77c\ub370\uc628(1\uc2b91\ud328) \u00b7 \uc560\ud2f0\ud29c\ub4dc(0\uc2b91\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "-", "\uc0c1\ub300\uc804\uc801": "\uae40\ubc94\uc218(1\uc2b91\ud328) \u00b7 \uc774\uacbd\ubbfc(1\uc2b91\ud328) \u00b7 \ubbf8\ud6c4(1\uc2b90\ud328)", "\uc774\ub984": "\ubc30\uc131\ud760", "\uc800\uadf8\uc804 \uc804\uc801": "0\uc2b9 1\ud328 (0.0%)", "\ud14c\ub780\uc804 \uc804\uc801": "1\uc2b9 2\ud328 (33.3%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "2\uc2b9 2\ud328 (50.0%)"}, {"CK \uc804\uc801": "1\uc2b9 0\ud328 (100.0%)", "\ub300\ud559 \uc804\uc801": "-", "\ub300\ud68c \uc804\uc801": "-", "\ub9f5 \uc804\uc801": "\uc624\ub514\uc138\uc774(0\uc2b92\ud328) \u00b7 \ub179\uc544\uc6c3(1\uc2b90\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "0\uc2b9 2\ud328 (0.0%)", "\uc0c1\ub300\uc804\uc801": "\ub3c4\uc7ac\uc6b1(0\uc2b92\ud328) \u00b7 \uae40\ubbfc\ucca0(1\uc2b90\ud328)", "\uc774\ub984": "\ubcc0\ud604\uc81c", "\uc800\uadf8\uc804 \uc804\uc801": "1\uc2b9 0\ud328 (100.0%)", "\ud14c\ub780\uc804 \uc804\uc801": "-", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "0\uc2b9 2\ud328 (0.0%)"}, {"CK \uc804\uc801": "9\uc2b9 18\ud328 (33.3%)", "\ub300\ud559 \uc804\uc801": "1\uc2b9 1\ud328 (50.0%)", "\ub300\ud68c \uc804\uc801": "1\uc2b9 2\ud328 (33.3%)", "\ub9f5 \uc804\uc801": "\ub179\uc544\uc6c3(7\uc2b99\ud328) \u00b7 \ub77c\ub370\uc628(4\uc2b97\ud328) \u00b7 \ud3f4\ub9ac\ud3ec\uc774\ub4dc(4\uc2b93\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "8\uc2b9 4\ud328 (66.7%)", "\uc0c1\ub300\uc804\uc801": "\ubc15\ud558\uc545(1\uc2b97\ud328) \u00b7 2\ub77c\ub2c8(2\uc2b92\ud328) \u00b7 \uc5f0\ube14\ube44(4\uc2b90\ud328)", "\uc774\ub984": "\ube44\ud0c0\ubc0d", "\uc800\uadf8\uc804 \uc804\uc801": "12\uc2b9 16\ud328 (42.9%)", "\ud14c\ub780\uc804 \uc804\uc801": "2\uc2b9 3\ud328 (40.0%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "5\uc2b9 6\ud328 (45.5%)"}, {"CK \uc804\uc801": "3\uc2b9 3\ud328 (50.0%)", "\ub300\ud559 \uc804\uc801": "-", "\ub300\ud68c \uc804\uc801": "-", "\ub9f5 \uc804\uc801": "\uc2e4\ud53c\ub4dc(1\uc2b92\ud328) \u00b7 \uc544\uc774\uc62c\ub85c\uc2a4(1\uc2b90\ud328) \u00b7 \uc624\ub514\uc138\uc774(0\uc2b91\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "-", "\uc0c1\ub300\uc804\uc801": "\ubc15\uc900\uc624(2\uc2b90\ud328) \u00b7 \uae40\uc724\uc911(1\uc2b91\ud328) \u00b7 \uae40\uc131\ub300(0\uc2b91\ud328)", "\uc774\ub984": "\uc0ac\ud14c", "\uc800\uadf8\uc804 \uc804\uc801": "2\uc2b9 2\ud328 (50.0%)", "\ud14c\ub780\uc804 \uc804\uc801": "-", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "1\uc2b9 1\ud328 (50.0%)"}, {"CK \uc804\uc801": "2\uc2b9 1\ud328 (66.7%)", "\ub300\ud559 \uc804\uc801": "-", "\ub300\ud68c \uc804\uc801": "6\uc2b9 5\ud328 (54.5%)", "\ub9f5 \uc804\uc801": "\ud3f4\ub9ac\ud3ec\uc774\ub4dc(5\uc2b94\ud328) \u00b7 \ub77c\ub370\uc628(4\uc2b93\ud328) \u00b7 \ub3c4\ubbf8\ub124\uc774\ud130(1\uc2b93\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "8\uc2b9 5\ud328 (61.5%)", "\uc0c1\ub300\uc804\uc801": "\ub610\ubd09\uc21c(3\uc2b96\ud328) \u00b7 \ub2e4\ub098\uc9f1(5\uc2b90\ud328) \u00b7 \ud558\ube14\ub9ac(2\uc2b93\ud328)", "\uc774\ub984": "\uc138\ub098", "\uc800\uadf8\uc804 \uc804\uc801": "9\uc2b9 10\ud328 (47.4%)", "\ud14c\ub780\uc804 \uc804\uc801": "1\uc2b9 0\ud328 (100.0%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "6\uc2b9 1\ud328 (85.7%)"}, {"CK \uc804\uc801": "16\uc2b9 9\ud328 (64.0%)", "\ub300\ud559 \uc804\uc801": "4\uc2b9 1\ud328 (80.0%)", "\ub300\ud68c \uc804\uc801": "0\uc2b9 4\ud328 (0.0%)", "\ub9f5 \uc804\uc801": "\ud3f4\ub9ac\ud3ec\uc774\ub4dc(10\uc2b96\ud328) \u00b7 \ub179\uc544\uc6c3(7\uc2b97\ud328) \u00b7 \ub77c\ub370\uc628(9\uc2b94\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "17\uc2b9 9\ud328 (65.4%)", "\uc0c1\ub300\uc804\uc801": "\uc288\uc288(8\uc2b93\ud328) \u00b7 \uc624\ud558\uc580(5\uc2b92\ud328) \u00b7 \ubc31\uac11\uc219(4\uc2b91\ud328)", "\uc774\ub984": "\uc18c\uc8fc\uc591", "\uc800\uadf8\uc804 \uc804\uc801": "12\uc2b9 11\ud328 (52.2%)", "\ud14c\ub780\uc804 \uc804\uc801": "6\uc2b9 0\ud328 (100.0%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "19\uc2b9 12\ud328 (61.3%)"}, {"CK \uc804\uc801": "5\uc2b9 2\ud328 (71.4%)", "\ub300\ud559 \uc804\uc801": "-", "\ub300\ud68c \uc804\uc801": "-", "\ub9f5 \uc804\uc801": "\ud3f4\ub9ac\ud3ec\uc774\ub4dc(2\uc2b91\ud328) \u00b7 \ub77c\ub370\uc628(1\uc2b91\ud328) \u00b7 \ubc84\ubbf8\uc5b4(1\uc2b90\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "-", "\uc0c1\ub300\uc804\uc801": "\ub530\ub0e5\uc789(3\uc2b91\ud328) \u00b7 \ub2e4\ub9b0(0\uc2b91\ud328) \u00b7 \uc138\ub098(1\uc2b90\ud328)", "\uc774\ub984": "\uc218\uc785\ubfcc\ub4dc", "\uc800\uadf8\uc804 \uc804\uc801": "1\uc2b9 0\ud328 (100.0%)", "\ud14c\ub780\uc804 \uc804\uc801": "3\uc2b9 2\ud328 (60.0%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "1\uc2b9 0\ud328 (100.0%)"}, {"CK \uc804\uc801": "8\uc2b9 1\ud328 (88.9%)", "\ub300\ud559 \uc804\uc801": "3\uc2b9 2\ud328 (60.0%)", "\ub300\ud68c \uc804\uc801": "1\uc2b9 2\ud328 (33.3%)", "\ub9f5 \uc804\uc801": "\ub179\uc544\uc6c3(8\uc2b93\ud328) \u00b7 \ub77c\ub370\uc628(6\uc2b92\ud328) \u00b7 \ud3f4\ub9ac\ud3ec\uc774\ub4dc(4\uc2b91\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "9\uc2b9 3\ud328 (75.0%)", "\uc0c1\ub300\uc804\uc801": "\uba3c\uc9c4(4\uc2b90\ud328) \u00b7 \ud038\uc8fc(1\uc2b93\ud328) \u00b7 \uba74\ucd94\uac00(2\uc2b91\ud328)", "\uc774\ub984": "\uc544\ub9ac\uc1a1\uc774", "\uc800\uadf8\uc804 \uc804\uc801": "12\uc2b9 6\ud328 (66.7%)", "\ud14c\ub780\uc804 \uc804\uc801": "9\uc2b9 1\ud328 (90.0%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "0\uc2b9 1\ud328 (0.0%)"}, {"CK \uc804\uc801": "1\uc2b9 4\ud328 (20.0%)", "\ub300\ud559 \uc804\uc801": "0\uc2b9 3\ud328 (0.0%)", "\ub300\ud68c \uc804\uc801": "1\uc2b9 5\ud328 (16.7%)", "\ub9f5 \uc804\uc801": "\ub77c\ub370\uc628(3\uc2b912\ud328) \u00b7 \ub370\uc790\ubdf0(2\uc2b96\ud328) \u00b7 \ud3f4\ub9ac\ud3ec\uc774\ub4dc(5\uc2b92\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "15\uc2b9 14\ud328 (51.7%)", "\uc0c1\ub300\uc804\uc801": "\uc5f0\ub450(5\uc2b92\ud328) \u00b7 \ube75\ub9ac\ub098(2\uc2b94\ud328) \u00b7 \ud587\uc0b4(2\uc2b92\ud328)", "\uc774\ub984": "\uc575\uc9c0", "\uc800\uadf8\uc804 \uc804\uc801": "3\uc2b9 5\ud328 (37.5%)", "\ud14c\ub780\uc804 \uc804\uc801": "7\uc2b9 5\ud328 (58.3%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "7\uc2b9 16\ud328 (30.4%)"}, {"CK \uc804\uc801": "14\uc2b9 8\ud328 (63.6%)", "\ub300\ud559 \uc804\uc801": "0\uc2b9 2\ud328 (0.0%)", "\ub300\ud68c \uc804\uc801": "1\uc2b9 0\ud328 (100.0%)", "\ub9f5 \uc804\uc801": "\ub77c\ub370\uc628(4\uc2b93\ud328) \u00b7 \ub370\uc790\ubdf0(2\uc2b92\ud328) \u00b7 \uc2e4\ud53c\ub4dc(3\uc2b91\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "4\uc2b9 2\ud328 (66.7%)", "\uc0c1\ub300\uc804\uc801": "\ubc15\uc7ac\ud601(4\uc2b92\ud328) \u00b7 \uae40\uacbd\ubaa8(1\uc2b94\ud328) \u00b7 \uc9c0\ub3d9\uc6d0(3\uc2b91\ud328)", "\uc774\ub984": "\uc774\uacbd\ubbfc", "\uc800\uadf8\uc804 \uc804\uc801": "12\uc2b9 9\ud328 (57.1%)", "\ud14c\ub780\uc804 \uc804\uc801": "7\uc2b9 1\ud328 (87.5%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "0\uc2b9 2\ud328 (0.0%)"}, {"CK \uc804\uc801": "19\uc2b9 18\ud328 (51.4%)", "\ub300\ud559 \uc804\uc801": "4\uc2b9 7\ud328 (36.4%)", "\ub300\ud68c \uc804\uc801": "10\uc2b9 6\ud328 (62.5%)", "\ub9f5 \uc804\uc801": "\ud3f4\ub9ac\ud3ec\uc774\ub4dc(17\uc2b913\ud328) \u00b7 \ub77c\ub370\uc628(12\uc2b916\ud328) \u00b7 \ub179\uc544\uc6c3(8\uc2b97\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "19\uc2b9 24\ud328 (44.2%)", "\uc0c1\ub300\uc804\uc801": "\uc9c4\uc720\uc131(4\uc2b910\ud328) \u00b7 \ube44\ud0c0\ubc0d(7\uc2b95\ud328) \u00b7 \ub824\uc6d0(6\uc2b92\ud328)", "\uc774\ub984": "\uc784\uc870\uc774", "\uc800\uadf8\uc804 \uc804\uc801": "8\uc2b9 8\ud328 (50.0%)", "\ud14c\ub780\uc804 \uc804\uc801": "23\uc2b9 17\ud328 (57.5%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "21\uc2b9 30\ud328 (41.2%)"}, {"CK \uc804\uc801": "5\uc2b9 4\ud328 (55.6%)", "\ub300\ud559 \uc804\uc801": "-", "\ub300\ud68c \uc804\uc801": "0\uc2b9 2\ud328 (0.0%)", "\ub9f5 \uc804\uc801": "\ub3c4\ubbf8\ub124\uc774\ud130(2\uc2b92\ud328) \u00b7 \ub77c\ub370\uc628(2\uc2b90\ud328) \u00b7 \ud3f4\ub9ac\ud3ec\uc774\ub4dc(0\uc2b92\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "3\uc2b9 0\ud328 (100.0%)", "\uc0c1\ub300\uc804\uc801": "\uc774\uc7ac\ud638(0\uc2b93\ud328) \u00b7 \uc870\uc77c\uc7a5(0\uc2b92\ud328) \u00b7 \ubabd\uad70(2\uc2b90\ud328)", "\uc774\ub984": "\uc815\uc724\uc885", "\uc800\uadf8\uc804 \uc804\uc801": "1\uc2b9 2\ud328 (33.3%)", "\ud14c\ub780\uc804 \uc804\uc801": "7\uc2b9 4\ud328 (63.6%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "-"}, {"CK \uc804\uc801": "3\uc2b9 2\ud328 (60.0%)", "\ub300\ud559 \uc804\uc801": "4\uc2b9 2\ud328 (66.7%)", "\ub300\ud68c \uc804\uc801": "13\uc2b9 5\ud328 (72.2%)", "\ub9f5 \uc804\uc801": "\ud3f4\ub9ac\ud3ec\uc774\ub4dc(8\uc2b98\ud328) \u00b7 \ub77c\ub370\uc628(7\uc2b95\ud328) \u00b7 \ubc84\ubbf8\uc5b4(5\uc2b96\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "9\uc2b9 17\ud328 (34.6%)", "\uc0c1\ub300\uc804\uc801": "\ud0dc\uc601(3\uc2b95\ud328) \u00b7 \ub450\ub514(2\uc2b93\ud328) \u00b7 \uaddc\ub9ac\uc57c(1\uc2b93\ud328)", "\uc774\ub984": "\uc848\ub2c8", "\uc800\uadf8\uc804 \uc804\uc801": "15\uc2b9 7\ud328 (68.2%)", "\ud14c\ub780\uc804 \uc804\uc801": "8\uc2b9 17\ud328 (32.0%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "6\uc2b9 2\ud328 (75.0%)"}, {"CK \uc804\uc801": "6\uc2b9 8\ud328 (42.9%)", "\ub300\ud559 \uc804\uc801": "0\uc2b9 1\ud328 (0.0%)", "\ub300\ud68c \uc804\uc801": "0\uc2b9 2\ud328 (0.0%)", "\ub9f5 \uc804\uc801": "\ud3f4\uc2a4\ud0c0(1\uc2b93\ud328) \u00b7 \ub179\uc544\uc6c3(1\uc2b92\ud328) \u00b7 \ub9ac\ud2b8\uba38\uc2a4(1\uc2b92\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "-", "\uc0c1\ub300\uc804\uc801": "\ub3c4\uc7ac\uc6b1(3\uc2b92\ud328) \u00b7 \ud669\ubcd1\uc601(0\uc2b93\ud328) \u00b7 \uc774\uc7ac\ud638(2\uc2b91\ud328)", "\uc774\ub984": "\uc870\uc77c\uc7a5", "\uc800\uadf8\uc804 \uc804\uc801": "0\uc2b9 2\ud328 (0.0%)", "\ud14c\ub780\uc804 \uc804\uc801": "2\uc2b9 6\ud328 (25.0%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "4\uc2b9 3\ud328 (57.1%)"}, {"CK \uc804\uc801": "11\uc2b9 9\ud328 (55.0%)", "\ub300\ud559 \uc804\uc801": "0\uc2b9 2\ud328 (0.0%)", "\ub300\ud68c \uc804\uc801": "3\uc2b9 2\ud328 (60.0%)", "\ub9f5 \uc804\uc801": "\ud3f4\ub9ac\ud3ec\uc774\ub4dc(4\uc2b910\ud328) \u00b7 \ub179\uc544\uc6c3(6\uc2b96\ud328) \u00b7 \ub77c\ub370\uc628(6\uc2b95\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "11\uc2b9 18\ud328 (37.9%)", "\uc0c1\ub300\uc804\uc801": "\uc720\uc774(4\uc2b96\ud328) \u00b7 \uc18c\uc8fc\uc591(5\uc2b91\ud328) \u00b7 \uae68\ub9bc\uc774(2\uc2b93\ud328)", "\uc774\ub984": "\uc8fc\ud558\ub791", "\uc800\uadf8\uc804 \uc804\uc801": "3\uc2b9 9\ud328 (25.0%)", "\ud14c\ub780\uc804 \uc804\uc801": "18\uc2b9 16\ud328 (52.9%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "4\uc2b9 6\ud328 (40.0%)"}, {"CK \uc804\uc801": "14\uc2b9 13\ud328 (51.9%)", "\ub300\ud559 \uc804\uc801": "-", "\ub300\ud68c \uc804\uc801": "-", "\ub9f5 \uc804\uc801": "\uc2e4\ud53c\ub4dc(4\uc2b93\ud328) \u00b7 \ub77c\ub370\uc628(3\uc2b93\ud328) \u00b7 \ud3f4\uc2a4\ud0c0(2\uc2b94\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "-", "\uc0c1\ub300\uc804\uc801": "\uc9c4\uc601\ud654(2\uc2b92\ud328) \u00b7 \ubc15\uc7ac\ud601(2\uc2b91\ud328) \u00b7 \uace0\uc11d\ud604(1\uc2b91\ud328)", "\uc774\ub984": "\uc9c0\ub3d9\uc6d0", "\uc800\uadf8\uc804 \uc804\uc801": "7\uc2b9 7\ud328 (50.0%)", "\ud14c\ub780\uc804 \uc804\uc801": "0\uc2b9 2\ud328 (0.0%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "7\uc2b9 4\ud328 (63.6%)"}, {"CK \uc804\uc801": "8\uc2b9 12\ud328 (40.0%)", "\ub300\ud559 \uc804\uc801": "1\uc2b9 1\ud328 (50.0%)", "\ub300\ud68c \uc804\uc801": "0\uc2b9 1\ud328 (0.0%)", "\ub9f5 \uc804\uc801": "\ub77c\ub370\uc628(6\uc2b95\ud328) \u00b7 \ub179\uc544\uc6c3(5\uc2b95\ud328) \u00b7 \uc560\ud2f0\ud29c\ub4dc(3\uc2b91\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "7\uc2b9 3\ud328 (70.0%)", "\uc0c1\ub300\uc804\uc801": "\ube75\ub9ac\ub098(5\uc2b93\ud328) \u00b7 \ubc15\ub4c0\ub4c0(3\uc2b92\ud328) \u00b7 \ud1a0\ub9c8\ud1a0(2\uc2b92\ud328)", "\uc774\ub984": "\uc9c0\ub450\ub450", "\uc800\uadf8\uc804 \uc804\uc801": "2\uc2b9 6\ud328 (25.0%)", "\ud14c\ub780\uc804 \uc804\uc801": "1\uc2b9 1\ud328 (50.0%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "13\uc2b9 10\ud328 (56.5%)"}, {"CK \uc804\uc801": "6\uc2b9 6\ud328 (50.0%)", "\ub300\ud559 \uc804\uc801": "2\uc2b9 3\ud328 (40.0%)", "\ub300\ud68c \uc804\uc801": "0\uc2b9 4\ud328 (0.0%)", "\ub9f5 \uc804\uc801": "\ud3f4\ub9ac\ud3ec\uc774\ub4dc(5\uc2b98\ud328) \u00b7 \ub77c\ub370\uc628(5\uc2b94\ud328) \u00b7 \ub179\uc544\uc6c3(1\uc2b93\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "4\uc2b9 3\ud328 (57.1%)", "\uc0c1\ub300\uc804\uc801": "\uc740\uc870(4\uc2b91\ud328) \u00b7 \ubc31\uc6d0\uc774\uc57c(0\uc2b93\ud328) \u00b7 \ubc24\ud558\ubc0d(1\uc2b92\ud328)", "\uc774\ub984": "\uc9c4\ub545\ucf69", "\uc800\uadf8\uc804 \uc804\uc801": "8\uc2b9 8\ud328 (50.0%)", "\ud14c\ub780\uc804 \uc804\uc801": "3\uc2b9 5\ud328 (37.5%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "1\uc2b9 3\ud328 (25.0%)"}, {"CK \uc804\uc801": "5\uc2b9 7\ud328 (41.7%)", "\ub300\ud559 \uc804\uc801": "2\uc2b9 1\ud328 (66.7%)", "\ub300\ud68c \uc804\uc801": "0\uc2b9 2\ud328 (0.0%)", "\ub9f5 \uc804\uc801": "\ub179\uc544\uc6c3(4\uc2b95\ud328) \u00b7 \ub77c\ub370\uc628(4\uc2b92\ud328) \u00b7 \ud3f4\ub9ac\ud3ec\uc774\ub4dc(2\uc2b93\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "3\uc2b9 1\ud328 (75.0%)", "\uc0c1\ub300\uc804\uc801": "\ub9c1\uace0(0\uc2b94\ud328) \u00b7 \ubabd\uc21c(3\uc2b91\ud328) \u00b7 \ud0a4\ub9c1(1\uc2b92\ud328)", "\uc774\ub984": "\ucc0c\ud0b9", "\uc800\uadf8\uc804 \uc804\uc801": "5\uc2b9 3\ud328 (62.5%)", "\ud14c\ub780\uc804 \uc804\uc801": "2\uc2b9 0\ud328 (100.0%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "3\uc2b9 8\ud328 (27.3%)"}, {"CK \uc804\uc801": "10\uc2b9 11\ud328 (47.6%)", "\ub300\ud559 \uc804\uc801": "6\uc2b9 4\ud328 (60.0%)", "\ub300\ud68c \uc804\uc801": "11\uc2b9 7\ud328 (61.1%)", "\ub9f5 \uc804\uc801": "\ud3f4\ub9ac\ud3ec\uc774\ub4dc(23\uc2b99\ud328) \u00b7 \ub77c\ub370\uc628(14\uc2b913\ud328) \u00b7 \ub179\uc544\uc6c3(11\uc2b94\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "32\uc2b9 12\ud328 (72.7%)", "\uc0c1\ub300\uc804\uc801": "\uc720\uc774(3\uc2b94\ud328) \u00b7 \ub69c\ube44(2\uc2b93\ud328) \u00b7 \ub0a8\uc218\ub315(4\uc2b91\ud328)", "\uc774\ub984": "\uce58\ub9ac", "\uc800\uadf8\uc804 \uc804\uc801": "16\uc2b9 4\ud328 (80.0%)", "\ud14c\ub780\uc804 \uc804\uc801": "14\uc2b9 21\ud328 (40.0%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "29\uc2b9 9\ud328 (76.3%)"}, {"CK \uc804\uc801": "0\uc2b9 1\ud328 (0.0%)", "\ub300\ud559 \uc804\uc801": "-", "\ub300\ud68c \uc804\uc801": "-", "\ub9f5 \uc804\uc801": "\ud3f4\ub9ac\ud3ec\uc774\ub4dc(0\uc2b91\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "-", "\uc0c1\ub300\uc804\uc801": "\ub514\uc784(0\uc2b91\ud328)", "\uc774\ub984": "\ud074\ud15c", "\uc800\uadf8\uc804 \uc804\uc801": "-", "\ud14c\ub780\uc804 \uc804\uc801": "-", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "0\uc2b9 1\ud328 (0.0%)"}, {"CK \uc804\uc801": "11\uc2b9 1\ud328 (91.7%)", "\ub300\ud559 \uc804\uc801": "2\uc2b9 6\ud328 (25.0%)", "\ub300\ud68c \uc804\uc801": "14\uc2b9 6\ud328 (70.0%)", "\ub9f5 \uc804\uc801": "\ub77c\ub370\uc628(19\uc2b921\ud328) \u00b7 \ud3f4\ub9ac\ud3ec\uc774\ub4dc(10\uc2b99\ud328) \u00b7 \ub179\uc544\uc6c3(9\uc2b93\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "30\uc2b9 31\ud328 (49.2%)", "\uc0c1\ub300\uc804\uc801": "\uc18c\uc2ec(9\uc2b94\ud328) \u00b7 \ub098\uc608\ub9ac(7\uc2b93\ud328) \u00b7 \ud30c\ucc0c(4\uc2b93\ud328)", "\uc774\ub984": "\ud1a0\ub9c8\ud1a0", "\uc800\uadf8\uc804 \uc804\uc801": "18\uc2b9 18\ud328 (50.0%)", "\ud14c\ub780\uc804 \uc804\uc801": "24\uc2b9 18\ud328 (57.1%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "15\uc2b9 8\ud328 (65.2%)"}, {"CK \uc804\uc801": "3\uc2b9 2\ud328 (60.0%)", "\ub300\ud559 \uc804\uc801": "-", "\ub300\ud68c \uc804\uc801": "-", "\ub9f5 \uc804\uc801": "\ub77c\ub370\uc628(1\uc2b91\ud328) \u00b7 \ud3f4\ub9ac\ud3ec\uc774\ub4dc(2\uc2b90\ud328) \u00b7 \uc2e4\ud53c\ub4dc(0\uc2b91\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "-", "\uc0c1\ub300\uc804\uc801": "\uc815\uc18c\uc724(2\uc2b91\ud328) \u00b7 \ubc15\uc131\uc900(0\uc2b91\ud328) \u00b7 \uc218\uc785\ubfcc\ub4dc(1\uc2b90\ud328)", "\uc774\ub984": "\ud30c\ub3c4\ud29c\ube0c", "\uc800\uadf8\uc804 \uc804\uc801": "2\uc2b9 2\ud328 (50.0%)", "\ud14c\ub780\uc804 \uc804\uc801": "-", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "1\uc2b9 0\ud328 (100.0%)"}, {"CK \uc804\uc801": "1\uc2b9 3\ud328 (25.0%)", "\ub300\ud559 \uc804\uc801": "0\uc2b9 1\ud328 (0.0%)", "\ub300\ud68c \uc804\uc801": "5\uc2b9 5\ud328 (50.0%)", "\ub9f5 \uc804\uc801": "\ud3f4\ub9ac\ud3ec\uc774\ub4dc(2\uc2b98\ud328) \u00b7 \ub370\uc790\ubdf0(1\uc2b97\ud328) \u00b7 \ub77c\ub370\uc628(3\uc2b92\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "4\uc2b9 10\ud328 (28.6%)", "\uc0c1\ub300\uc804\uc801": "\uba3c\uc9c4(1\uc2b93\ud328) \u00b7 \ud551\ud551(0\uc2b94\ud328) \u00b7 \uc608\ube48(1\uc2b92\ud328)", "\uc774\ub984": "\ud55c\ucabc\ub2c8", "\uc800\uadf8\uc804 \uc804\uc801": "4\uc2b9 16\ud328 (20.0%)", "\ud14c\ub780\uc804 \uc804\uc801": "3\uc2b9 1\ud328 (75.0%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "3\uc2b9 1\ud328 (75.0%)"}, {"CK \uc804\uc801": "7\uc2b9 8\ud328 (46.7%)", "\ub300\ud559 \uc804\uc801": "2\uc2b9 1\ud328 (66.7%)", "\ub300\ud68c \uc804\uc801": "3\uc2b9 1\ud328 (75.0%)", "\ub9f5 \uc804\uc801": "\ub77c\ub370\uc628(4\uc2b911\ud328) \u00b7 \ub179\uc544\uc6c3(7\uc2b95\ud328) \u00b7 \ud3f4\ub9ac\ud3ec\uc774\ub4dc(4\uc2b96\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "12\uc2b9 17\ud328 (41.4%)", "\uc0c1\ub300\uc804\uc801": "\uc694\ub2dd(5\uc2b91\ud328) \u00b7 \ucd5c\ub3c4\ub791(3\uc2b93\ud328) \u00b7 \uacf5\ub2e4\uce20(1\uc2b93\ud328)", "\uc774\ub984": "\ud587\uc0b4", "\uc800\uadf8\uc804 \uc804\uc801": "16\uc2b9 14\ud328 (53.3%)", "\ud14c\ub780\uc804 \uc804\uc801": "1\uc2b9 0\ud328 (100.0%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "7\uc2b9 13\ud328 (35.0%)"}, {"CK \uc804\uc801": "5\uc2b9 10\ud328 (33.3%)", "\ub300\ud559 \uc804\uc801": "-", "\ub300\ud68c \uc804\uc801": "0\uc2b9 1\ud328 (0.0%)", "\ub9f5 \uc804\uc801": "\ub179\uc544\uc6c3(1\uc2b92\ud328) \u00b7 \ub3c4\ubbf8\ub124\uc774\ud130(1\uc2b91\ud328) \u00b7 \uba54\ud2b8\ub85c\ud3f4\ub9ac\uc2a4(0\uc2b92\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "-", "\uc0c1\ub300\uc804\uc801": "\uae40\uc131\ub300(3\uc2b94\ud328) \u00b7 \uae40\ubbfc\ucca0(1\uc2b92\ud328) \u00b7 \uae40\uc815\uc6b0(1\uc2b90\ud328)", "\uc774\ub984": "\ud669\ubcd1\uc601", "\uc800\uadf8\uc804 \uc804\uc801": "5\uc2b9 9\ud328 (35.7%)", "\ud14c\ub780\uc804 \uc804\uc801": "0\uc2b9 1\ud328 (0.0%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "0\uc2b9 1\ud328 (0.0%)"}, {"CK \uc804\uc801": "1\uc2b9 4\ud328 (20.0%)", "\ub300\ud559 \uc804\uc801": "1\uc2b9 1\ud328 (50.0%)", "\ub300\ud68c \uc804\uc801": "2\uc2b9 3\ud328 (40.0%)", "\ub9f5 \uc804\uc801": "\ud3f4\ub9ac\ud3ec\uc774\ub4dc(5\uc2b96\ud328) \u00b7 \uc774\ud074\ub9bd\uc2a4(1\uc2b94\ud328) \u00b7 \ub370\uc790\ubdf0(2\uc2b92\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "8\uc2b9 8\ud328 (50.0%)", "\uc0c1\ub300\uc804\uc801": "2\ub77c\ub2c8(0\uc2b93\ud328) \u00b7 \uc120\uc815\uc740(1\uc2b92\ud328) \u00b7 \uae40\ub9d0\ub791(2\uc2b90\ud328)", "\uc774\ub984": "\ud6a8\uc9f1", "\uc800\uadf8\uc804 \uc804\uc801": "1\uc2b9 6\ud328 (14.3%)", "\ud14c\ub780\uc804 \uc804\uc801": "10\uc2b9 8\ud328 (55.6%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "1\uc2b9 2\ud328 (33.3%)"}];
-    
-    // 문자열 "3승 2패 (60.0%)" -> { wl: "3승 2패", rate: "60.0%", numRate: 60.0 } 변환
-    function parseStat(statStr) {
-        if (!statStr || statStr === "-") return { wl: "-", rate: "-", numRate: 0, wins: 0, losses: 0 };
-        const match = statStr.match(/(\d+)승 (\d+)패 \(([\d.]+)%\)/);
-        if (match) {
-            return { wl: `${match[1]}승 ${match[2]}패`, rate: `${match[3]}%`, numRate: parseFloat(match[3]), wins: parseInt(match[1]), losses: parseInt(match[2]) };
-        }
-        return { wl: statStr, rate: "-", numRate: 0, wins: 0, losses: 0 };
+    // 1. 메뉴 탭 전환 기능
+    function switchPage(pageId) {
+        // 모든 페이지 숨기기
+        document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
+        // 모든 탭 버튼 활성화 해제
+        document.querySelectorAll('.nav-pills .nav-link').forEach(el => el.classList.remove('active'));
+        
+        // 선택한 페이지만 보이기
+        document.getElementById('page-' + pageId).classList.add('active');
+        event.currentTarget.classList.add('active');
     }
 
-    // 도넛 차트 채우기 애니메이션 함수
-    function updateDonut(elementId, percentage, color) {
-        const el = document.getElementById(elementId);
-        // CSS conic-gradient로 퍼센트만큼 색칠하고 나머지는 회색(#eee)으로 처리
-        el.style.background = `conic-gradient(${color} ${percentage}%, #eee 0)`;
-    }
+    // 2. 전적 페이지 기능
+    const playersData = [{"CK \uc804\uc801": "0\uc2b9 1\ud328 (0.0%)", "\ub300\ud559 \uc804\uc801": "0\uc2b9 2\ud328 (0.0%)", "\ub300\ud68c \uc804\uc801": "-", "\ub9f5 \uc804\uc801": "\ud3f4\ub9ac\ud3ec\uc774\ub4dc(0\uc2b92\ud328) \u00b7 \ub77c\ub370\uc628(0\uc2b91\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "-", "\uc0c1\ub300\uc804\uc801": "\uac15\uc0c8\uc774(0\uc2b91\ud328) \u00b7 \ubfcc\ub9ac(0\uc2b91\ud328) \u00b7 \uc8fc\uc11c\ub9ac(0\uc2b91\ud328)", "\uc774\ub984": "\uac15\ub355\uad6c", "\uc800\uadf8\uc804 \uc804\uc801": "-", "\ud14c\ub780\uc804 \uc804\uc801": "-", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "0\uc2b9 3\ud328 (0.0%)"}, {"CK \uc804\uc801": "1\uc2b9 0\ud328 (100.0%)", "\ub300\ud559 \uc804\uc801": "-", "\ub300\ud68c \uc804\uc801": "0\uc2b9 2\ud328 (0.0%)", "\ub9f5 \uc804\uc801": "\uc624\ub514\uc138\uc774(1\uc2b91\ud328) \u00b7 \uc544\uc774\uc62c\ub85c\uc2a4(0\uc2b91\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "-", "\uc0c1\ub300\uc804\uc801": "\uae40\uc724\ud658(1\uc2b90\ud328) \u00b7 \uc7a5\uc724\ucca0(0\uc2b91\ud328) \u00b7 \ucd5c\ud638\uc120(0\uc2b91\ud328)", "\uc774\ub984": "\uae40\ubbfc\ucca0", "\uc800\uadf8\uc804 \uc804\uc801": "1\uc2b9 0\ud328 (100.0%)", "\ud14c\ub780\uc804 \uc804\uc801": "0\uc2b9 1\ud328 (0.0%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "0\uc2b9 1\ud328 (0.0%)"}, {"CK \uc804\uc801": "16\uc2b9 14\ud328 (53.3%)", "\ub300\ud559 \uc804\uc801": "-", "\ub300\ud68c \uc804\uc801": "-", "\ub9f5 \uc804\uc801": "\ub179\uc544\uc6c3(4\uc2b92\ud328) \u00b7 \ub370\uc790\ubdf0(5\uc2b91\ud328) \u00b7 \ub77c\ub370\uc628(1\uc2b93\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "6\uc2b9 4\ud328 (60.0%)", "\uc0c1\ub300\uc804\uc801": "\uc9c0\ub3d9\uc6d0(4\uc2b93\ud328) \u00b7 \ub9cc\ub450\ud638\uc131(3\uc2b91\ud328) \u00b7 \uc724\uc218\ucca0(2\uc2b92\ud328)", "\uc774\ub984": "\uae40\uc724\ud658", "\uc800\uadf8\uc804 \uc804\uc801": "1\uc2b9 0\ud328 (100.0%)", "\ud14c\ub780\uc804 \uc804\uc801": "11\uc2b9 7\ud328 (61.1%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "10\uc2b9 11\ud328 (47.6%)"}, {"CK \uc804\uc801": "4\uc2b9 2\ud328 (66.7%)", "\ub300\ud559 \uc804\uc801": "-", "\ub300\ud68c \uc804\uc801": "1\uc2b9 0\ud328 (100.0%)", "\ub9f5 \uc804\uc801": "\ub77c\ub370\uc628(2\uc2b95\ud328) \u00b7 \uc560\ud2f0\ud29c\ub4dc(2\uc2b93\ud328) \u00b7 \uc624\ub514\uc138\uc774(3\uc2b90\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "5\uc2b9 8\ud328 (38.5%)", "\uc0c1\ub300\uc804\uc801": "\ud558\ube14\ub9ac(3\uc2b93\ud328) \u00b7 \ud788\uc5c9(1\uc2b93\ud328) \u00b7 \uce74\ud788\ub9ac(3\uc2b90\ud328)", "\uc774\ub984": "\ub0a8\ub355\uc120", "\uc800\uadf8\uc804 \uc804\uc801": "7\uc2b9 4\ud328 (63.6%)", "\ud14c\ub780\uc804 \uc804\uc801": "2\uc2b9 5\ud328 (28.6%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "1\uc2b9 1\ud328 (50.0%)"}, {"CK \uc804\uc801": "1\uc2b9 1\ud328 (50.0%)", "\ub300\ud559 \uc804\uc801": "-", "\ub300\ud68c \uc804\uc801": "-", "\ub9f5 \uc804\uc801": "\ud3f4\ub9ac\ud3ec\uc774\ub4dc(1\uc2b91\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "-", "\uc0c1\ub300\uc804\uc801": "\ud558\uc724(1\uc2b91\ud328)", "\uc774\ub984": "\ub0ad\ub2c8", "\uc800\uadf8\uc804 \uc804\uc801": "-", "\ud14c\ub780\uc804 \uc804\uc801": "-", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "1\uc2b9 1\ud328 (50.0%)"}, {"CK \uc804\uc801": "3\uc2b9 2\ud328 (60.0%)", "\ub300\ud559 \uc804\uc801": "-", "\ub300\ud68c \uc804\uc801": "9\uc2b9 7\ud328 (56.2%)", "\ub9f5 \uc804\uc801": "\ub77c\ub370\uc628(8\uc2b98\ud328) \u00b7 \ub370\uc790\ubdf0(6\uc2b93\ud328) \u00b7 \uc774\ud074\ub9bd\uc2a4(4\uc2b95\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "10\uc2b9 15\ud328 (40.0%)", "\uc0c1\ub300\uc804\uc801": "\uae30\ub098(3\uc2b96\ud328) \u00b7 \uad6c\ubcf4\ub77c(4\uc2b91\ud328) \u00b7 \ub69c\ubbf8(3\uc2b91\ud328)", "\uc774\ub984": "\ub2e4\uc608", "\uc800\uadf8\uc804 \uc804\uc801": "1\uc2b9 3\ud328 (25.0%)", "\ud14c\ub780\uc804 \uc804\uc801": "7\uc2b9 6\ud328 (53.8%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "14\uc2b9 15\ud328 (48.3%)"}, {"CK \uc804\uc801": "2\uc2b9 2\ud328 (50.0%)", "\ub300\ud559 \uc804\uc801": "1\uc2b9 0\ud328 (100.0%)", "\ub300\ud68c \uc804\uc801": "0\uc2b9 1\ud328 (0.0%)", "\ub9f5 \uc804\uc801": "\ud3f4\ub9ac\ud3ec\uc774\ub4dc(5\uc2b92\ud328) \u00b7 \ub370\uc790\ubdf0(2\uc2b93\ud328) \u00b7 \ub179\uc544\uc6c3(1\uc2b93\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "6\uc2b9 8\ud328 (42.9%)", "\uc0c1\ub300\uc804\uc801": "\uc624\uc870\uc740(3\uc2b90\ud328) \u00b7 \ucd5c\ub3c4\ub791(1\uc2b91\ud328) \u00b7 \ube75\ub9ac\ub098(0\uc2b92\ud328)", "\uc774\ub984": "\ub450\ub514", "\uc800\uadf8\uc804 \uc804\uc801": "3\uc2b9 2\ud328 (60.0%)", "\ud14c\ub780\uc804 \uc804\uc801": "5\uc2b9 4\ud328 (55.6%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "1\uc2b9 5\ud328 (16.7%)"}, {"CK \uc804\uc801": "0\uc2b9 1\ud328 (0.0%)", "\ub300\ud559 \uc804\uc801": "1\uc2b9 1\ud328 (50.0%)", "\ub300\ud68c \uc804\uc801": "3\uc2b9 1\ud328 (75.0%)", "\ub9f5 \uc804\uc801": "\ud3f4\ub9ac\ud3ec\uc774\ub4dc(3\uc2b96\ud328) \u00b7 \ubc84\ubbf8\uc5b4(3\uc2b95\ud328) \u00b7 \ub77c\ub370\uc628(3\uc2b93\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "8\uc2b9 11\ud328 (42.1%)", "\uc0c1\ub300\uc804\uc801": "\ubaa8\uafc0\ubaac(2\uc2b94\ud328) \u00b7 \uce74\ud788\ub9ac(2\uc2b94\ud328) \u00b7 \ub7ed\ub728(2\uc2b91\ud328)", "\uc774\ub984": "\ub514\uc784", "\uc800\uadf8\uc804 \uc804\uc801": "8\uc2b9 8\ud328 (50.0%)", "\ud14c\ub780\uc804 \uc804\uc801": "3\uc2b9 5\ud328 (37.5%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "1\uc2b9 1\ud328 (50.0%)"}, {"CK \uc804\uc801": "3\uc2b9 2\ud328 (60.0%)", "\ub300\ud559 \uc804\uc801": "0\uc2b9 2\ud328 (0.0%)", "\ub300\ud68c \uc804\uc801": "2\uc2b9 2\ud328 (50.0%)", "\ub9f5 \uc804\uc801": "\ub77c\ub370\uc628(2\uc2b97\ud328) \u00b7 \ud3f4\ub9ac\ud3ec\uc774\ub4dc(3\uc2b94\ud328) \u00b7 \ub370\uc790\ubdf0(1\uc2b93\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "2\uc2b9 11\ud328 (15.4%)", "\uc0c1\ub300\uc804\uc801": "\uc624\ub9ac\uafcd(1\uc2b92\ud328) \u00b7 \uc7c8\ub2cc(0\uc2b93\ud328) \u00b7 \ub098\ub2a5\ud1a0\ub07c(0\uc2b92\ud328)", "\uc774\ub984": "\ub9c9\ub0b4\ud604\uc9c4", "\uc800\uadf8\uc804 \uc804\uc801": "4\uc2b9 9\ud328 (30.8%)", "\ud14c\ub780\uc804 \uc804\uc801": "1\uc2b9 6\ud328 (14.3%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "2\uc2b9 2\ud328 (50.0%)"}, {"CK \uc804\uc801": "7\uc2b9 9\ud328 (43.8%)", "\ub300\ud559 \uc804\uc801": "3\uc2b9 2\ud328 (60.0%)", "\ub300\ud68c \uc804\uc801": "3\uc2b9 1\ud328 (75.0%)", "\ub9f5 \uc804\uc801": "\ub179\uc544\uc6c3(8\uc2b97\ud328) \u00b7 \ub77c\ub370\uc628(8\uc2b94\ud328) \u00b7 \ud3f4\ub9ac\ud3ec\uc774\ub4dc(5\uc2b96\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "15\uc2b9 13\ud328 (53.6%)", "\uc0c1\ub300\uc804\uc801": "\uc218\ub2c8\uc591(2\uc2b94\ud328) \u00b7 \uc740\uc11c(2\uc2b93\ud328) \u00b7 \ud587\ucc38\uc0c8(0\uc2b95\ud328)", "\uc774\ub984": "\uba3c\uc9c4", "\uc800\uadf8\uc804 \uc804\uc801": "9\uc2b9 1\ud328 (90.0%)", "\ud14c\ub780\uc804 \uc804\uc801": "8\uc2b9 10\ud328 (44.4%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "11\uc2b9 14\ud328 (44.0%)"}, {"CK \uc804\uc801": "5\uc2b9 6\ud328 (45.5%)", "\ub300\ud559 \uc804\uc801": "1\uc2b9 4\ud328 (20.0%)", "\ub300\ud68c \uc804\uc801": "3\uc2b9 7\ud328 (30.0%)", "\ub9f5 \uc804\uc801": "\ub77c\ub370\uc628(10\uc2b99\ud328) \u00b7 \ud3f4\ub9ac\ud3ec\uc774\ub4dc(9\uc2b97\ud328) \u00b7 \ub370\uc790\ubdf0(7\uc2b96\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "32\uc2b9 15\ud328 (68.1%)", "\uc0c1\ub300\uc804\uc801": "\ubdf0\ub7ec(5\uc2b91\ud328) \u00b7 \uae40\ucc44\uc774(2\uc2b93\ud328) \u00b7 \uc58c\ucb48(4\uc2b91\ud328)", "\uc774\ub984": "\ubaa8\ub9ac", "\uc800\uadf8\uc804 \uc804\uc801": "21\uc2b9 10\ud328 (67.7%)", "\ud14c\ub780\uc804 \uc804\uc801": "3\uc2b9 3\ud328 (50.0%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "17\uc2b9 19\ud328 (47.2%)"}, {"CK \uc804\uc801": "6\uc2b9 4\ud328 (60.0%)", "\ub300\ud559 \uc804\uc801": "1\uc2b9 1\ud328 (50.0%)", "\ub300\ud68c \uc804\uc801": "1\uc2b9 0\ud328 (100.0%)", "\ub9f5 \uc804\uc801": "\ub370\uc790\ubdf0(2\uc2b92\ud328) \u00b7 \ub77c\ub370\uc628(4\uc2b90\ud328) \u00b7 \uc774\ud074\ub9bd\uc2a4(0\uc2b92\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "1\uc2b9 1\ud328 (50.0%)", "\uc0c1\ub300\uc804\uc801": "\uae40\uc724\uc911(3\uc2b92\ud328) \u00b7 \ubc15\uc900\uc624(2\uc2b90\ud328) \u00b7 \uc6d0\uc120\uc7ac(1\uc2b91\ud328)", "\uc774\ub984": "\ubabd\uad70", "\uc800\uadf8\uc804 \uc804\uc801": "3\uc2b9 2\ud328 (60.0%)", "\ud14c\ub780\uc804 \uc804\uc801": "1\uc2b9 0\ud328 (100.0%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "5\uc2b9 4\ud328 (55.6%)"}, {"CK \uc804\uc801": "6\uc2b9 7\ud328 (46.2%)", "\ub300\ud559 \uc804\uc801": "-", "\ub300\ud68c \uc804\uc801": "-", "\ub9f5 \uc804\uc801": "\ub3c4\ubbf8\ub124\uc774\ud130(0\uc2b92\ud328) \u00b7 \uc81c\uc778\ub3c4(2\uc2b90\ud328) \u00b7 \ud3f4\uc2a4\ud0c0(2\uc2b90\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "-", "\uc0c1\ub300\uc804\uc801": "\ubc15\uc131\uade0(0\uc2b93\ud328) \u00b7 \uc9c0\ub3d9\uc6d0(2\uc2b91\ud328) \u00b7 \uad6c\uc131\ud6c8(1\uc2b90\ud328)", "\uc774\ub984": "\ubc15\uc218\ubc94", "\uc800\uadf8\uc804 \uc804\uc801": "1\uc2b9 2\ud328 (33.3%)", "\ud14c\ub780\uc804 \uc804\uc801": "4\uc2b9 4\ud328 (50.0%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "1\uc2b9 1\ud328 (50.0%)"}, {"CK \uc804\uc801": "9\uc2b9 10\ud328 (47.4%)", "\ub300\ud559 \uc804\uc801": "-", "\ub300\ud68c \uc804\uc801": "1\uc2b9 0\ud328 (100.0%)", "\ub9f5 \uc804\uc801": "\uba54\ud2b8\ub85c\ud3f4\ub9ac\uc2a4(2\uc2b93\ud328) \u00b7 \ub179\uc544\uc6c3(1\uc2b92\ud328) \u00b7 \ub77c\ub370\uc628(3\uc2b90\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "0\uc2b9 1\ud328 (0.0%)", "\uc0c1\ub300\uc804\uc801": "\uc724\uc6a9\ud0dc(2\uc2b91\ud328) \u00b7 \uc0ac\ud14c(1\uc2b91\ud328) \u00b7 \ubc15\uc218\ubc94(2\uc2b90\ud328)", "\uc774\ub984": "\ubc15\uc900\uc624", "\uc800\uadf8\uc804 \uc804\uc801": "1\uc2b9 0\ud328 (100.0%)", "\ud14c\ub780\uc804 \uc804\uc801": "3\uc2b9 5\ud328 (37.5%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "6\uc2b9 6\ud328 (50.0%)"}, {"CK \uc804\uc801": "1\uc2b9 1\ud328 (50.0%)", "\ub300\ud559 \uc804\uc801": "-", "\ub300\ud68c \uc804\uc801": "-", "\ub9f5 \uc804\uc801": "\ud3f4\ub9ac\ud3ec\uc774\ub4dc(1\uc2b91\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "-", "\uc0c1\ub300\uc804\uc801": "\uc6b0\uc9c8(1\uc2b90\ud328) \u00b7 \uc9c4\ub545\ucf69(0\uc2b91\ud328)", "\uc774\ub984": "\ubc15\ucb48\uc774", "\uc800\uadf8\uc804 \uc804\uc801": "-", "\ud14c\ub780\uc804 \uc804\uc801": "-", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "1\uc2b9 1\ud328 (50.0%)"}, {"CK \uc804\uc801": "3\uc2b9 5\ud328 (37.5%)", "\ub300\ud559 \uc804\uc801": "-", "\ub300\ud68c \uc804\uc801": "-", "\ub9f5 \uc804\uc801": "\ub179\uc544\uc6c3(2\uc2b91\ud328) \u00b7 \ub77c\ub370\uc628(1\uc2b91\ud328) \u00b7 \uc560\ud2f0\ud29c\ub4dc(0\uc2b91\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "-", "\uc0c1\ub300\uc804\uc801": "\uae40\ubc94\uc218(1\uc2b91\ud328) \u00b7 \uc774\uacbd\ubbfc(1\uc2b91\ud328) \u00b7 \ubbf8\ud6c4(1\uc2b90\ud328)", "\uc774\ub984": "\ubc30\uc131\ud760", "\uc800\uadf8\uc804 \uc804\uc801": "0\uc2b9 1\ud328 (0.0%)", "\ud14c\ub780\uc804 \uc804\uc801": "1\uc2b9 2\ud328 (33.3%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "2\uc2b9 2\ud328 (50.0%)"}, {"CK \uc804\uc801": "1\uc2b9 0\ud328 (100.0%)", "\ub300\ud559 \uc804\uc801": "-", "\ub300\ud68c \uc804\uc801": "-", "\ub9f5 \uc804\uc801": "\uc624\ub514\uc138\uc774(0\uc2b92\ud328) \u00b7 \ub179\uc544\uc6c3(1\uc2b90\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "0\uc2b9 2\ud328 (0.0%)", "\uc0c1\ub300\uc804\uc801": "\ub3c4\uc7ac\uc6b1(0\uc2b92\ud328) \u00b7 \uae40\ubbfc\ucca0(1\uc2b90\ud328)", "\uc774\ub984": "\ubcc0\ud604\uc81c", "\uc800\uadf8\uc804 \uc804\uc801": "1\uc2b9 0\ud328 (100.0%)", "\ud14c\ub780\uc804 \uc804\uc801": "-", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "0\uc2b9 2\ud328 (0.0%)"}, {"CK \uc804\uc801": "9\uc2b9 18\ud328 (33.3%)", "\ub300\ud559 \uc804\uc801": "1\uc2b9 1\ud328 (50.0%)", "\ub300\ud68c \uc804\uc801": "1\uc2b9 2\ud328 (33.3%)", "\ub9f5 \uc804\uc801": "\ub179\uc544\uc6c3(7\uc2b99\ud328) \u00b7 \ub77c\ub370\uc628(4\uc2b97\ud328) \u00b7 \ud3f4\ub9ac\ud3ec\uc774\ub4dc(4\uc2b93\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "8\uc2b9 4\ud328 (66.7%)", "\uc0c1\ub300\uc804\uc801": "\ubc15\ud558\uc545(1\uc2b97\ud328) \u00b7 2\ub77c\ub2c8(2\uc2b92\ud328) \u00b7 \uc5f0\ube14\ube44(4\uc2b90\ud328)", "\uc774\ub984": "\ube44\ud0c0\ubc0d", "\uc800\uadf8\uc804 \uc804\uc801": "12\uc2b9 16\ud328 (42.9%)", "\ud14c\ub780\uc804 \uc804\uc801": "2\uc2b9 3\ud328 (40.0%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "5\uc2b9 6\ud328 (45.5%)"}, {"CK \uc804\uc801": "3\uc2b9 3\ud328 (50.0%)", "\ub300\ud559 \uc804\uc801": "-", "\ub300\ud68c \uc804\uc801": "-", "\ub9f5 \uc804\uc801": "\uc2e4\ud53c\ub4dc(1\uc2b92\ud328) \u00b7 \uc544\uc774\uc62c\ub85c\uc2a4(1\uc2b90\ud328) \u00b7 \uc624\ub514\uc138\uc774(0\uc2b91\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "-", "\uc0c1\ub300\uc804\uc801": "\ubc15\uc900\uc624(2\uc2b90\ud328) \u00b7 \uae40\uc724\uc911(1\uc2b91\ud328) \u00b7 \uae40\uc131\ub300(0\uc2b91\ud328)", "\uc774\ub984": "\uc0ac\ud14c", "\uc800\uadf8\uc804 \uc804\uc801": "2\uc2b9 2\ud328 (50.0%)", "\ud14c\ub780\uc804 \uc804\uc801": "-", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "1\uc2b9 1\ud328 (50.0%)"}, {"CK \uc804\uc801": "2\uc2b9 1\ud328 (66.7%)", "\ub300\ud559 \uc804\uc801": "-", "\ub300\ud68c \uc804\uc801": "6\uc2b9 5\ud328 (54.5%)", "\ub9f5 \uc804\uc801": "\ud3f4\ub9ac\ud3ec\uc774\ub4dc(5\uc2b94\ud328) \u00b7 \ub77c\ub370\uc628(4\uc2b93\ud328) \u00b7 \ub3c4\ubbf8\ub124\uc774\ud130(1\uc2b93\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "8\uc2b9 5\ud328 (61.5%)", "\uc0c1\ub300\uc804\uc801": "\ub610\ubd09\uc21c(3\uc2b96\ud328) \u00b7 \ub2e4\ub098\uc9f1(5\uc2b90\ud328) \u00b7 \ud558\ube14\ub9ac(2\uc2b93\ud328)", "\uc774\ub984": "\uc138\ub098", "\uc800\uadf8\uc804 \uc804\uc801": "9\uc2b9 10\ud328 (47.4%)", "\ud14c\ub780\uc804 \uc804\uc801": "1\uc2b9 0\ud328 (100.0%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "6\uc2b9 1\ud328 (85.7%)"}, {"CK \uc804\uc801": "16\uc2b9 9\ud328 (64.0%)", "\ub300\ud559 \uc804\uc801": "4\uc2b9 1\ud328 (80.0%)", "\ub300\ud68c \uc804\uc801": "0\uc2b9 4\ud328 (0.0%)", "\ub9f5 \uc804\uc801": "\ud3f4\ub9ac\ud3ec\uc774\ub4dc(10\uc2b96\ud328) \u00b7 \ub179\uc544\uc6c3(7\uc2b97\ud328) \u00b7 \ub77c\ub370\uc628(9\uc2b94\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "17\uc2b9 9\ud328 (65.4%)", "\uc0c1\ub300\uc804\uc801": "\uc288\uc288(8\uc2b93\ud328) \u00b7 \uc624\ud558\uc580(5\uc2b92\ud328) \u00b7 \ubc31\uac11\uc219(4\uc2b91\ud328)", "\uc774\ub984": "\uc18c\uc8fc\uc591", "\uc800\uadf8\uc804 \uc804\uc801": "12\uc2b9 11\ud328 (52.2%)", "\ud14c\ub780\uc804 \uc804\uc801": "6\uc2b9 0\ud328 (100.0%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "19\uc2b9 12\ud328 (61.3%)"}, {"CK \uc804\uc801": "5\uc2b9 2\ud328 (71.4%)", "\ub300\ud559 \uc804\uc801": "-", "\ub300\ud68c \uc804\uc801": "-", "\ub9f5 \uc804\uc801": "\ud3f4\ub9ac\ud3ec\uc774\ub4dc(2\uc2b91\ud328) \u00b7 \ub77c\ub370\uc628(1\uc2b91\ud328) \u00b7 \ubc84\ubbf8\uc5b4(1\uc2b90\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "-", "\uc0c1\ub300\uc804\uc801": "\ub530\ub0e5\uc789(3\uc2b91\ud328) \u00b7 \ub2e4\ub9b0(0\uc2b91\ud328) \u00b7 \uc138\ub098(1\uc2b90\ud328)", "\uc774\ub984": "\uc218\uc785\ubfcc\ub4dc", "\uc800\uadf8\uc804 \uc804\uc801": "1\uc2b9 0\ud328 (100.0%)", "\ud14c\ub780\uc804 \uc804\uc801": "3\uc2b9 2\ud328 (60.0%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "1\uc2b9 0\ud328 (100.0%)"}, {"CK \uc804\uc801": "8\uc2b9 1\ud328 (88.9%)", "\ub300\ud559 \uc804\uc801": "3\uc2b9 2\ud328 (60.0%)", "\ub300\ud68c \uc804\uc801": "1\uc2b9 2\ud328 (33.3%)", "\ub9f5 \uc804\uc801": "\ub179\uc544\uc6c3(8\uc2b93\ud328) \u00b7 \ub77c\ub370\uc628(6\uc2b92\ud328) \u00b7 \ud3f4\ub9ac\ud3ec\uc774\ub4dc(4\uc2b91\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "9\uc2b9 3\ud328 (75.0%)", "\uc0c1\ub300\uc804\uc801": "\uba3c\uc9c4(4\uc2b90\ud328) \u00b7 \ud038\uc8fc(1\uc2b93\ud328) \u00b7 \uba74\ucd94\uac00(2\uc2b91\ud328)", "\uc774\ub984": "\uc544\ub9ac\uc1a1\uc774", "\uc800\uadf8\uc804 \uc804\uc801": "12\uc2b9 6\ud328 (66.7%)", "\ud14c\ub780\uc804 \uc804\uc801": "9\uc2b9 1\ud328 (90.0%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "0\uc2b9 1\ud328 (0.0%)"}, {"CK \uc804\uc801": "1\uc2b9 4\ud328 (20.0%)", "\ub300\ud559 \uc804\uc801": "0\uc2b9 3\ud328 (0.0%)", "\ub300\ud68c \uc804\uc801": "1\uc2b9 5\ud328 (16.7%)", "\ub9f5 \uc804\uc801": "\ub77c\ub370\uc628(3\uc2b912\ud328) \u00b7 \ub370\uc790\ubdf0(2\uc2b96\ud328) \u00b7 \ud3f4\ub9ac\ud3ec\uc774\ub4dc(5\uc2b92\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "15\uc2b9 14\ud328 (51.7%)", "\uc0c1\ub300\uc804\uc801": "\uc5f0\ub450(5\uc2b92\ud328) \u00b7 \ube75\ub9ac\ub098(2\uc2b94\ud328) \u00b7 \ud587\uc0b4(2\uc2b92\ud328)", "\uc774\ub984": "\uc575\uc9c0", "\uc800\uadf8\uc804 \uc804\uc801": "3\uc2b9 5\ud328 (37.5%)", "\ud14c\ub780\uc804 \uc804\uc801": "7\uc2b9 5\ud328 (58.3%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "7\uc2b9 16\ud328 (30.4%)"}, {"CK \uc804\uc801": "14\uc2b9 8\ud328 (63.6%)", "\ub300\ud559 \uc804\uc801": "0\uc2b9 2\ud328 (0.0%)", "\ub300\ud68c \uc804\uc801": "1\uc2b9 0\ud328 (100.0%)", "\ub9f5 \uc804\uc801": "\ub77c\ub370\uc628(4\uc2b93\ud328) \u00b7 \ub370\uc790\ubdf0(2\uc2b92\ud328) \u00b7 \uc2e4\ud53c\ub4dc(3\uc2b91\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "4\uc2b9 2\ud328 (66.7%)", "\uc0c1\ub300\uc804\uc801": "\ubc15\uc7ac\ud601(4\uc2b92\ud328) \u00b7 \uae40\uacbd\ubaa8(1\uc2b94\ud328) \u00b7 \uc9c0\ub3d9\uc6d0(3\uc2b91\ud328)", "\uc774\ub984": "\uc774\uacbd\ubbfc", "\uc800\uadf8\uc804 \uc804\uc801": "12\uc2b9 9\ud328 (57.1%)", "\ud14c\ub780\uc804 \uc804\uc801": "7\uc2b9 1\ud328 (87.5%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "0\uc2b9 2\ud328 (0.0%)"}, {"CK \uc804\uc801": "19\uc2b9 18\ud328 (51.4%)", "\ub300\ud559 \uc804\uc801": "4\uc2b9 7\ud328 (36.4%)", "\ub300\ud68c \uc804\uc801": "10\uc2b9 6\ud328 (62.5%)", "\ub9f5 \uc804\uc801": "\ud3f4\ub9ac\ud3ec\uc774\ub4dc(17\uc2b913\ud328) \u00b7 \ub77c\ub370\uc628(12\uc2b916\ud328) \u00b7 \ub179\uc544\uc6c3(8\uc2b97\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "19\uc2b9 24\ud328 (44.2%)", "\uc0c1\ub300\uc804\uc801": "\uc9c4\uc720\uc131(4\uc2b910\ud328) \u00b7 \ube44\ud0c0\ubc0d(7\uc2b95\ud328) \u00b7 \ub824\uc6d0(6\uc2b92\ud328)", "\uc774\ub984": "\uc784\uc870\uc774", "\uc800\uadf8\uc804 \uc804\uc801": "8\uc2b9 8\ud328 (50.0%)", "\ud14c\ub780\uc804 \uc804\uc801": "23\uc2b9 17\ud328 (57.5%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "21\uc2b9 30\ud328 (41.2%)"}, {"CK \uc804\uc801": "5\uc2b9 4\ud328 (55.6%)", "\ub300\ud559 \uc804\uc801": "-", "\ub300\ud68c \uc804\uc801": "0\uc2b9 2\ud328 (0.0%)", "\ub9f5 \uc804\uc801": "\ub3c4\ubbf8\ub124\uc774\ud130(2\uc2b92\ud328) \u00b7 \ub77c\ub370\uc628(2\uc2b90\ud328) \u00b7 \ud3f4\ub9ac\ud3ec\uc774\ub4dc(0\uc2b92\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "3\uc2b9 0\ud328 (100.0%)", "\uc0c1\ub300\uc804\uc801": "\uc774\uc7ac\ud638(0\uc2b93\ud328) \u00b7 \uc870\uc77c\uc7a5(0\uc2b92\ud328) \u00b7 \ubabd\uad70(2\uc2b90\ud328)", "\uc774\ub984": "\uc815\uc724\uc885", "\uc800\uadf8\uc804 \uc804\uc801": "1\uc2b9 2\ud328 (33.3%)", "\ud14c\ub780\uc804 \uc804\uc801": "7\uc2b9 4\ud328 (63.6%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "-"}, {"CK \uc804\uc801": "3\uc2b9 2\ud328 (60.0%)", "\ub300\ud559 \uc804\uc801": "4\uc2b9 2\ud328 (66.7%)", "\ub300\ud68c \uc804\uc801": "13\uc2b9 5\ud328 (72.2%)", "\ub9f5 \uc804\uc801": "\ud3f4\ub9ac\ud3ec\uc774\ub4dc(8\uc2b98\ud328) \u00b7 \ub77c\ub370\uc628(7\uc2b95\ud328) \u00b7 \ubc84\ubbf8\uc5b4(5\uc2b96\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "9\uc2b9 17\ud328 (34.6%)", "\uc0c1\ub300\uc804\uc801": "\ud0dc\uc601(3\uc2b95\ud328) \u00b7 \ub450\ub514(2\uc2b93\ud328) \u00b7 \uaddc\ub9ac\uc57c(1\uc2b93\ud328)", "\uc774\ub984": "\uc848\ub2c8", "\uc800\uadf8\uc804 \uc804\uc801": "15\uc2b9 7\ud328 (68.2%)", "\ud14c\ub780\uc804 \uc804\uc801": "8\uc2b9 17\ud328 (32.0%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "6\uc2b9 2\ud328 (75.0%)"}, {"CK \uc804\uc801": "6\uc2b9 8\ud328 (42.9%)", "\ub300\ud559 \uc804\uc801": "0\uc2b9 1\ud328 (0.0%)", "\ub300\ud68c \uc804\uc801": "0\uc2b9 2\ud328 (0.0%)", "\ub9f5 \uc804\uc801": "\ud3f4\uc2a4\ud0c0(1\uc2b93\ud328) \u00b7 \ub179\uc544\uc6c3(1\uc2b92\ud328) \u00b7 \ub9ac\ud2b8\uba38\uc2a4(1\uc2b92\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "-", "\uc0c1\ub300\uc804\uc801": "\ub3c4\uc7ac\uc6b1(3\uc2b92\ud328) \u00b7 \ud669\ubcd1\uc601(0\uc2b93\ud328) \u00b7 \uc774\uc7ac\ud638(2\uc2b91\ud328)", "\uc774\ub984": "\uc870\uc77c\uc7a5", "\uc800\uadf8\uc804 \uc804\uc801": "0\uc2b9 2\ud328 (0.0%)", "\ud14c\ub780\uc804 \uc804\uc801": "2\uc2b9 6\ud328 (25.0%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "4\uc2b9 3\ud328 (57.1%)"}, {"CK \uc804\uc801": "11\uc2b9 9\ud328 (55.0%)", "\ub300\ud559 \uc804\uc801": "0\uc2b9 2\ud328 (0.0%)", "\ub300\ud68c \uc804\uc801": "3\uc2b9 2\ud328 (60.0%)", "\ub9f5 \uc804\uc801": "\ud3f4\ub9ac\ud3ec\uc774\ub4dc(4\uc2b910\ud328) \u00b7 \ub179\uc544\uc6c3(6\uc2b96\ud328) \u00b7 \ub77c\ub370\uc628(6\uc2b95\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "11\uc2b9 18\ud328 (37.9%)", "\uc0c1\ub300\uc804\uc801": "\uc720\uc774(4\uc2b96\ud328) \u00b7 \uc18c\uc8fc\uc591(5\uc2b91\ud328) \u00b7 \uae68\ub9bc\uc774(2\uc2b93\ud328)", "\uc774\ub984": "\uc8fc\ud558\ub791", "\uc800\uadf8\uc804 \uc804\uc801": "3\uc2b9 9\ud328 (25.0%)", "\ud14c\ub780\uc804 \uc804\uc801": "18\uc2b9 16\ud328 (52.9%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "4\uc2b9 6\ud328 (40.0%)"}, {"CK \uc804\uc801": "14\uc2b9 13\ud328 (51.9%)", "\ub300\ud559 \uc804\uc801": "-", "\ub300\ud68c \uc804\uc801": "-", "\ub9f5 \uc804\uc801": "\uc2e4\ud53c\ub4dc(4\uc2b93\ud328) \u00b7 \ub77c\ub370\uc628(3\uc2b93\ud328) \u00b7 \ud3f4\uc2a4\ud0c0(2\uc2b94\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "-", "\uc0c1\ub300\uc804\uc801": "\uc9c4\uc601\ud654(2\uc2b92\ud328) \u00b7 \ubc15\uc7ac\ud601(2\uc2b91\ud328) \u00b7 \uace0\uc11d\ud604(1\uc2b91\ud328)", "\uc774\ub984": "\uc9c0\ub3d9\uc6d0", "\uc800\uadf8\uc804 \uc804\uc801": "7\uc2b9 7\ud328 (50.0%)", "\ud14c\ub780\uc804 \uc804\uc801": "0\uc2b9 2\ud328 (0.0%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "7\uc2b9 4\ud328 (63.6%)"}, {"CK \uc804\uc801": "8\uc2b9 12\ud328 (40.0%)", "\ub300\ud559 \uc804\uc801": "1\uc2b9 1\ud328 (50.0%)", "\ub300\ud68c \uc804\uc801": "0\uc2b9 1\ud328 (0.0%)", "\ub9f5 \uc804\uc801": "\ub77c\ub370\uc628(6\uc2b95\ud328) \u00b7 \ub179\uc544\uc6c3(5\uc2b95\ud328) \u00b7 \uc560\ud2f0\ud29c\ub4dc(3\uc2b91\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "7\uc2b9 3\ud328 (70.0%)", "\uc0c1\ub300\uc804\uc801": "\ube75\ub9ac\ub098(5\uc2b93\ud328) \u00b7 \ubc15\ub4c0\ub4c0(3\uc2b92\ud328) \u00b7 \ud1a0\ub9c8\ud1a0(2\uc2b92\ud328)", "\uc774\ub984": "\uc9c0\ub450\ub450", "\uc800\uadf8\uc804 \uc804\uc801": "2\uc2b9 6\ud328 (25.0%)", "\ud14c\ub780\uc804 \uc804\uc801": "1\uc2b9 1\ud328 (50.0%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "13\uc2b9 10\ud328 (56.5%)"}, {"CK \uc804\uc801": "6\uc2b9 6\ud328 (50.0%)", "\ub300\ud559 \uc804\uc801": "2\uc2b9 3\ud328 (40.0%)", "\ub300\ud68c \uc804\uc801": "0\uc2b9 4\ud328 (0.0%)", "\ub9f5 \uc804\uc801": "\ud3f4\ub9ac\ud3ec\uc774\ub4dc(5\uc2b98\ud328) \u00b7 \ub77c\ub370\uc628(5\uc2b94\ud328) \u00b7 \ub179\uc544\uc6c3(1\uc2b93\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "4\uc2b9 3\ud328 (57.1%)", "\uc0c1\ub300\uc804\uc801": "\uc740\uc870(4\uc2b91\ud328) \u00b7 \ubc31\uc6d0\uc774\uc57c(0\uc2b93\ud328) \u00b7 \ubc24\ud558\ubc0d(1\uc2b92\ud328)", "\uc774\ub984": "\uc9c4\ub545\ucf69", "\uc800\uadf8\uc804 \uc804\uc801": "8\uc2b9 8\ud328 (50.0%)", "\ud14c\ub780\uc804 \uc804\uc801": "3\uc2b9 5\ud328 (37.5%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "1\uc2b9 3\ud328 (25.0%)"}, {"CK \uc804\uc801": "5\uc2b9 7\ud328 (41.7%)", "\ub300\ud559 \uc804\uc801": "2\uc2b9 1\ud328 (66.7%)", "\ub300\ud68c \uc804\uc801": "0\uc2b9 2\ud328 (0.0%)", "\ub9f5 \uc804\uc801": "\ub179\uc544\uc6c3(4\uc2b95\ud328) \u00b7 \ub77c\ub370\uc628(4\uc2b92\ud328) \u00b7 \ud3f4\ub9ac\ud3ec\uc774\ub4dc(2\uc2b93\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "3\uc2b9 1\ud328 (75.0%)", "\uc0c1\ub300\uc804\uc801": "\ub9c1\uace0(0\uc2b94\ud328) \u00b7 \ubabd\uc21c(3\uc2b91\ud328) \u00b7 \ud0a4\ub9c1(1\uc2b92\ud328)", "\uc774\ub984": "\ucc0c\ud0b9", "\uc800\uadf8\uc804 \uc804\uc801": "5\uc2b9 3\ud328 (62.5%)", "\ud14c\ub780\uc804 \uc804\uc801": "2\uc2b9 0\ud328 (100.0%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "3\uc2b9 8\ud328 (27.3%)"}, {"CK \uc804\uc801": "10\uc2b9 11\ud328 (47.6%)", "\ub300\ud559 \uc804\uc801": "6\uc2b9 4\ud328 (60.0%)", "\ub300\ud68c \uc804\uc801": "11\uc2b9 7\ud328 (61.1%)", "\ub9f5 \uc804\uc801": "\ud3f4\ub9ac\ud3ec\uc774\ub4dc(23\uc2b99\ud328) \u00b7 \ub77c\ub370\uc628(14\uc2b913\ud328) \u00b7 \ub179\uc544\uc6c3(11\uc2b94\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "32\uc2b9 12\ud328 (72.7%)", "\uc0c1\ub300\uc804\uc801": "\uc720\uc774(3\uc2b94\ud328) \u00b7 \ub69c\ube44(2\uc2b93\ud328) \u00b7 \ub0a8\uc218\ub315(4\uc2b91\ud328)", "\uc774\ub984": "\uce58\ub9ac", "\uc800\uadf8\uc804 \uc804\uc801": "16\uc2b9 4\ud328 (80.0%)", "\ud14c\ub780\uc804 \uc804\uc801": "14\uc2b9 21\ud328 (40.0%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "29\uc2b9 9\ud328 (76.3%)"}, {"CK \uc804\uc801": "0\uc2b9 1\ud328 (0.0%)", "\ub300\ud559 \uc804\uc801": "-", "\ub300\ud68c \uc804\uc801": "-", "\ub9f5 \uc804\uc801": "\ud3f4\ub9ac\ud3ec\uc774\ub4dc(0\uc2b91\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "-", "\uc0c1\ub300\uc804\uc801": "\ub514\uc784(0\uc2b91\ud328)", "\uc774\ub984": "\ud074\ud15c", "\uc800\uadf8\uc804 \uc804\uc801": "-", "\ud14c\ub780\uc804 \uc804\uc801": "-", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "0\uc2b9 1\ud328 (0.0%)"}, {"CK \uc804\uc801": "11\uc2b9 1\ud328 (91.7%)", "\ub300\ud559 \uc804\uc801": "2\uc2b9 6\ud328 (25.0%)", "\ub300\ud68c \uc804\uc801": "14\uc2b9 6\ud328 (70.0%)", "\ub9f5 \uc804\uc801": "\ub77c\ub370\uc628(19\uc2b921\ud328) \u00b7 \ud3f4\ub9ac\ud3ec\uc774\ub4dc(10\uc2b99\ud328) \u00b7 \ub179\uc544\uc6c3(9\uc2b93\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "30\uc2b9 31\ud328 (49.2%)", "\uc0c1\ub300\uc804\uc801": "\uc18c\uc2ec(9\uc2b94\ud328) \u00b7 \ub098\uc608\ub9ac(7\uc2b93\ud328) \u00b7 \ud30c\ucc0c(4\uc2b93\ud328)", "\uc774\ub984": "\ud1a0\ub9c8\ud1a0", "\uc800\uadf8\uc804 \uc804\uc801": "18\uc2b9 18\ud328 (50.0%)", "\ud14c\ub780\uc804 \uc804\uc801": "24\uc2b9 18\ud328 (57.1%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "15\uc2b9 8\ud328 (65.2%)"}, {"CK \uc804\uc801": "3\uc2b9 2\ud328 (60.0%)", "\ub300\ud559 \uc804\uc801": "-", "\ub300\ud68c \uc804\uc801": "-", "\ub9f5 \uc804\uc801": "\ub77c\ub370\uc628(1\uc2b91\ud328) \u00b7 \ud3f4\ub9ac\ud3ec\uc774\ub4dc(2\uc2b90\ud328) \u00b7 \uc2e4\ud53c\ub4dc(0\uc2b91\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "-", "\uc0c1\ub300\uc804\uc801": "\uc815\uc18c\uc724(2\uc2b91\ud328) \u00b7 \ubc15\uc131\uc900(0\uc2b91\ud328) \u00b7 \uc218\uc785\ubfcc\ub4dc(1\uc2b90\ud328)", "\uc774\ub984": "\ud30c\ub3c4\ud29c\ube0c", "\uc800\uadf8\uc804 \uc804\uc801": "2\uc2b9 2\ud328 (50.0%)", "\ud14c\ub780\uc804 \uc804\uc801": "-", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "1\uc2b9 0\ud328 (100.0%)"}, {"CK \uc804\uc801": "1\uc2b9 3\ud328 (25.0%)", "\ub300\ud559 \uc804\uc801": "0\uc2b9 1\ud328 (0.0%)", "\ub300\ud68c \uc804\uc801": "5\uc2b9 5\ud328 (50.0%)", "\ub9f5 \uc804\uc801": "\ud3f4\ub9ac\ud3ec\uc774\ub4dc(2\uc2b98\ud328) \u00b7 \ub370\uc790\ubdf0(1\uc2b97\ud328) \u00b7 \ub77c\ub370\uc628(3\uc2b92\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "4\uc2b9 10\ud328 (28.6%)", "\uc0c1\ub300\uc804\uc801": "\uba3c\uc9c4(1\uc2b93\ud328) \u00b7 \ud551\ud551(0\uc2b94\ud328) \u00b7 \uc608\ube48(1\uc2b92\ud328)", "\uc774\ub984": "\ud55c\ucabc\ub2c8", "\uc800\uadf8\uc804 \uc804\uc801": "4\uc2b9 16\ud328 (20.0%)", "\ud14c\ub780\uc804 \uc804\uc801": "3\uc2b9 1\ud328 (75.0%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "3\uc2b9 1\ud328 (75.0%)"}, {"CK \uc804\uc801": "7\uc2b9 8\ud328 (46.7%)", "\ub300\ud559 \uc804\uc801": "2\uc2b9 1\ud328 (66.7%)", "\ub300\ud68c \uc804\uc801": "3\uc2b9 1\ud328 (75.0%)", "\ub9f5 \uc804\uc801": "\ub77c\ub370\uc628(4\uc2b911\ud328) \u00b7 \ub179\uc544\uc6c3(7\uc2b95\ud328) \u00b7 \ud3f4\ub9ac\ud3ec\uc774\ub4dc(4\uc2b96\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "12\uc2b9 17\ud328 (41.4%)", "\uc0c1\ub300\uc804\uc801": "\uc694\ub2dd(5\uc2b91\ud328) \u00b7 \ucd5c\ub3c4\ub791(3\uc2b93\ud328) \u00b7 \uacf5\ub2e4\uce20(1\uc2b93\ud328)", "\uc774\ub984": "\ud587\uc0b4", "\uc800\uadf8\uc804 \uc804\uc801": "16\uc2b9 14\ud328 (53.3%)", "\ud14c\ub780\uc804 \uc804\uc801": "1\uc2b9 0\ud328 (100.0%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "7\uc2b9 13\ud328 (35.0%)"}, {"CK \uc804\uc801": "5\uc2b9 10\ud328 (33.3%)", "\ub300\ud559 \uc804\uc801": "-", "\ub300\ud68c \uc804\uc801": "0\uc2b9 1\ud328 (0.0%)", "\ub9f5 \uc804\uc801": "\ub179\uc544\uc6c3(1\uc2b92\ud328) \u00b7 \ub3c4\ubbf8\ub124\uc774\ud130(1\uc2b91\ud328) \u00b7 \uba54\ud2b8\ub85c\ud3f4\ub9ac\uc2a4(0\uc2b92\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "-", "\uc0c1\ub300\uc804\uc801": "\uae40\uc131\ub300(3\uc2b94\ud328) \u00b7 \uae40\ubbfc\ucca0(1\uc2b92\ud328) \u00b7 \uae40\uc815\uc6b0(1\uc2b90\ud328)", "\uc774\ub984": "\ud669\ubcd1\uc601", "\uc800\uadf8\uc804 \uc804\uc801": "5\uc2b9 9\ud328 (35.7%)", "\ud14c\ub780\uc804 \uc804\uc801": "0\uc2b9 1\ud328 (0.0%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "0\uc2b9 1\ud328 (0.0%)"}, {"CK \uc804\uc801": "1\uc2b9 4\ud328 (20.0%)", "\ub300\ud559 \uc804\uc801": "1\uc2b9 1\ud328 (50.0%)", "\ub300\ud68c \uc804\uc801": "2\uc2b9 3\ud328 (40.0%)", "\ub9f5 \uc804\uc801": "\ud3f4\ub9ac\ud3ec\uc774\ub4dc(5\uc2b96\ud328) \u00b7 \uc774\ud074\ub9bd\uc2a4(1\uc2b94\ud328) \u00b7 \ub370\uc790\ubdf0(2\uc2b92\ud328)", "\ubbf8\ub2c8 \uc804\uc801": "8\uc2b9 8\ud328 (50.0%)", "\uc0c1\ub300\uc804\uc801": "2\ub77c\ub2c8(0\uc2b93\ud328) \u00b7 \uc120\uc815\uc740(1\uc2b92\ud328) \u00b7 \uae40\ub9d0\ub791(2\uc2b90\ud328)", "\uc774\ub984": "\ud6a8\uc9f1", "\uc800\uadf8\uc804 \uc804\uc801": "1\uc2b9 6\ud328 (14.3%)", "\ud14c\ub780\uc804 \uc804\uc801": "10\uc2b9 8\ud328 (55.6%)", "\ud504\ub85c\ud1a0\uc2a4\uc804 \uc804\uc801": "1\uc2b9 2\ud328 (33.3%)"}];
 
     function selectPlayer(name) {
-        // UI 변경
         document.getElementById('welcomeScreen').style.display = 'none';
-        document.getElementById('mainDashboard').style.display = 'block';
-        document.getElementById('rightDashboard').style.display = 'block';
+        document.getElementById('statContent').style.display = 'block';
         
         document.querySelectorAll('.player-item').forEach(el => el.classList.remove('active'));
         event.currentTarget.classList.add('active');
 
-        // 데이터 매핑
         const p = playersData.find(x => x['이름'] === name);
         if (!p) return;
 
-        document.getElementById('p-name').innerText = p['이름'];
+        document.getElementById('p-name').innerText = p['이름'] + ' 님의 전적';
+        document.getElementById('p-fmt-1').innerText = p['대회 전적'] || '-';
+        document.getElementById('p-fmt-2').innerText = p['대학 전적'] || '-';
+        document.getElementById('p-fmt-3').innerText = (p['미니 전적'] || '-') + ' / ' + (p['CK 전적'] || '-');
 
-        // 종족전 데이터 파싱
-        const rT = parseStat(p['테란전 전적']);
-        const rZ = parseStat(p['저그전 전적']);
-        const rP = parseStat(p['프로토스전 전적']);
-
-        // 도넛 차트 텍스트 업데이트
-        document.getElementById('rate-t').innerText = rT.rate; document.getElementById('wl-t').innerText = rT.wl;
-        document.getElementById('rate-z').innerText = rZ.rate; document.getElementById('wl-z').innerText = rZ.wl;
-        document.getElementById('rate-p').innerText = rP.rate; document.getElementById('wl-p').innerText = rP.wl;
-
-        // 도넛 차트 그래프 업데이트 (CSS 변수 활용)
-        updateDonut('donut-t', rT.numRate, 'var(--race-t)');
-        updateDonut('donut-z', rZ.numRate, 'var(--race-z)');
-        updateDonut('donut-p', rP.numRate, 'var(--race-p)');
-
-        // 총 전적 계산 (세 종족전 합산)
-        const totalWins = rT.wins + rZ.wins + rP.wins;
-        const totalLosses = rT.losses + rZ.losses + rP.losses;
-        const totalGames = totalWins + totalLosses;
-        const totalRate = totalGames > 0 ? ((totalWins / totalGames) * 100).toFixed(1) + "%" : "0%";
-
-        // 우측 패널 업데이트
-        document.getElementById('p-total-games').innerText = totalGames;
-        document.getElementById('p-total-wl').innerText = `${totalWins}승 ${totalLosses}패`;
-        document.getElementById('p-total-rate').innerText = totalRate;
-        
-        // 대회, 대학, CK 파싱
-        const f1 = parseStat(p['대회 전적']);
-        const f2 = parseStat(p['대학 전적']);
-        const f3 = parseStat(p['미니 전적']);
-        const f4 = parseStat(p['CK 전적']);
-        
-        document.getElementById('p-fmt-1').innerText = `대회: ${f1.wl} (${f1.rate})`;
-        document.getElementById('p-fmt-2-rate').innerText = f2.rate;
-        document.getElementById('p-fmt-2').innerText = f2.wl;
-        
-        // CK와 미니를 합쳐서 표시
-        const ckMiniWins = f3.wins + f4.wins;
-        const ckMiniLosses = f3.losses + f4.losses;
-        const ckMiniRate = (ckMiniWins+ckMiniLosses) > 0 ? ((ckMiniWins/(ckMiniWins+ckMiniLosses))*100).toFixed(1) + "%" : "-";
-        document.getElementById('p-fmt-3-rate').innerText = ckMiniRate;
-        document.getElementById('p-fmt-3').innerText = `${ckMiniWins}승 ${ckMiniLosses}패`;
-
-        // 맵 & 상대전적
-        document.getElementById('p-maps').innerHTML = (p['맵 전적'] || "-").replace(/ · /g, "<br>");
-        document.getElementById('p-opps').innerHTML = (p['상대전적'] || "-").replace(/ · /g, "<br>");
+        document.getElementById('p-race-t').innerText = p['테란전 전적'] || '-';
+        document.getElementById('p-race-z').innerText = p['저그전 전적'] || '-';
+        document.getElementById('p-race-p').innerText = p['프로토스전 전적'] || '-';
     }
 
-    // 좌측 사이드바 검색 필터링
     function filterPlayers() {
         const input = document.getElementById('searchInput').value.toLowerCase();
         const items = document.querySelectorAll('.player-item');
         items.forEach(item => {
             const name = item.querySelector('.player-name-text').innerText.toLowerCase();
-            item.style.display = name.includes(input) ? "flex" : "none";
+            item.style.display = name.includes(input) ? "block" : "none";
         });
     }
 </script>
