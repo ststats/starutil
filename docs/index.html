@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>스타대학 - 전적</title>
+    <title>스타대학 - 홈</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
     <style>
@@ -26,13 +26,14 @@
             --fs-body: 13px;
         }
         
-        /* 탭 전환 시 스크롤바 생성 유무로 인한 화면 밀림(흔들림) 방지 */
+        /* 팝업 오픈 시 흔들림 방지 */
         html { overflow-y: scroll; }
+        body.modal-open { padding-right: 0 !important; overflow-y: scroll !important; }
         
         body { font-family: 'Pretendard', sans-serif; background-color: var(--color-bg); color: var(--color-text-main); }
         a { text-decoration: none; color: inherit; cursor: pointer; }
         
-        /* 상단 GNB (우측 정렬 및 클릭 시 흔들림 방지) */
+        /* 상단 GNB */
         .top-navbar { background-color: #fff; height: 64px; border-bottom: 1px solid var(--color-border); }
         .top-navbar .navbar-inner { height: 100%; display: flex; align-items: center; width: 100%; }
         .top-navbar .logo { font-size: 20px; font-weight: 800; margin-right: 30px; display: flex; align-items: center; flex-shrink: 0; }
@@ -67,15 +68,12 @@
         .section-title-sm { font-size: var(--fs-subheading); font-weight: 800; color: #111; padding-bottom: 8px; border-bottom: 1px solid #eee; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
         .clean-card { background: var(--color-card); border: 1px solid var(--color-border); border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.015); }
         
-        /* 전체보기 버튼 작고 세련되게 */
+        /* 버튼 */
         .btn-view-all { background: transparent; border: none; font-size: 12px; font-weight: 700; color: #888; padding: 4px 8px; border-radius: 6px; cursor: pointer; transition: 0.15s; }
         .btn-view-all:hover { background: #f1f3f5; color: #222; }
-
-        /* 버튼 */
         .btn-clean { background: #fff; border: 1px solid #dcdfe4; border-radius: 6px; font-size: var(--fs-body); font-weight: 600; padding: 6px 14px; color: #555; transition: 0.1s; cursor: pointer; }
         .btn-clean:hover, .btn-clean.active { background: var(--color-primary-tint); color: var(--color-primary); border-color: #b9cdf5; }
         
-        /* 최근 전적 필터 네비게이션 스타일 (PC & 모바일 통합) */
         .filter-nav { display: flex; gap: 16px; margin-left: 16px; border-left: 2px solid #eaedf2; padding-left: 16px; align-items: center; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; }
         .filter-nav::-webkit-scrollbar { display: none; }
         .filter-item { font-size: 13px; font-weight: 600; color: #888; cursor: pointer; position: relative; padding: 4px 0; transition: color 0.15s; flex-shrink: 0; }
@@ -83,25 +81,24 @@
         .filter-item.active { color: var(--color-primary); font-weight: 800; }
         .filter-item.active::after { content: ''; position: absolute; bottom: -2px; left: 0; right: 0; height: 2px; background-color: var(--color-primary); border-radius: 2px; }
 
-        /* 팀 전적 4카드 */
         .stat-card-box { text-align: center; padding: 24px; }
         .stat-card-box .label { font-size: var(--fs-subheading); color: var(--color-text-sub); font-weight: 700; margin-bottom: 6px; }
         .stat-card-box .rate { font-size: var(--fs-hero); font-weight: 800; line-height: 1.1; margin-bottom: 4px; color: var(--color-primary); }
         .stat-card-box .wl { font-size: var(--fs-body); color: #888; font-weight: 600; margin-bottom: 12px; }
 
-        /* 경기 내역 래퍼 및 리스트 */
+        /* 리스트 래퍼 */
         .match-item-wrap { border-bottom: 1px solid var(--color-border); }
         .match-item-wrap:last-child { border-bottom: none; }
         .match-list-scroll { overflow-x: auto; }
         .match-list-scroll::-webkit-scrollbar { height: 6px; }
         .match-list-scroll::-webkit-scrollbar-thumb { background: #c7d6f5; border-radius: 3px; }
         
-        .match-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 15px; font-size: var(--fs-body); background: #fff; transition: background 0.1s; cursor: pointer; min-width: 500px; }
+        .match-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 15px; font-size: var(--fs-body); background: #fff; transition: background 0.1s; cursor: pointer; min-width: 480px; }
         .match-row:hover { background: var(--color-primary-tint); }
         .match-row.match-header { background: #fff !important; cursor: default; font-weight: 700; color: #666; border-bottom: 2px solid #d8dce3; }
         .match-row.match-header > div { font-weight: 700; color: #666; }
         
-        /* 컬럼 넓이 고정 */
+        /* 컬럼 설정 */
         .m-date { width: 70px; color: #888; text-align: center; flex-shrink: 0; }
         .m-type { width: 45px; text-align: center; flex-shrink: 0; }
         .m-opp-team { width: 110px; text-align: center; font-weight: 700; color: #222; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-shrink: 0; }
@@ -109,7 +106,7 @@
         .m-map { width: 90px; text-align: center; color: #666; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-shrink: 0; }
         .m-score { width: 45px; text-align: center; font-weight: 800; flex-shrink: 0; }
         .m-res { width: 50px; display: flex; justify-content: center; flex-shrink: 0; }
-        .m-arrow { width: 35px; text-align: right; color: #888; font-weight: 700; font-size: var(--fs-body); flex-shrink: 0; }
+        .m-arrow { width: 25px; text-align: right; color: #adb5bd; font-size: 10px; transition: transform 0.2s; flex-shrink: 0; }
 
         /* 뱃지 */
         .tag-badge { font-size: 11px; font-weight: 700; padding: 3px 6px; border-radius: 4px; background: var(--color-primary-tint); color: #2c5cc9; border: 1px solid var(--color-primary-tint-strong); }
@@ -119,7 +116,7 @@
         .badge-lose { background-color: var(--color-lose); }
         .badge-draw { background-color: var(--color-draw); }
 
-        /* 모달 공통 */
+        /* 모달 */
         .modal-header { position: relative; display: flex; align-items: center; justify-content: center; padding: 18px; border-bottom: 1px solid var(--color-border) !important; background: #fff; }
         .modal-title { font-size: var(--fs-heading); font-weight: 800; text-align: center; width: 100%; margin: 0; color: #111; }
         .modal-header .btn-close { position: absolute; right: 18px; top: 50%; transform: translateY(-50%); margin: 0; }
@@ -181,28 +178,16 @@
         .team-row-clickable { cursor: pointer; transition: background 0.1s; }
         .team-row-clickable:hover { background: var(--color-primary-tint) !important; }
 
-        /* ==============================
-            일정(캘린더) 페이지 스크롤 완벽 픽스 및 레이아웃 변경
-        ============================== */
+        /* 일정 캘린더 */
         .cal-app-root { padding: 0 0 24px 0; }
-        
-        /* 모바일에서는 column, PC에서는 row */
         .cal-main-layout { display: flex; gap: 24px; align-items: flex-start; width: 100%; min-width: 0; }
+        .cal-left-area { display: flex; flex-direction: column; gap: 20px; flex: 1 1 0%; min-width: 0; overflow: hidden; }
+        .cal-left-area .clean-card { min-width: 0; max-width: 100%; display: flex; flex-direction: column; width: 100%; }
         
-        /* PC: Sidebar가 왼쪽에 위치 (order: 1) / Calendar는 오른쪽에 위치 (order: 2) */
-        .cal-sidebar { width: 360px; display: flex; flex-direction: column; gap: 24px; flex-shrink: 0; order: 1; }
-        .cal-calendar-area { display: flex; flex-direction: column; gap: 24px; flex: 1 1 0%; min-width: 0; overflow: hidden; order: 2; width: 100%; }
-        .cal-calendar-area .clean-card { min-width: 0; max-width: 100%; display: flex; flex-direction: column; width: 100%; overflow: hidden; }
-
+        .cal-sidebar { width: 360px; display: flex; flex-direction: column; gap: 20px; flex-shrink: 0; }
         @media (max-width: 991px) {
-            .cal-main-layout { flex-direction: column; gap: 20px; }
-            /* 모바일: Sidebar 껍데기를 없애고, 내부 요소들이 .cal-main-layout 의 자식으로 작동하게 함 */
-            .cal-sidebar { display: contents; } 
-            
-            /* 모바일 순서 지정: 1.오늘의일정, 2.달력, 3.선택한날짜 */
-            .cal-today-card-wrapper { order: 1; width: 100%; }
-            .cal-calendar-area { order: 2; width: 100%; }
-            .cal-selected-card-wrapper { order: 3; width: 100%; }
+            .cal-main-layout { flex-direction: column; }
+            .cal-sidebar { width: 100%; }
         }
 
         .cal-nav-group { display: flex; align-items: center; gap: 10px; }
@@ -210,8 +195,7 @@
         .cal-nav-btn:hover { background: var(--color-primary-tint); color: var(--color-primary); }
         .cal-nav-badge { font-size: var(--fs-subheading); font-weight: 800; color: #111; min-width: 86px; text-align: center; }
 
-        /* 달력 칸 가로 스크롤 허용 (내부 표가 700px 이하로 줄지 않게) */
-        .cal-calendar-inner { width: 100%; overflow-x: auto; padding-bottom: 6px; -webkit-overflow-scrolling: touch; }
+        .cal-calendar-inner { width: 100%; max-width: 100%; overflow-x: auto; padding-bottom: 6px; -webkit-overflow-scrolling: touch; }
         .cal-calendar-inner::-webkit-scrollbar { height: 6px; }
         .cal-calendar-inner::-webkit-scrollbar-thumb { background: #c7d6f5; border-radius: 3px; }
         .cal-calendar-scroll-content { min-width: 700px; width: 100%; } 
@@ -257,17 +241,19 @@
     <div class="navbar-inner container">
         <div class="logo">스타대학</div>
         <div class="nav-menu" id="mainMenu">
-            <a class="nav-item" onclick="switchPage('home')">홈</a>
+            <!-- 기본 active를 홈으로 설정 -->
+            <a class="nav-item active" onclick="switchPage('home')">홈</a>
             <a class="nav-item" onclick="switchPage('schedule')">일정</a>
             <a class="nav-item" onclick="switchPage('members')">멤버</a>
-            <a class="nav-item active" onclick="switchPage('stats')">전적</a>
+            <a class="nav-item" onclick="switchPage('stats')">전적</a>
             <a class="nav-item" onclick="alert('시너지표 메뉴는 준비중입니다.')">시너지표</a>
             <a class="nav-item" onclick="alert('도구 메뉴는 준비중입니다.')">도구</a>
         </div>
     </div>
 </div>
 
-<div id="page-home" class="page-section container">
+<!-- 기본 노출 화면: 홈 -->
+<div id="page-home" class="page-section active container">
     <div class="clean-card p-4 mb-4 text-center">
         <div class="fw-bold" style="font-size: var(--fs-hero); letter-spacing: -1px; color: #111;">스타대학 홈</div>
     </div>
@@ -280,7 +266,6 @@
 <div id="page-schedule" class="page-section container">
     <div class="cal-app-root">
         <div class="cal-main-layout">
-            <!-- 사이드바: PC에서는 왼쪽(order:1), 모바일에서는 위아래로 분리 -->
             <aside class="cal-sidebar">
                 <div class="clean-card p-4 cal-today-card-wrapper">
                     <div class="section-title">오늘의 일정</div>
@@ -292,7 +277,6 @@
                 </div>
             </aside>
             
-            <!-- 캘린더 본체: PC에서는 오른쪽(order:2) -->
             <section class="cal-calendar-area">
                 <div class="clean-card p-4">
                     <div class="section-title">
@@ -303,7 +287,6 @@
                             <button class="cal-nav-btn" onclick="changeMonth(1)">›</button>
                         </div>
                     </div>
-                    <!-- 가로 스크롤 유도 구조 -->
                     <div class="cal-calendar-inner">
                         <div class="cal-calendar-scroll-content">
                             <div class="cal-weekdays">
@@ -322,8 +305,8 @@
     <div id="members-groups"></div>
 </div>
 
-<!-- 전적 페이지 -->
-<div id="page-stats" class="page-section active container">
+<!-- 전적 페이지 (초기 로드 시 숨김) -->
+<div id="page-stats" class="page-section container">
     <div class="sub-tabs">
         <div class="sub-tab active" id="tab-team" onclick="switchStatView('team')">팀</div>
         <div class="sub-tab" id="tab-individual" onclick="switchStatView('individual')">개인</div>
@@ -354,175 +337,175 @@
                                     <td class="text-start ps-4 fw-bold text-dark">BGM</td>
                                     <td>-</td><td>-</td>
                                     <td>1승 0패</td><td>-</td>
-                                    <td class="text-secondary" style="font-size:var(--fs-body);">▼</td>
+                                    <td class="text-secondary" style="font-size:10px; vertical-align:middle; width: 35px;">▼</td>
                                 </tr>
                                 
                                 <tr class="team-row-clickable" style="border-bottom:1px solid #f1f3f5;" data-team="DM">
                                     <td class="text-start ps-4 fw-bold text-dark">DM</td>
                                     <td>-</td><td>-</td>
                                     <td>2승 0패</td><td>-</td>
-                                    <td class="text-secondary" style="font-size:var(--fs-body);">▼</td>
+                                    <td class="text-secondary" style="font-size:10px; vertical-align:middle; width: 35px;">▼</td>
                                 </tr>
                                 
                                 <tr class="team-row-clickable" style="border-bottom:1px solid #f1f3f5;" data-team="HM">
                                     <td class="text-start ps-4 fw-bold text-dark">HM</td>
                                     <td>1승 0패</td><td>-</td>
                                     <td>1승 0패</td><td>-</td>
-                                    <td class="text-secondary" style="font-size:var(--fs-body);">▼</td>
+                                    <td class="text-secondary" style="font-size:10px; vertical-align:middle; width: 35px;">▼</td>
                                 </tr>
                                 
                                 <tr class="team-row-clickable" style="border-bottom:1px solid #f1f3f5;" data-team="JSA">
                                     <td class="text-start ps-4 fw-bold text-dark">JSA</td>
                                     <td>1승 2패</td><td>1승 1패</td>
                                     <td>5승 2패</td><td>1승 0패</td>
-                                    <td class="text-secondary" style="font-size:var(--fs-body);">▼</td>
+                                    <td class="text-secondary" style="font-size:10px; vertical-align:middle; width: 35px;">▼</td>
                                 </tr>
                                 
                                 <tr class="team-row-clickable" style="border-bottom:1px solid #f1f3f5;" data-team="YB">
                                     <td class="text-start ps-4 fw-bold text-dark">YB</td>
                                     <td>1승 1패</td><td>-</td>
                                     <td>1승 2패</td><td>-</td>
-                                    <td class="text-secondary" style="font-size:var(--fs-body);">▼</td>
+                                    <td class="text-secondary" style="font-size:10px; vertical-align:middle; width: 35px;">▼</td>
                                 </tr>
                                 
                                 <tr class="team-row-clickable" style="border-bottom:1px solid #f1f3f5;" data-team="거성대">
                                     <td class="text-start ps-4 fw-bold text-dark">거성대</td>
                                     <td>1승 0패</td><td>-</td>
                                     <td>-</td><td>-</td>
-                                    <td class="text-secondary" style="font-size:var(--fs-body);">▼</td>
+                                    <td class="text-secondary" style="font-size:10px; vertical-align:middle; width: 35px;">▼</td>
                                 </tr>
                                 
                                 <tr class="team-row-clickable" style="border-bottom:1px solid #f1f3f5;" data-team="내전">
                                     <td class="text-start ps-4 fw-bold text-dark">내전</td>
                                     <td>-</td><td>-</td>
                                     <td>-</td><td>-</td>
-                                    <td class="text-secondary" style="font-size:var(--fs-body);">▼</td>
+                                    <td class="text-secondary" style="font-size:10px; vertical-align:middle; width: 35px;">▼</td>
                                 </tr>
                                 
                                 <tr class="team-row-clickable" style="border-bottom:1px solid #f1f3f5;" data-team="노적단">
                                     <td class="text-start ps-4 fw-bold text-dark">노적단</td>
                                     <td>-</td><td>-</td>
                                     <td>-</td><td>1승 0패</td>
-                                    <td class="text-secondary" style="font-size:var(--fs-body);">▼</td>
+                                    <td class="text-secondary" style="font-size:10px; vertical-align:middle; width: 35px;">▼</td>
                                 </tr>
                                 
                                 <tr class="team-row-clickable" style="border-bottom:1px solid #f1f3f5;" data-team="뉴캣슬">
                                     <td class="text-start ps-4 fw-bold text-dark">뉴캣슬</td>
                                     <td>-</td><td>0승 1패</td>
                                     <td>4승 4패</td><td>0승 1패</td>
-                                    <td class="text-secondary" style="font-size:var(--fs-body);">▼</td>
+                                    <td class="text-secondary" style="font-size:10px; vertical-align:middle; width: 35px;">▼</td>
                                 </tr>
                                 
                                 <tr class="team-row-clickable" style="border-bottom:1px solid #f1f3f5;" data-team="늪지대">
                                     <td class="text-start ps-4 fw-bold text-dark">늪지대</td>
                                     <td>0승 1패</td><td>1승 0패</td>
                                     <td>1승 4패</td><td>1승 0패</td>
-                                    <td class="text-secondary" style="font-size:var(--fs-body);">▼</td>
+                                    <td class="text-secondary" style="font-size:10px; vertical-align:middle; width: 35px;">▼</td>
                                 </tr>
                                 
                                 <tr class="team-row-clickable" style="border-bottom:1px solid #f1f3f5;" data-team="드림즈">
                                     <td class="text-start ps-4 fw-bold text-dark">드림즈</td>
                                     <td>-</td><td>-</td>
                                     <td>0승 1패</td><td>-</td>
-                                    <td class="text-secondary" style="font-size:var(--fs-body);">▼</td>
+                                    <td class="text-secondary" style="font-size:10px; vertical-align:middle; width: 35px;">▼</td>
                                 </tr>
                                 
                                 <tr class="team-row-clickable" style="border-bottom:1px solid #f1f3f5;" data-team="섭이대">
                                     <td class="text-start ps-4 fw-bold text-dark">섭이대</td>
                                     <td>-</td><td>-</td>
                                     <td>1승 0패</td><td>-</td>
-                                    <td class="text-secondary" style="font-size:var(--fs-body);">▼</td>
+                                    <td class="text-secondary" style="font-size:10px; vertical-align:middle; width: 35px;">▼</td>
                                 </tr>
                                 
                                 <tr class="team-row-clickable" style="border-bottom:1px solid #f1f3f5;" data-team="소림사">
                                     <td class="text-start ps-4 fw-bold text-dark">소림사</td>
                                     <td>1승 0패</td><td>0승 1패</td>
                                     <td>1승 0패</td><td>-</td>
-                                    <td class="text-secondary" style="font-size:var(--fs-body);">▼</td>
+                                    <td class="text-secondary" style="font-size:10px; vertical-align:middle; width: 35px;">▼</td>
                                 </tr>
                                 
                                 <tr class="team-row-clickable" style="border-bottom:1px solid #f1f3f5;" data-team="수술대">
                                     <td class="text-start ps-4 fw-bold text-dark">수술대</td>
                                     <td>1승 0패</td><td>-</td>
                                     <td>3승 3패</td><td>-</td>
-                                    <td class="text-secondary" style="font-size:var(--fs-body);">▼</td>
+                                    <td class="text-secondary" style="font-size:10px; vertical-align:middle; width: 35px;">▼</td>
                                 </tr>
                                 
                                 <tr class="team-row-clickable" style="border-bottom:1px solid #f1f3f5;" data-team="신세계">
                                     <td class="text-start ps-4 fw-bold text-dark">신세계</td>
                                     <td>-</td><td>-</td>
                                     <td>1승 0패</td><td>-</td>
-                                    <td class="text-secondary" style="font-size:var(--fs-body);">▼</td>
+                                    <td class="text-secondary" style="font-size:10px; vertical-align:middle; width: 35px;">▼</td>
                                 </tr>
                                 
                                 <tr class="team-row-clickable" style="border-bottom:1px solid #f1f3f5;" data-team="씨나인">
                                     <td class="text-start ps-4 fw-bold text-dark">씨나인</td>
                                     <td>0승 2패</td><td>0승 3패</td>
                                     <td>4승 5패</td><td>3승 0패</td>
-                                    <td class="text-secondary" style="font-size:var(--fs-body);">▼</td>
+                                    <td class="text-secondary" style="font-size:10px; vertical-align:middle; width: 35px;">▼</td>
                                 </tr>
                                 
                                 <tr class="team-row-clickable" style="border-bottom:1px solid #f1f3f5;" data-team="엠비대">
                                     <td class="text-start ps-4 fw-bold text-dark">엠비대</td>
                                     <td>2승 1패</td><td>0승 1패</td>
                                     <td>2승 2패</td><td>0승 1패</td>
-                                    <td class="text-secondary" style="font-size:var(--fs-body);">▼</td>
+                                    <td class="text-secondary" style="font-size:10px; vertical-align:middle; width: 35px;">▼</td>
                                 </tr>
                                 
                                 <tr class="team-row-clickable" style="border-bottom:1px solid #f1f3f5;" data-team="연합팀">
                                     <td class="text-start ps-4 fw-bold text-dark">연합팀</td>
                                     <td>-</td><td>-</td>
                                     <td>-</td><td>19승 18패</td>
-                                    <td class="text-secondary" style="font-size:var(--fs-body);">▼</td>
+                                    <td class="text-secondary" style="font-size:10px; vertical-align:middle; width: 35px;">▼</td>
                                 </tr>
                                 
                                 <tr class="team-row-clickable" style="border-bottom:1px solid #f1f3f5;" data-team="와플대">
                                     <td class="text-start ps-4 fw-bold text-dark">와플대</td>
                                     <td>1승 1패</td><td>-</td>
                                     <td>4승 0패</td><td>-</td>
-                                    <td class="text-secondary" style="font-size:var(--fs-body);">▼</td>
+                                    <td class="text-secondary" style="font-size:10px; vertical-align:middle; width: 35px;">▼</td>
                                 </tr>
                                 
                                 <tr class="team-row-clickable" style="border-bottom:1px solid #f1f3f5;" data-team="우끼끼즈">
                                     <td class="text-start ps-4 fw-bold text-dark">우끼끼즈</td>
                                     <td>-</td><td>0승 1패</td>
                                     <td>-</td><td>-</td>
-                                    <td class="text-secondary" style="font-size:var(--fs-body);">▼</td>
+                                    <td class="text-secondary" style="font-size:10px; vertical-align:middle; width: 35px;">▼</td>
                                 </tr>
                                 
                                 <tr class="team-row-clickable" style="border-bottom:1px solid #f1f3f5;" data-team="이노대">
                                     <td class="text-start ps-4 fw-bold text-dark">이노대</td>
                                     <td>2승 0패</td><td>-</td>
                                     <td>4승 0패</td><td>2승 2패</td>
-                                    <td class="text-secondary" style="font-size:var(--fs-body);">▼</td>
+                                    <td class="text-secondary" style="font-size:10px; vertical-align:middle; width: 35px;">▼</td>
                                 </tr>
                                 
                                 <tr class="team-row-clickable" style="border-bottom:1px solid #f1f3f5;" data-team="장독대">
                                     <td class="text-start ps-4 fw-bold text-dark">장독대</td>
                                     <td>1승 0패</td><td>0승 1패</td>
                                     <td>0승 1패</td><td>-</td>
-                                    <td class="text-secondary" style="font-size:var(--fs-body);">▼</td>
+                                    <td class="text-secondary" style="font-size:10px; vertical-align:middle; width: 35px;">▼</td>
                                 </tr>
                                 
                                 <tr class="team-row-clickable" style="border-bottom:1px solid #f1f3f5;" data-team="정선대">
                                     <td class="text-start ps-4 fw-bold text-dark">정선대</td>
                                     <td>2승 1패</td><td>0승 1패</td>
                                     <td>5승 1패</td><td>-</td>
-                                    <td class="text-secondary" style="font-size:var(--fs-body);">▼</td>
+                                    <td class="text-secondary" style="font-size:10px; vertical-align:middle; width: 35px;">▼</td>
                                 </tr>
                                 
                                 <tr class="team-row-clickable" style="border-bottom:1px solid #f1f3f5;" data-team="케이대">
                                     <td class="text-start ps-4 fw-bold text-dark">케이대</td>
                                     <td>3승 1패</td><td>-</td>
                                     <td>3승 3패</td><td>0승 1패</td>
-                                    <td class="text-secondary" style="font-size:var(--fs-body);">▼</td>
+                                    <td class="text-secondary" style="font-size:10px; vertical-align:middle; width: 35px;">▼</td>
                                 </tr>
                                 
                                 <tr class="team-row-clickable" style="border-bottom:1px solid #f1f3f5;" data-team="흑카데미">
                                     <td class="text-start ps-4 fw-bold text-dark">흑카데미</td>
                                     <td>1승 0패</td><td>-</td>
                                     <td>0승 6패</td><td>-</td>
-                                    <td class="text-secondary" style="font-size:var(--fs-body);">▼</td>
+                                    <td class="text-secondary" style="font-size:10px; vertical-align:middle; width: 35px;">▼</td>
                                 </tr>
                                 
                             </tbody>
@@ -596,7 +579,6 @@
             </div>
             
             <div class="col-md-9">
-                
                 <div id="indiv-summary-content">
                     <div class="section-title">전체 요약</div>
                     <div class="clean-card p-0 overflow-hidden">
@@ -676,7 +658,6 @@
                                 <div class="m-opp-player">상대 선수</div>
                                 <div class="m-map">맵</div>
                                 <div class="m-res">결과</div>
-                                <div class="m-arrow"></div>
                             </div>
                             <div id="indiv-recent-list"></div>
                         </div>
@@ -713,7 +694,7 @@
 </div>
 
 <div class="modal fade" id="indivMatchesModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-scrollable" style="max-width: 600px;">
+    <div class="modal-dialog modal-dialog-scrollable" style="max-width: 550px;">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="indivModalTitle">개인 전체 전적</h5>
@@ -728,7 +709,6 @@
                         <div class="m-opp-player">상대 선수</div>
                         <div class="m-map">맵</div>
                         <div class="m-res">결과</div>
-                        <div class="m-arrow"></div>
                     </div>
                     <div id="indiv-modal-list"></div>
                 </div>
@@ -920,7 +900,7 @@
                     <div class="m-opp-team">${m['상대팀']}</div>
                     <div class="m-score">${m['세트 결과'] || '-'}</div>
                     <div class="m-res">${badgeHtml}</div>
-                    <div class="m-arrow">▼</div>
+                    <div class="m-arrow" style="font-size: 10px;">▼</div>
                 </div>
                 <div class="collapse" id="${collapseId}">
                     <div class="px-4 py-2" style="background-color:#fcfcfd; border-top:1px dashed #eaedf2;">
@@ -1197,7 +1177,6 @@
                     <div class="m-opp-player">${m['상대 선수']}</div>
                     <div class="m-map">${m['맵'] || '-'}</div>
                     <div class="m-res">${badgeHtml}</div>
-                    <div class="m-arrow">▼</div>
                 </div>
             </div>
             `;
