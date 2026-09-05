@@ -4,126 +4,230 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>스타크래프트 전적 검색</title>
-    <!-- Bootstrap 5 -->
+    <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Pretendard Font -->
+    <!-- Pretendard 폰트 -->
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
     <style>
-        body { font-family: 'Pretendard', sans-serif; background-color: #f1f3f5; color: #202124; }
-        
-        /* Layout */
-        .sidebar { background-color: #fff; height: 100vh; overflow-y: auto; border-right: 1px solid #e9ecef; }
-        .main-content { padding: 30px; height: 100vh; overflow-y: auto; }
-        
-        /* Sidebar Player List */
-        .search-box { background-color: #f1f3f5; border: none; border-radius: 8px; padding: 10px 15px; width: 100%; outline: none; }
-        .player-item { padding: 12px 20px; cursor: pointer; border-bottom: 1px solid #f8f9fa; display: flex; align-items: center; transition: background 0.1s; }
-        .player-item:hover, .player-item.active { background-color: #f8f9fa; }
-        
-        /* Race Badges */
-        .race-badge { width: 22px; height: 22px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 900; color: white; margin-right: 10px; }
-        .race-Z { background-color: #8432a8; } /* 저그: 보라 */
-        .race-T { background-color: #2979ff; } /* 테란: 파랑 */
-        .race-P { background-color: #fbc02d; } /* 토스: 노랑 */
-        
-        /* Cards */
-        .stat-card { background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); padding: 24px; margin-bottom: 20px; border: 1px solid #e9ecef; }
-        
-        /* Profile Area */
-        .profile-img-placeholder { width: 90px; height: 90px; border-radius: 50%; background-color: #e9ecef; margin-right: 24px; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: #adb5bd; }
-        .profile-name { font-size: 32px; font-weight: 800; letter-spacing: -1px; margin-bottom: 8px; }
-        
-        /* Stat Items */
-        .stat-box { padding: 15px; border-radius: 8px; background-color: #f8f9fa; text-align: center; }
-        .stat-label { font-size: 13px; color: #868e96; font-weight: 600; margin-bottom: 5px; }
-        .stat-rate { font-size: 24px; font-weight: 800; color: #212529; line-height: 1.2; }
-        .stat-detail { font-size: 13px; color: #868e96; margin-top: 2px; }
-        
-        /* Maps & Opponents */
-        .list-box-title { font-size: 14px; font-weight: 700; color: #495057; border-bottom: 2px solid #212529; padding-bottom: 8px; margin-bottom: 12px; }
-        .list-box-text { font-size: 14px; color: #495057; line-height: 1.8; }
+        :root {
+            --bg-body: #f4f5f7;
+            --bg-card: #ffffff;
+            --text-main: #111111;
+            --text-muted: #777777;
+            --border-color: #ebebeb;
+            --race-z: #673ab7; /* 저그 보라색 */
+            --race-t: #1976d2; /* 테란 파란색 */
+            --race-p: #fbc02d; /* 토스 노란색 */
+        }
+        body { font-family: 'Pretendard', sans-serif; background-color: var(--bg-body); color: var(--text-main); }
+        a { text-decoration: none; color: inherit; }
+        ul { list-style: none; padding: 0; margin: 0; }
+
+        /* 네비게이션 바 (상단) */
+        .top-navbar { background-color: #fff; border-bottom: 1px solid var(--border-color); padding: 0 20px; height: 60px; display: flex; align-items: center; justify-content: space-between; }
+        .top-navbar .logo { font-size: 20px; font-weight: 900; letter-spacing: -1px; margin-right: 30px; }
+        .top-navbar .nav-links a { margin-right: 20px; font-size: 15px; font-weight: 600; color: #555; }
+        .top-navbar .nav-links a:hover { color: #000; }
+
+        /* 검색 & 필터 바 */
+        .filter-bar { background-color: #fff; border-radius: 12px; border: 1px solid var(--border-color); padding: 15px 20px; margin: 20px 0; display: flex; align-items: center; gap: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
+        .main-search-input { border: 1px solid #ddd; background-color: #f9f9f9; padding: 10px 15px; border-radius: 8px; width: 300px; outline: none; }
+        .crew-filters span { margin-right: 15px; font-size: 14px; color: var(--text-muted); cursor: pointer; font-weight: 600; }
+        .crew-filters span.active { color: #fff; background-color: #333; padding: 4px 12px; border-radius: 20px; }
+
+        /* 공통 카드 스타일 */
+        .stat-card { background-color: var(--bg-card); border-radius: 12px; border: 1px solid var(--border-color); padding: 25px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
+
+        /* 사이드바 (플레이어 리스트) */
+        .sidebar-box { height: calc(100vh - 180px); overflow-y: auto; background-color: transparent; }
+        .player-item { padding: 10px 15px; cursor: pointer; border-radius: 8px; display: flex; align-items: center; margin-bottom: 2px; }
+        .player-item:hover, .player-item.active { background-color: #eaeef2; }
+        .race-icon { width: 22px; height: 22px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; color: white; margin-right: 12px; }
+        .bg-Z { background-color: var(--race-z); }
+        .bg-T { background-color: var(--race-t); }
+        .bg-P { background-color: var(--race-p); }
+
+        /* 프로필 영역 */
+        .profile-pic { width: 80px; height: 80px; border-radius: 50%; background-color: #ddd; margin-right: 20px; }
+        .profile-name { font-size: 30px; font-weight: 900; margin-bottom: 5px; letter-spacing: -1px; }
+        .badge-tag { background-color: #f1f3f5; color: #495057; font-size: 12px; padding: 4px 10px; border-radius: 6px; font-weight: 600; margin-right: 5px; }
+
+        /* 우측 요약 통계 영역 */
+        .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .summary-item { margin-bottom: 15px; }
+        .summary-title { font-size: 12px; color: var(--text-muted); margin-bottom: 2px; font-weight: 600; }
+        .summary-value { font-size: 26px; font-weight: 900; line-height: 1.1; }
+        .summary-sub { font-size: 12px; color: #999; margin-top: 2px; }
+
+        /* 종족별 도넛 차트 (CSS Only) */
+        .donut-container { display: flex; justify-content: space-around; text-align: center; margin-top: 10px; }
+        .donut { width: 110px; height: 110px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px auto; position: relative; background: #eee; }
+        .donut::before { content: ""; width: 85px; height: 85px; background: #fff; border-radius: 50%; position: absolute; }
+        .donut-text { position: relative; font-size: 18px; font-weight: 800; }
+        .donut-label { font-size: 13px; font-weight: 600; color: #555; }
+        .donut-sub { font-size: 12px; color: #999; }
     </style>
 </head>
 <body>
 
-<div class="container-fluid p-0">
-    <div class="row g-0">
-        <!-- 1. 좌측 사이드바 (멤버 리스트) -->
-        <div class="col-md-3 col-lg-2 sidebar d-none d-md-block">
-            <div class="p-3 border-bottom sticky-top bg-white">
-                <h6 class="fw-bold mb-3">팀 로스터 (시즌 전체)</h6>
-                <input type="text" id="searchInput" class="search-box" placeholder="🔍 멤버 검색..." onkeyup="filterPlayers()">
-            </div>
-            <div id="playerList">
+<!-- 1. 상단 네비게이션 바 -->
+<div class="top-navbar">
+    <div class="d-flex align-items-center">
+        <div class="logo">ONE K 스타일</div>
+        <div class="nav-links d-none d-md-flex">
+            <a href="#">라이브</a><a href="#">일정</a><a href="#">멤버</a>
+            <a href="#" style="border-bottom: 3px solid #000; padding-bottom: 18px;">전적·분석</a>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid px-4">
+    <!-- 2. 검색 및 필터 바 -->
+    <div class="filter-bar">
+        <input type="text" class="main-search-input" id="searchInput" placeholder="🔍 선수 검색" onkeyup="filterPlayers()">
+        <div class="crew-filters d-none d-md-block">
+            <span class="active">전체 시즌</span>
+            <span>시즌 1</span>
+            <span>시즌 2</span>
+            <!-- 나중에 파이썬에서 크루 목록을 가져와서 뿌려줄 수 있는 자리입니다 -->
+        </div>
+    </div>
+
+    <!-- 3. 메인 그리드 레이아웃 -->
+    <div class="row g-4">
+        
+        <!-- 좌측: 플레이어 리스트 -->
+        <div class="col-lg-2">
+            <div class="sidebar-box" id="playerList">
                 {% for player in member_stats['전체'] %}
+                <!-- onclick 이벤트로 선수 데이터를 우측에 뿌려줍니다 -->
                 <div class="player-item" onclick="selectPlayer('{{ player.이름 }}')">
-                    <!-- 종족 아이콘은 이름에서 유추하거나 기본값 세팅 -->
-                    <div class="race-badge race-P" id="badge-{{ player.이름 }}">P</div> 
-                    <span class="fw-bold text-dark player-name-text">{{ player.이름 }}</span>
+                    <div class="race-icon bg-P" id="badge-{{ player.이름 }}">P</div> 
+                    <span class="fw-bold player-name-text">{{ player.이름 }}</span>
                 </div>
                 {% endfor %}
             </div>
         </div>
 
-        <!-- 2. 우측 메인 대시보드 -->
-        <div class="col-md-9 col-lg-10 main-content" id="mainDashboard" style="display: none;">
+        <!-- 중앙: 프로필 및 디테일 통계 -->
+        <div class="col-lg-7" id="mainDashboard" style="display: none;">
             
-            <!-- 상단 프로필 카드 -->
-            <div class="stat-card d-flex align-items-center">
-                <div class="profile-img-placeholder">👤</div>
-                <div>
-                    <div class="profile-name" id="p-name">이름</div>
-                    <div class="d-flex gap-2">
-                        <span class="badge bg-dark px-3 py-2 rounded-pill fs-6 fw-normal">전체 시즌 스탯</span>
+            <!-- 상단: 프로필 카드 -->
+            <div class="stat-card">
+                <div class="d-flex align-items-center border-bottom pb-4 mb-4">
+                    <div class="profile-pic"></div>
+                    <div>
+                        <div class="profile-name" id="p-name">이름</div>
+                        <div class="d-flex align-items-center mt-1">
+                            <span class="badge-tag" style="background-color: #673ab7; color: white;" id="p-race-tag">Zerg</span>
+                            <span class="badge-tag">통합 전적 대시보드</span>
+                        </div>
                     </div>
+                </div>
+                
+                <!-- 탭 흉내내기 -->
+                <div class="d-flex gap-2">
+                    <button class="btn btn-sm btn-dark rounded-pill px-3">전체</button>
+                    <button class="btn btn-sm btn-light border rounded-pill px-3">대회</button>
+                    <button class="btn btn-sm btn-light border rounded-pill px-3">대학대전</button>
+                    <button class="btn btn-sm btn-light border rounded-pill px-3">CK/미니</button>
                 </div>
             </div>
 
-            <div class="row">
-                <!-- 좌측 메인 통계: 형식별 전적 -->
-                <div class="col-xl-8">
-                    <div class="stat-card">
-                        <h5 class="fw-bold mb-4">매치 형식별 전적</h5>
-                        <div class="row g-3">
-                            <div class="col-sm-6 col-md-3"><div class="stat-box"><div class="stat-label">대회 전적</div><div class="stat-rate" id="p-fmt-1-r">0%</div><div class="stat-detail" id="p-fmt-1-w">-</div></div></div>
-                            <div class="col-sm-6 col-md-3"><div class="stat-box"><div class="stat-label">대학대전 전적</div><div class="stat-rate" id="p-fmt-2-r">0%</div><div class="stat-detail" id="p-fmt-2-w">-</div></div></div>
-                            <div class="col-sm-6 col-md-3"><div class="stat-box"><div class="stat-label">미니대전 전적</div><div class="stat-rate" id="p-fmt-3-r">0%</div><div class="stat-detail" id="p-fmt-3-w">-</div></div></div>
-                            <div class="col-sm-6 col-md-3"><div class="stat-box"><div class="stat-label">CK 전적</div><div class="stat-rate" id="p-fmt-4-r">0%</div><div class="stat-detail" id="p-fmt-4-w">-</div></div></div>
+            <!-- 하단: 종족전 승률 (도넛 차트) -->
+            <div class="stat-card">
+                <h6 class="fw-bold mb-4">종족전 스탯</h6>
+                <div class="donut-container">
+                    
+                    <!-- vs Protoss -->
+                    <div>
+                        <!-- background 스타일을 JS로 조작해서 차트를 채웁니다 -->
+                        <div class="donut" id="donut-p" style="background: conic-gradient(var(--race-p) 0%, #eee 0);">
+                            <span class="donut-text" id="rate-p">0%</span>
                         </div>
+                        <div class="donut-label">vs Protoss</div>
+                        <div class="donut-sub" id="wl-p">0승 0패</div>
                     </div>
 
-                    <div class="stat-card">
-                        <h5 class="fw-bold mb-4">종족전 전적</h5>
-                        <div class="row g-3">
-                            <div class="col-md-4"><div class="stat-box" style="border-top: 3px solid #2979ff;"><div class="stat-label">VS 테란 (T)</div><div class="stat-rate" id="p-race-t-r">0%</div><div class="stat-detail" id="p-race-t-w">-</div></div></div>
-                            <div class="col-md-4"><div class="stat-box" style="border-top: 3px solid #8432a8;"><div class="stat-label">VS 저그 (Z)</div><div class="stat-rate" id="p-race-z-r">0%</div><div class="stat-detail" id="p-race-z-w">-</div></div></div>
-                            <div class="col-md-4"><div class="stat-box" style="border-top: 3px solid #fbc02d;"><div class="stat-label">VS 토스 (P)</div><div class="stat-rate" id="p-race-p-r">0%</div><div class="stat-detail" id="p-race-p-w">-</div></div></div>
+                    <!-- vs Terran -->
+                    <div>
+                        <div class="donut" id="donut-t" style="background: conic-gradient(var(--race-t) 0%, #eee 0);">
+                            <span class="donut-text" id="rate-t">0%</span>
                         </div>
+                        <div class="donut-label">vs Terran</div>
+                        <div class="donut-sub" id="wl-t">0승 0패</div>
+                    </div>
+
+                    <!-- vs Zerg -->
+                    <div>
+                        <div class="donut" id="donut-z" style="background: conic-gradient(var(--race-z) 0%, #eee 0);">
+                            <span class="donut-text" id="rate-z">0%</span>
+                        </div>
+                        <div class="donut-label">vs Zerg</div>
+                        <div class="donut-sub" id="wl-z">0승 0패</div>
+                    </div>
+
+                </div>
+            </div>
+            
+            <!-- 추가: 맵 & 상대 스탯 가로 배치 -->
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="stat-card h-100">
+                        <h6 class="fw-bold mb-3 border-bottom pb-2">주력 맵 TOP 3</h6>
+                        <div id="p-maps" class="text-secondary fs-6" style="line-height: 1.8;">데이터 없음</div>
                     </div>
                 </div>
-
-                <!-- 우측 서브 통계: 맵 & 주요 상대 -->
-                <div class="col-xl-4">
+                <div class="col-md-6">
                     <div class="stat-card h-100">
-                        <div class="mb-4">
-                            <div class="list-box-title">주력 맵 TOP 3</div>
-                            <div class="list-box-text" id="p-maps">데이터 없음</div>
-                        </div>
-                        <div>
-                            <div class="list-box-title">주요 상대 TOP 3</div>
-                            <div class="list-box-text" id="p-opps">데이터 없음</div>
-                        </div>
+                        <h6 class="fw-bold mb-3 border-bottom pb-2">주요 상대 TOP 3</h6>
+                        <div id="p-opps" class="text-secondary fs-6" style="line-height: 1.8;">데이터 없음</div>
                     </div>
                 </div>
             </div>
 
         </div>
-        
-        <!-- 대시보드 로딩 전 안내 화면 -->
-        <div class="col-md-9 col-lg-10 d-flex justify-content-center align-items-center bg-light" id="welcomeScreen" style="height: 100vh;">
-            <div class="text-center text-muted">
-                <h3>👈 좌측에서 멤버를 선택해주세요.</h3>
-                <p>선택한 멤버의 상세 스탯 대시보드가 이곳에 나타납니다.</p>
+
+        <!-- 우측: 요약 스탯 -->
+        <div class="col-lg-3" id="rightDashboard" style="display: none;">
+            <div class="stat-card">
+                <div class="summary-grid">
+                    
+                    <div class="summary-item">
+                        <div class="summary-title">총 전적</div>
+                        <div class="summary-value" id="p-total-games">0</div>
+                        <div class="summary-sub" id="p-total-wl">0-0</div>
+                    </div>
+                    
+                    <div class="summary-item">
+                        <div class="summary-title">전체 승률</div>
+                        <div class="summary-value" id="p-total-rate">0%</div>
+                        <div class="summary-sub text-primary fw-bold" id="p-fmt-1">대회: -</div>
+                    </div>
+
+                    <div class="summary-item">
+                        <div class="summary-title">대학대전</div>
+                        <div class="summary-value" style="font-size: 20px;" id="p-fmt-2-rate">0%</div>
+                        <div class="summary-sub" id="p-fmt-2">0승 0패</div>
+                    </div>
+
+                    <div class="summary-item">
+                        <div class="summary-title">CK / 미니</div>
+                        <div class="summary-value" style="font-size: 20px;" id="p-fmt-3-rate">0%</div>
+                        <div class="summary-sub" id="p-fmt-3">0승 0패</div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+
+        <!-- 초기 안내 화면 -->
+        <div class="col-lg-10" id="welcomeScreen">
+            <div class="stat-card d-flex align-items-center justify-content-center" style="height: 60vh;">
+                <div class="text-center text-muted">
+                    <h3 class="fw-bold mb-3">👈 좌측에서 선수를 선택해주세요</h3>
+                    <p>선택한 선수의 통계가 이곳에 나타납니다.</p>
+                </div>
             </div>
         </div>
 
@@ -131,61 +235,96 @@
 </div>
 
 <script>
-    // 파이썬 Jinja2가 넘겨준 데이터를 자바스크립트 변수로 안전하게 저장
+    // 파이썬 Jinja2가 넘겨준 데이터
     const playersData = {{ member_stats['전체'] | tojson }};
     
-    // "3승 2패 (60.0%)" 같은 문자열을 분리해서 예쁘게 보여주기 위한 헬퍼 함수
+    // 문자열 "3승 2패 (60.0%)" -> { wl: "3승 2패", rate: "60.0%", numRate: 60.0 } 변환
     function parseStat(statStr) {
-        if (!statStr || statStr === "-") return { wl: "-", rate: "-" };
-        // 정규식으로 승, 패, 승률 추출
-        const match = statStr.match(/(\d+승 \d+패) \(([\d.]+%)\)/);
+        if (!statStr || statStr === "-") return { wl: "-", rate: "-", numRate: 0, wins: 0, losses: 0 };
+        const match = statStr.match(/(\d+)승 (\d+)패 \(([\d.]+)%\)/);
         if (match) {
-            return { wl: match[1], rate: match[2] };
+            return { wl: `${match[1]}승 ${match[2]}패`, rate: `${match[3]}%`, numRate: parseFloat(match[3]), wins: parseInt(match[1]), losses: parseInt(match[2]) };
         }
-        return { wl: statStr, rate: "-" };
+        return { wl: statStr, rate: "-", numRate: 0, wins: 0, losses: 0 };
+    }
+
+    // 도넛 차트 채우기 애니메이션 함수
+    function updateDonut(elementId, percentage, color) {
+        const el = document.getElementById(elementId);
+        // CSS conic-gradient로 퍼센트만큼 색칠하고 나머지는 회색(#eee)으로 처리
+        el.style.background = `conic-gradient(${color} ${percentage}%, #eee 0)`;
     }
 
     function selectPlayer(name) {
-        // UI 처리
+        // UI 변경
         document.getElementById('welcomeScreen').style.display = 'none';
         document.getElementById('mainDashboard').style.display = 'block';
+        document.getElementById('rightDashboard').style.display = 'block';
+        
         document.querySelectorAll('.player-item').forEach(el => el.classList.remove('active'));
         event.currentTarget.classList.add('active');
 
-        // 데이터 찾기
+        // 데이터 매핑
         const p = playersData.find(x => x['이름'] === name);
         if (!p) return;
 
-        // 이름 세팅
         document.getElementById('p-name').innerText = p['이름'];
 
-        // 형식별 전적 파싱 및 세팅
-        const f1 = parseStat(p['대회 전적']); document.getElementById('p-fmt-1-r').innerText = f1.rate; document.getElementById('p-fmt-1-w').innerText = f1.wl;
-        const f2 = parseStat(p['대학 전적']); document.getElementById('p-fmt-2-r').innerText = f2.rate; document.getElementById('p-fmt-2-w').innerText = f2.wl;
-        const f3 = parseStat(p['미니 전적']); document.getElementById('p-fmt-3-r').innerText = f3.rate; document.getElementById('p-fmt-3-w').innerText = f3.wl;
-        const f4 = parseStat(p['CK 전적']);  document.getElementById('p-fmt-4-r').innerText = f4.rate; document.getElementById('p-fmt-4-w').innerText = f4.wl;
+        // 종족전 데이터 파싱
+        const rT = parseStat(p['테란전 전적']);
+        const rZ = parseStat(p['저그전 전적']);
+        const rP = parseStat(p['프로토스전 전적']);
 
-        // 종족전 전적 파싱 및 세팅
-        const rT = parseStat(p['테란전 전적']); document.getElementById('p-race-t-r').innerText = rT.rate; document.getElementById('p-race-t-w').innerText = rT.wl;
-        const rZ = parseStat(p['저그전 전적']); document.getElementById('p-race-z-r').innerText = rZ.rate; document.getElementById('p-race-z-w').innerText = rZ.wl;
-        const rP = parseStat(p['프로토스전 전적']); document.getElementById('p-race-p-r').innerText = rP.rate; document.getElementById('p-race-p-w').innerText = rP.wl;
+        // 도넛 차트 텍스트 업데이트
+        document.getElementById('rate-t').innerText = rT.rate; document.getElementById('wl-t').innerText = rT.wl;
+        document.getElementById('rate-z').innerText = rZ.rate; document.getElementById('wl-z').innerText = rZ.wl;
+        document.getElementById('rate-p').innerText = rP.rate; document.getElementById('wl-p').innerText = rP.wl;
 
-        // 맵 & 상대 (가운데 점(·)을 줄바꿈(<br>)으로 변경해서 세로로 예쁘게 정렬)
+        // 도넛 차트 그래프 업데이트 (CSS 변수 활용)
+        updateDonut('donut-t', rT.numRate, 'var(--race-t)');
+        updateDonut('donut-z', rZ.numRate, 'var(--race-z)');
+        updateDonut('donut-p', rP.numRate, 'var(--race-p)');
+
+        // 총 전적 계산 (세 종족전 합산)
+        const totalWins = rT.wins + rZ.wins + rP.wins;
+        const totalLosses = rT.losses + rZ.losses + rP.losses;
+        const totalGames = totalWins + totalLosses;
+        const totalRate = totalGames > 0 ? ((totalWins / totalGames) * 100).toFixed(1) + "%" : "0%";
+
+        // 우측 패널 업데이트
+        document.getElementById('p-total-games').innerText = totalGames;
+        document.getElementById('p-total-wl').innerText = `${totalWins}승 ${totalLosses}패`;
+        document.getElementById('p-total-rate').innerText = totalRate;
+        
+        // 대회, 대학, CK 파싱
+        const f1 = parseStat(p['대회 전적']);
+        const f2 = parseStat(p['대학 전적']);
+        const f3 = parseStat(p['미니 전적']);
+        const f4 = parseStat(p['CK 전적']);
+        
+        document.getElementById('p-fmt-1').innerText = `대회: ${f1.wl} (${f1.rate})`;
+        document.getElementById('p-fmt-2-rate').innerText = f2.rate;
+        document.getElementById('p-fmt-2').innerText = f2.wl;
+        
+        // CK와 미니를 합쳐서 표시
+        const ckMiniWins = f3.wins + f4.wins;
+        const ckMiniLosses = f3.losses + f4.losses;
+        const ckMiniRate = (ckMiniWins+ckMiniLosses) > 0 ? ((ckMiniWins/(ckMiniWins+ckMiniLosses))*100).toFixed(1) + "%" : "-";
+        document.getElementById('p-fmt-3-rate').innerText = ckMiniRate;
+        document.getElementById('p-fmt-3').innerText = `${ckMiniWins}승 ${ckMiniLosses}패`;
+
+        // 맵 & 상대전적
         document.getElementById('p-maps').innerHTML = (p['맵 전적'] || "-").replace(/ · /g, "<br>");
         document.getElementById('p-opps').innerHTML = (p['상대전적'] || "-").replace(/ · /g, "<br>");
     }
 
-    // 좌측 사이드바 검색 필터링 기능
+    // 좌측 사이드바 검색 필터링
     function filterPlayers() {
         const input = document.getElementById('searchInput').value.toLowerCase();
         const items = document.querySelectorAll('.player-item');
         items.forEach(item => {
             const name = item.querySelector('.player-name-text').innerText.toLowerCase();
-            if (name.includes(input)) {
-                item.style.display = "flex";
-            } else {
-                item.style.display = "none";
-            }
+            item.style.display = name.includes(input) ? "flex" : "none";
         });
     }
 </script>
