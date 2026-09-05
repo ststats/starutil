@@ -1,4 +1,4 @@
 pandas
-gspread
+gspread>=5.10
 jinja2
 openpyxl
