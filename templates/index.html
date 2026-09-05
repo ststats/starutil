@@ -135,6 +135,77 @@
         .stat-table thead th { background: #f4f5f7; border-bottom: 1px solid var(--color-border); font-size: var(--fs-body); color: #666; font-weight: 700; padding-top: 10px; padding-bottom: 10px; }
         .team-row-clickable { cursor: pointer; transition: background 0.1s; }
         .team-row-clickable:hover { background: var(--color-primary-tint) !important; }
+
+        /* ==============================
+            일정(캘린더) 페이지
+        ============================== */
+        .cal-app-root { padding: 24px 0; }
+        .cal-main-layout { display: flex; gap: 24px; align-items: flex-start; }
+        .cal-left-area { display: flex; flex-direction: column; gap: 20px; flex: 1 1 0; min-width: 0; }
+        .cal-sidebar { width: 360px; display: flex; flex-direction: column; gap: 20px; flex-shrink: 0; }
+        @media (max-width: 991px) {
+            .cal-main-layout { flex-direction: column; }
+            .cal-sidebar { width: 100%; }
+        }
+
+        .cal-nav-group { display: flex; align-items: center; gap: 10px; }
+        .cal-nav-btn { background: transparent; border: none; color: var(--color-text-sub); width: 26px; height: 26px; border-radius: 50%; font-size: 14px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.15s; }
+        .cal-nav-btn:hover { background: var(--color-primary-tint); color: var(--color-primary); }
+        .cal-nav-badge { font-size: var(--fs-subheading); font-weight: 800; color: #111; min-width: 86px; text-align: center; }
+
+        .cal-weekdays { display: grid; grid-template-columns: repeat(7, minmax(0,1fr)); text-align: center; font-size: var(--fs-caption); font-weight: 700; color: var(--color-text-sub); margin-bottom: 8px; }
+        .cal-weekdays div:first-child { color: var(--color-lose); }
+        .cal-weekdays div:last-child { color: var(--color-primary); }
+
+        .cal-days-grid { display: grid; grid-template-columns: repeat(7, minmax(0,1fr)); border-top: 1px solid var(--color-border); border-left: 1px solid var(--color-border); }
+        .cal-day-cell { background: #fff; min-height: 96px; display: flex; flex-direction: column; padding: 6px; cursor: pointer; border-right: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border); transition: background 0.15s; box-sizing: border-box; }
+        .cal-day-cell:hover { background: var(--color-primary-tint); }
+        .cal-day-cell.other-month { background: #fafbfc; }
+        .cal-day-cell.other-month .cal-day-number { color: #c3c9d1; }
+
+        .cal-day-number { font-size: var(--fs-body); font-weight: 700; color: #222; margin-bottom: 4px; line-height: 1.3; }
+        .cal-day-cell:nth-child(7n+1) .cal-day-number { color: var(--color-lose); }
+        .cal-day-cell:nth-child(7n) .cal-day-number { color: var(--color-primary); }
+        .cal-day-cell.holiday .cal-day-number { color: var(--color-lose) !important; }
+        .cal-day-cell.today .cal-day-number { width: max-content; position: relative; z-index: 1; }
+        .cal-day-cell.today .cal-day-number::after { content: ''; position: absolute; bottom: 1px; left: -3px; right: -3px; height: 8px; background-color: var(--color-primary-tint-strong); z-index: -1; border-radius: 3px; }
+
+        .cal-cell-event { border-radius: 6px; padding: 3px 5px; margin-bottom: 3px; font-weight: 600; display: flex; flex-direction: column; gap: 1px; color: #222; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .cal-cell-top { display: flex; justify-content: space-between; align-items: center; font-weight: 700; white-space: nowrap; }
+        .cal-event-time { opacity: 0.75; font-size: var(--fs-micro); }
+        .cal-event-person { font-weight: 700; font-size: var(--fs-micro); margin-left: auto; text-align: right; }
+        .cal-event-desc { font-size: var(--fs-micro); text-align: right; white-space: pre-wrap; word-break: break-all; margin-left: auto; line-height: 1.25; }
+
+        .cal-today-list, .cal-selected-list { display: flex; flex-direction: column; gap: 10px; }
+        .cal-today-card, .cal-selected-card { background: #fff; border: 1px solid var(--color-border); border-radius: 10px; padding: 10px 14px; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.015); }
+        .cal-no-schedule { font-size: var(--fs-body); color: var(--color-text-sub); text-align: center; padding: 16px 0; width: 100%; }
+        .cal-card-main { display: flex; align-items: center; gap: 8px; font-size: var(--fs-body); }
+        .cal-card-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+        .cal-card-time { color: var(--color-text-sub); font-weight: 700; font-size: var(--fs-body); }
+        .cal-card-person { font-weight: 800; color: #222; font-size: var(--fs-body); }
+        .cal-card-desc { color: #444; font-size: var(--fs-body); flex-grow: 1; font-weight: 500; }
+        .cal-btn-group { display: flex; gap: 8px; margin-left: auto; flex-shrink: 0; }
+        .cal-edit-btn { background: none; border: none; color: var(--color-primary); font-size: var(--fs-body); font-weight: 700; padding: 0 4px; cursor: pointer; }
+        .cal-edit-btn:hover { text-decoration: underline; }
+        .cal-delete-btn { background: none; border: none; color: var(--color-lose); font-size: var(--fs-body); font-weight: 700; padding: 0 4px; cursor: pointer; }
+        .cal-delete-btn:hover { text-decoration: underline; }
+
+        .cal-form-row { display: flex; gap: 8px; margin-bottom: 10px; align-items: flex-start; }
+        .cal-form-row input, .cal-form-row select, .cal-form-row textarea {
+            width: 100%; height: 40px; padding: 0 10px; background: #fff; border: 1px solid var(--color-border);
+            color: #222; border-radius: 8px; font-size: var(--fs-body); font-family: inherit;
+            transition: 0.15s; box-sizing: border-box; display: flex; align-items: center;
+        }
+        .cal-form-row input:focus, .cal-form-row select:focus, .cal-form-row textarea:focus {
+            outline: none; border-color: var(--color-primary); box-shadow: 0 0 0 3px var(--color-primary-tint);
+        }
+        .cal-form-row textarea { resize: none; padding-top: 10px; overflow: hidden; line-height: 1.3; height: 40px; }
+
+        .cal-btn-primary { width: 100%; padding: 12px; background: var(--color-primary); color: #fff; border: none; border-radius: 8px; font-weight: 700; font-size: var(--fs-body); margin-top: 6px; cursor: pointer; transition: 0.15s; }
+        .cal-btn-primary:hover { background: #1f5fd1; }
+        .cal-btn-action { background: #10b981; color: #fff; border: none; padding: 0 14px; height: 40px; border-radius: 8px; font-size: var(--fs-body); font-weight: 700; flex-shrink: 0; cursor: pointer; transition: 0.15s; }
+        .cal-btn-action:hover:not(:disabled) { background: #0ea371; }
+        .cal-btn-action:disabled { background: #c7cdd6; cursor: not-allowed; opacity: 0.8; }
     </style>
 </head>
 <body>
@@ -150,7 +221,66 @@
 </div>
 
 <div id="page-home" class="page-section container"><h4 class="fw-bold">홈 페이지 준비중</h4></div>
-<div id="page-schedule" class="page-section container"><h4 class="fw-bold">일정 페이지 준비중</h4></div>
+<div id="page-schedule" class="page-section container">
+    <div class="cal-app-root">
+        <div class="cal-main-layout">
+            <section class="cal-left-area">
+                <div style="display:flex; flex-direction:column; gap:20px;">
+
+                    <!-- 오늘의 일정 -->
+                    <div class="clean-card p-4">
+                        <div class="section-title">오늘의 일정</div>
+                        <div class="cal-today-list" id="todayList"></div>
+                    </div>
+
+                    <!-- 김윤환 일정 (주간) -->
+                    <div class="clean-card p-4">
+                        <div class="section-title">
+                            김윤환 일정
+                            <div class="cal-nav-group">
+                                <button class="cal-nav-btn" onclick="changeWeeklyOffset(-1)">‹</button>
+                                <button class="cal-nav-btn" onclick="changeWeeklyOffset(1)">›</button>
+                            </div>
+                        </div>
+                        <div id="calendarInner">
+                            <div class="cal-weekdays">
+                                <div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div>
+                            </div>
+                            <div class="cal-days-grid" id="weeklyGrid"></div>
+                        </div>
+                    </div>
+
+                    <!-- 월간 캘린더 -->
+                    <div class="clean-card p-4">
+                        <div class="section-title">
+                            이달의 일정
+                            <div class="cal-nav-group">
+                                <button class="cal-nav-btn" onclick="changeMonth(-1)">‹</button>
+                                <div id="monthTitle" class="cal-nav-badge"></div>
+                                <button class="cal-nav-btn" onclick="changeMonth(1)">›</button>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="cal-weekdays">
+                                <div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div>
+                            </div>
+                            <div class="cal-days-grid" id="daysGrid"></div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <aside class="cal-sidebar">
+                <!-- 선택한 날짜 일정 -->
+                <div class="clean-card p-4">
+                    <div class="section-title" id="selectedListTitle">선택한 날짜 일정</div>
+                    <div class="cal-selected-list" id="selectedDateList"></div>
+                </div>
+            </aside>
+        </div>
+    </div>
+</div>
 <div id="page-members" class="page-section container">
     <div id="members-groups"></div>
 </div>
@@ -370,16 +500,19 @@
 <div class="modal fade" id="memberProfileModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered" style="max-width: 400px;">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="memberProfileTitle">이름</h5>
+            <div class="modal-header" style="padding: 14px 18px;">
+                <h5 class="modal-title" id="memberProfileTitle"></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body" style="padding: 22px 26px;">
                 <div class="d-flex align-items-center mb-3">
                     <div class="profile-avatar" id="mp-avatar" style="width:64px;height:64px;margin-right:16px;">👤</div>
                     <div>
-                        <div class="fw-bold" id="mp-name" style="font-size:var(--fs-heading);">이름</div>
-                        <span class="tag-badge" id="mp-role-badge">직책</span>
+                        <div class="fw-bold" id="mp-name" style="font-size:var(--fs-heading); margin-bottom:6px;">이름</div>
+                        <div class="d-flex gap-2">
+                            <span class="tag-badge" id="mp-role-badge">직책</span>
+                            <span class="tag-badge" id="mp-race-badge">종족</span>
+                        </div>
                     </div>
                 </div>
                 <table class="table table-borderless mb-0" style="font-size:var(--fs-body);">
@@ -650,9 +783,9 @@
         const m = dbMembers.find(x => x['이름'] === name);
         if (!m) return;
 
-        document.getElementById('memberProfileTitle').innerText = name;
         document.getElementById('mp-name').innerText = name;
         document.getElementById('mp-role-badge').innerText = m['직책'] || '미정';
+        document.getElementById('mp-race-badge').innerText = m['종족'] || '종족 미정';
 
         const avatarUrl = getProfileImgUrl(m['SOOP ID']);
         const avatarEl = document.getElementById('mp-avatar');
@@ -667,15 +800,16 @@
         const soopId = m['SOOP ID'];
         const broadcastLabel = m['방송국'] || (soopId ? `SOOP (${soopId})` : '-');
         const broadcast = soopId
-            ? `<a href="https://www.sooplive.com/station/${soopId}" target="_blank" rel="noopener" style="color:var(--color-primary); text-decoration:underline;">${broadcastLabel}</a>`
+            ? `<a href="https://www.sooplive.com/station/${soopId}" target="_blank" rel="noopener" style="display:inline-flex; align-items:center; gap:6px; color:var(--color-primary); text-decoration:underline;">
+                   <img src="images/숲로고.webp" alt="SOOP" style="width:16px; height:16px; border-radius:4px; object-fit:contain; text-decoration:none;">
+                   ${broadcastLabel}
+               </a>`
             : broadcastLabel;
 
         const rows = [
             ['성별', m['성별'] || '-'],
             ['생년월일', m['생년월일'] || '-'],
             ['MBTI', m['MBTI'] || '-'],
-            ['직책', m['직책'] || '-'],
-            ['종족', m['종족'] || '-'],
             ['티어', m['티어'] || '-'],
             ['활동기간', period],
             ['방송국', broadcast],
@@ -811,6 +945,251 @@
         calculateTeamSummaries();
         renderMembersPage();
     };
+</script>
+
+<!-- ===== 일정(캘린더) 페이지 로직 (열람 전용 — 데이터 입력/수정은 별도 관리자 페이지에서) ===== -->
+<script>
+    let calCurrentDate = new Date();
+    let calSelectedDateStr = "";
+    let calSelectedType = "calendar";
+    let calSchedules = {};
+    let calWeeklySchedules = {};
+    let calWeeklyOffset = 0;
+
+    // 관리자 페이지가 GitHub에 커밋해두는 공개 데이터 파일 (읽기 전용으로 fetch)
+    const CAL_DATA_URL = 'data/calendar.json';
+
+    const calPublicHolidays = {
+        "2024-01-01": true, "2024-02-09": true, "2024-02-10": true, "2024-02-11": true, "2024-02-12": true,
+        "2024-03-01": true, "2024-04-10": true, "2024-05-05": true, "2024-05-06": true, "2024-05-15": true,
+        "2024-06-06": true, "2024-08-15": true, "2024-09-16": true, "2024-09-17": true, "2024-09-18": true,
+        "2024-10-03": true, "2024-10-09": true, "2024-12-25": true,
+        "2025-01-01": true, "2025-01-28": true, "2025-01-29": true, "2025-01-30": true, "2025-03-01": true, "2025-03-03": true,
+        "2025-05-05": true, "2025-05-06": true, "2025-06-06": true, "2025-08-15": true, "2025-10-03": true, "2025-10-05": true, "2025-10-06": true, "2025-10-07": true, "2025-10-08": true, "2025-10-09": true, "2025-12-25": true,
+        "2026-01-01": true, "2026-02-16": true, "2026-02-17": true, "2026-02-18": true, "2026-03-01": true, "2026-03-02": true,
+        "2026-05-05": true, "2026-05-24": true, "2026-05-25": true, "2026-06-06": true, "2026-08-15": true, "2026-09-24": true, "2026-09-25": true, "2026-09-26": true, "2026-09-28": true, "2026-10-03": true, "2026-10-09": true, "2026-12-25": true
+    };
+
+    const calEscapeHTML = (str) => {
+        if (!str) return '';
+        return str.replace(/[&<>'"]/g, tag => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+        }[tag]));
+    };
+
+    const calGetFormatDate = (year, month, day) => {
+        return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    };
+
+    const calLoadPublicData = async () => {
+        try {
+            const res = await fetch(CAL_DATA_URL, { cache: 'no-store' });
+            if (res.ok) {
+                const parsed = await res.json();
+                if (parsed.schedules) {
+                    calSchedules = parsed.schedules;
+                    calWeeklySchedules = parsed.weeklySchedules || {};
+                } else {
+                    calSchedules = parsed;
+                }
+            }
+        } catch (e) {
+            console.error(e);
+        }
+        calRenderCalendar();
+    };
+
+    const calGetEventHTML = (item) => {
+        const timeHtml = item.time ? `<span class="cal-event-time">${calEscapeHTML(item.time)}</span>` : '';
+        const personText = item.person ? `<span class="cal-event-person">${calEscapeHTML(item.person)}</span>` : '';
+        return `
+            <div class="cal-cell-event" style="background-color: ${item.color || '#eff6ff'};">
+                <div class="cal-cell-top">${timeHtml}${personText}</div>
+                <div class="cal-event-desc">${calEscapeHTML(item.desc)}</div>
+            </div>
+        `;
+    };
+
+    const calRenderCalendar = () => {
+        const year = calCurrentDate.getFullYear();
+        const month = calCurrentDate.getMonth();
+
+        document.getElementById('monthTitle').innerText = `${year}년 ${month + 1}월`;
+
+        const firstDayIndex = new Date(year, month, 1).getDay();
+        const lastDay = new Date(year, month + 1, 0).getDate();
+        const prevLastDay = new Date(year, month, 0).getDate();
+
+        const daysGrid = document.getElementById('daysGrid');
+        daysGrid.innerHTML = "";
+
+        const actualToday = new Date();
+        const curTodayStr = calGetFormatDate(actualToday.getFullYear(), actualToday.getMonth() + 1, actualToday.getDate());
+
+        for (let i = firstDayIndex; i > 0; i--) {
+            daysGrid.insertAdjacentHTML('beforeend', `<div class="cal-day-cell other-month"><span class="cal-day-number">${prevLastDay - i + 1}</span></div>`);
+        }
+
+        for (let i = 1; i <= lastDay; i++) {
+            const dateStr = calGetFormatDate(year, month + 1, i);
+            const dayDiv = document.createElement('div');
+            dayDiv.className = 'cal-day-cell';
+
+            if (dateStr === curTodayStr) dayDiv.classList.add('today');
+            if (calPublicHolidays[dateStr]) dayDiv.classList.add('holiday');
+
+            let dayHTML = `<span class="cal-day-number">${i}</span>`;
+
+            if (calSchedules[dateStr] && calSchedules[dateStr].length > 0) {
+                calSchedules[dateStr].forEach(item => {
+                    dayHTML += calGetEventHTML(item);
+                });
+            }
+
+            dayDiv.innerHTML = dayHTML;
+            dayDiv.onclick = () => calSelectDate(dateStr, 'calendar');
+            daysGrid.appendChild(dayDiv);
+        }
+
+        const totalCellsCount = firstDayIndex + lastDay;
+        const nextDaysCount = totalCellsCount % 7 === 0 ? 0 : 7 - (totalCellsCount % 7);
+        for (let i = 1; i <= nextDaysCount; i++) {
+            daysGrid.insertAdjacentHTML('beforeend', `<div class="cal-day-cell other-month"><span class="cal-day-number">${i}</span></div>`);
+        }
+
+        calRenderTodaySchedules();
+        calRenderWeeklyGrid();
+        calRenderSelectedDateSchedules();
+    };
+
+    const calRenderWeeklyGrid = () => {
+        const grid = document.getElementById('weeklyGrid');
+        grid.innerHTML = "";
+
+        const now = new Date();
+        const startOfWeek = new Date(now);
+        startOfWeek.setDate(now.getDate() - now.getDay() + (calWeeklyOffset * 7));
+
+        const actualToday = new Date();
+        const curTodayStr = calGetFormatDate(actualToday.getFullYear(), actualToday.getMonth() + 1, actualToday.getDate());
+
+        for (let i = 0; i < 7; i++) {
+            const currentDay = new Date(startOfWeek);
+            currentDay.setDate(startOfWeek.getDate() + i);
+            const dateStr = calGetFormatDate(currentDay.getFullYear(), currentDay.getMonth() + 1, currentDay.getDate());
+
+            const cell = document.createElement('div');
+            cell.className = 'cal-day-cell';
+
+            if (dateStr === curTodayStr) cell.classList.add('today');
+            if (calPublicHolidays[dateStr]) cell.classList.add('holiday');
+
+            let cellHTML = `<span class="cal-day-number">${currentDay.getDate()}</span>`;
+
+            if (calWeeklySchedules[dateStr] && calWeeklySchedules[dateStr].length > 0) {
+                calWeeklySchedules[dateStr].forEach(item => {
+                    cellHTML += calGetEventHTML(item);
+                });
+            }
+
+            cell.innerHTML = cellHTML;
+            cell.onclick = () => {
+                calSelectDate(dateStr, 'weekly');
+            };
+            grid.appendChild(cell);
+        }
+    };
+
+    const changeMonth = (direction) => {
+        calCurrentDate.setMonth(calCurrentDate.getMonth() + direction);
+        calRenderCalendar();
+    };
+
+    const changeWeeklyOffset = (direction) => {
+        calWeeklyOffset += direction;
+        calRenderWeeklyGrid();
+    };
+
+    const calSelectDate = (dateStr, type = 'calendar') => {
+        calSelectedDateStr = dateStr;
+        calSelectedType = type;
+        calRenderSelectedDateSchedules();
+    };
+
+    const calRenderTodaySchedules = () => {
+        const container = document.getElementById('todayList');
+        const today = new Date();
+        const curTodayStr = calGetFormatDate(today.getFullYear(), today.getMonth() + 1, today.getDate());
+
+        const todayItems = (calSchedules[curTodayStr] || []).slice();
+        todayItems.sort((a, b) => (a.time || "").localeCompare(b.time || ""));
+
+        if (todayItems.length === 0) {
+            container.innerHTML = `<div class="cal-no-schedule">오늘 등록된 일정이 없습니다.</div>`;
+            return;
+        }
+
+        container.innerHTML = todayItems.map(item => {
+            const timeHtml = item.time ? `<span class="cal-card-time">${calEscapeHTML(item.time)}</span>` : '';
+            const personHtml = item.person ? `<span class="cal-card-person">${calEscapeHTML(item.person)}</span>` : '';
+            const detailHtml = item.detail ? `<div style="color: var(--color-text-sub); font-size: var(--fs-caption); padding-left: 18px;">↳ ${calEscapeHTML(item.detail)}</div>` : '';
+
+            return `
+                <div class="cal-today-card">
+                    <div class="cal-card-main">
+                        <div class="cal-card-dot" style="background-color: ${item.color || '#eff6ff'};"></div>
+                        ${timeHtml} ${personHtml}
+                        <span class="cal-card-desc">${calEscapeHTML(item.desc)}</span>
+                    </div>
+                    ${detailHtml}
+                </div>
+            `;
+        }).join('');
+    };
+
+    const calRenderSelectedDateSchedules = () => {
+        const container = document.getElementById('selectedDateList');
+        const titleEl = document.getElementById('selectedListTitle');
+
+        if (!calSelectedDateStr) {
+            container.innerHTML = `<div class="cal-no-schedule">날짜를 클릭하세요.</div>`;
+            return;
+        }
+
+        const prefix = (calSelectedType === 'weekly') ? '김윤환 ' : '';
+        titleEl.innerText = `선택한 날짜 ${prefix}일정`;
+
+        const targetStore = (calSelectedType === 'weekly') ? calWeeklySchedules : calSchedules;
+        const daySchedules = targetStore[calSelectedDateStr] || [];
+
+        if (daySchedules.length === 0) {
+            container.innerHTML = `<div class="cal-no-schedule">등록된 일정이 없습니다.</div>`;
+            return;
+        }
+
+        container.innerHTML = daySchedules.map(item => {
+            const timeHtml = item.time ? `<span class="cal-card-time">${calEscapeHTML(item.time)}</span>` : '';
+            const personHtml = item.person ? `<span class="cal-card-person">${calEscapeHTML(item.person)}</span>` : '';
+
+            return `
+                <div class="cal-selected-card">
+                    <div class="cal-card-main">
+                        <div class="cal-card-dot" style="background-color: ${item.color || '#eff6ff'};"></div>
+                        ${timeHtml} ${personHtml}
+                        <span class="cal-card-desc">${calEscapeHTML(item.desc)}</span>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    };
+
+    (function initCalendar() {
+        const today = new Date();
+        const curTodayStr = calGetFormatDate(today.getFullYear(), today.getMonth() + 1, today.getDate());
+        calSelectedDateStr = curTodayStr;
+        calSelectedType = 'calendar';
+        calLoadPublicData();
+    })();
 </script>
 </body>
 </html>
