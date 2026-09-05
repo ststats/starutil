@@ -519,6 +519,7 @@
                     <div class="m-date">${m['날짜'] ? m['날짜'].split(' ')[0].substring(2) : ''}</div>
                     <div class="m-type"><span class="tag-badge">${escapeHTML(m['형식'])}</span></div>
                     <div class="m-opp-team">${teamLogoHtml(m['상대팀'])}${escapeHTML(m['상대팀'])}</div>
+                    <div class="m-opp-player">${escapeHTML(m['상대 선수']) || '-'}</div>
                     <div class="m-map">${escapeHTML(m['맵']) || '-'}</div>
                     <div class="m-res">${badgeHtml}</div>
                 </div>
@@ -548,7 +549,6 @@
     }
 
     async function loadSynergyData() {
-        const tbody = document.getElementById('synergy-tbody');
         try {
             const datesRes = await fetch(`${STSTATS_BASE}/data/dates.js`, { cache: 'no-store' });
             const datesText = await datesRes.text();
@@ -590,7 +590,9 @@
             renderSynergyTable();
         } catch (e) {
             console.error(e);
-            tbody.innerHTML = `<tr><td colspan="3" class="text-center text-muted py-4">데이터를 불러오지 못했습니다.</td></tr>`;
+            const errRow = `<tr><td colspan="3" class="text-center text-muted py-4">데이터를 불러오지 못했습니다.</td></tr>`;
+            document.getElementById('synergy-tbody-male').innerHTML = errRow;
+            document.getElementById('synergy-tbody-female').innerHTML = errRow;
         }
     }
 
@@ -606,48 +608,54 @@
         document.querySelectorAll('#synergy-metric-filter .filter-item').forEach(el => {
             el.classList.toggle('active', el.dataset.metric === metric);
         });
-        document.getElementById('synergy-metric-label').innerText = SYNERGY_METRIC_LABELS[metric] || '';
+        document.querySelectorAll('.synergy-metric-label').forEach(el => {
+            el.innerText = SYNERGY_METRIC_LABELS[metric] || '';
+        });
         renderSynergyTable();
     }
 
+    function synergyRowHtml(m, idx) {
+        const ours = m.ourMember;
+        const name = ours['이름'] || m.nickname;
+
+        let displayVal;
+        if (synergyMetric === 'balloons') displayVal = (m.balloons || 0).toLocaleString('ko-KR') + '개';
+        else if (synergyMetric === 'broadcast_seconds') displayVal = formatSecondsToHM(m.broadcast_seconds);
+        else if (synergyMetric === 'cumulative_viewers') displayVal = (m.cumulative_viewers || 0).toLocaleString('ko-KR') + '명';
+        else displayVal = `${m.sponsor_wins || 0}승 ${m.sponsor_losses || 0}패`;
+
+        return `
+        <tr>
+            <td class="text-start ps-4 text-secondary fw-bold" style="white-space:nowrap;">${idx + 1}</td>
+            <td class="text-start ps-3">
+                <span class="d-flex align-items-center gap-2">
+                    ${avatarHtml(ours['SOOP ID'], 'player-avatar-sm')}
+                    <span class="fw-bold">${escapeHTML(name)}</span>
+                </span>
+            </td>
+            <td class="fw-bold" style="color:var(--color-primary); white-space:nowrap;">${escapeHTML(displayVal)}</td>
+        </tr>`;
+    }
+
+    function sortSynergyRows(rows) {
+        if (synergyMetric === 'sponsor') {
+            return rows.slice().sort((a, b) => (b.sponsor_wins || 0) - (a.sponsor_wins || 0));
+        }
+        return rows.slice().sort((a, b) => (b[synergyMetric] || 0) - (a[synergyMetric] || 0));
+    }
+
     function renderSynergyTable() {
-        const tbody = document.getElementById('synergy-tbody');
+        const maleTbody = document.getElementById('synergy-tbody-male');
+        const femaleTbody = document.getElementById('synergy-tbody-female');
         if (!synergyData) return;
 
-        let rows = synergyData.filter(m => m.active);
-        if (rows.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="3" class="text-center text-muted py-4">표시할 멤버가 없습니다.</td></tr>`;
-            return;
-        }
+        const active = synergyData.filter(m => m.active);
+        const male = sortSynergyRows(active.filter(m => m.ourMember['성별'] === '남자'));
+        const female = sortSynergyRows(active.filter(m => m.ourMember['성별'] === '여자'));
 
-        if (synergyMetric === 'sponsor') {
-            rows = rows.slice().sort((a, b) => (b.sponsor_wins || 0) - (a.sponsor_wins || 0));
-        } else {
-            rows = rows.slice().sort((a, b) => (b[synergyMetric] || 0) - (a[synergyMetric] || 0));
-        }
-
-        tbody.innerHTML = rows.map((m, idx) => {
-            const ours = m.ourMember;
-            const name = ours['이름'] || m.nickname;
-
-            let displayVal;
-            if (synergyMetric === 'balloons') displayVal = (m.balloons || 0).toLocaleString('ko-KR') + '개';
-            else if (synergyMetric === 'broadcast_seconds') displayVal = formatSecondsToHM(m.broadcast_seconds);
-            else if (synergyMetric === 'cumulative_viewers') displayVal = (m.cumulative_viewers || 0).toLocaleString('ko-KR') + '명';
-            else displayVal = `${m.sponsor_wins || 0}승 ${m.sponsor_losses || 0}패`;
-
-            return `
-            <tr>
-                <td class="text-start ps-4 text-secondary fw-bold" style="white-space:nowrap;">${idx + 1}</td>
-                <td class="text-start ps-3">
-                    <span class="d-flex align-items-center gap-2">
-                        ${avatarHtml(ours['SOOP ID'], 'player-avatar-sm')}
-                        <span class="fw-bold">${escapeHTML(name)}</span>
-                    </span>
-                </td>
-                <td class="fw-bold" style="color:var(--color-primary); white-space:nowrap;">${escapeHTML(displayVal)}</td>
-            </tr>`;
-        }).join('');
+        const noData = `<tr><td colspan="3" class="text-center text-muted py-4">표시할 멤버가 없습니다.</td></tr>`;
+        maleTbody.innerHTML = male.length ? male.map(synergyRowHtml).join('') : noData;
+        femaleTbody.innerHTML = female.length ? female.map(synergyRowHtml).join('') : noData;
     }
 
     window.onload = function() {
