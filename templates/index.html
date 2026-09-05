@@ -92,20 +92,44 @@
             <div class="filter-item" data-metric="sponsor" onclick="setSynergyMetric('sponsor')">스폰전적</div>
         </div>
     </div>
-    <div class="clean-card p-0 overflow-hidden">
-        <div class="table-responsive">
-            <table class="table table-borderless table-hover mb-0 text-center stat-table">
-                <thead>
-                    <tr>
-                        <th class="text-start ps-4" style="width:60px; white-space:nowrap;">순위</th>
-                        <th class="text-start ps-3" style="white-space:nowrap;">멤버</th>
-                        <th style="width:140px; white-space:nowrap;" id="synergy-metric-label">별풍선</th>
-                    </tr>
-                </thead>
-                <tbody id="synergy-tbody">
-                    <tr><td colspan="3" class="text-center text-muted py-4">불러오는 중...</td></tr>
-                </tbody>
-            </table>
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="section-title-sm">남자 멤버</div>
+            <div class="clean-card p-0 overflow-hidden">
+                <div class="table-responsive">
+                    <table class="table table-borderless table-hover mb-0 text-center stat-table">
+                        <thead>
+                            <tr>
+                                <th class="text-start ps-4" style="width:60px; white-space:nowrap;">순위</th>
+                                <th class="text-start ps-3" style="white-space:nowrap;">멤버</th>
+                                <th style="width:140px; white-space:nowrap;" class="synergy-metric-label">별풍선</th>
+                            </tr>
+                        </thead>
+                        <tbody id="synergy-tbody-male">
+                            <tr><td colspan="3" class="text-center text-muted py-4">불러오는 중...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="section-title-sm">여자 멤버</div>
+            <div class="clean-card p-0 overflow-hidden">
+                <div class="table-responsive">
+                    <table class="table table-borderless table-hover mb-0 text-center stat-table">
+                        <thead>
+                            <tr>
+                                <th class="text-start ps-4" style="width:60px; white-space:nowrap;">순위</th>
+                                <th class="text-start ps-3" style="white-space:nowrap;">멤버</th>
+                                <th style="width:140px; white-space:nowrap;" class="synergy-metric-label">별풍선</th>
+                            </tr>
+                        </thead>
+                        <tbody id="synergy-tbody-female">
+                            <tr><td colspan="3" class="text-center text-muted py-4">불러오는 중...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
     <div class="text-center text-muted mt-2" id="synergy-updated" style="font-size:11px;"></div>
@@ -165,21 +189,21 @@
                 <div class="section-title">상대 전적</div>
                 <div class="clean-card p-0 overflow-hidden d-flex flex-column flex-grow-1">
                     <div class="table-responsive flex-grow-1" style="overflow-y: auto;">
-                        <table class="table table-borderless table-hover mb-0 text-center stat-table">
+                        <table class="table table-borderless table-hover mb-0 text-center stat-table" style="min-width: 480px;">
                             <thead>
-                                <tr><th class="text-start ps-4">상대</th><th>대회</th><th>대학</th><th>미니</th><th>CK</th><th></th></tr>
+                                <tr><th class="text-start ps-4" style="white-space:nowrap;">상대</th><th style="white-space:nowrap;">대회</th><th style="white-space:nowrap;">대학</th><th style="white-space:nowrap;">미니</th><th style="white-space:nowrap;">CK</th><th></th></tr>
                             </thead>
                             <tbody>
                                 {% for row in crew_stats['전체'] %}
                                 <tr class="team-row-clickable" style="border-bottom:1px solid #f1f3f5;" data-team="{{ row['상대'] | e }}">
-                                    <td class="text-start ps-4 fw-bold text-dark">
+                                    <td class="text-start ps-4 fw-bold text-dark" style="white-space:nowrap;">
                                         <span class="d-flex align-items-center gap-2">
                                             <img src="images/{{ (row['상대'] if row['상대'] != '내전' else '캄몬스타즈') | e }}.webp" alt="" class="team-logo-icon" style="width:16px;height:16px;" onerror="this.remove();">
                                             {{ row['상대'] | e }}
                                         </span>
                                     </td>
-                                    <td>{{ row['대회 전적'] | e }}</td><td>{{ row['대학 전적'] | e }}</td>
-                                    <td>{{ row['미니 전적'] | e }}</td><td>{{ row['CK 전적'] | e }}</td>
+                                    <td style="white-space:nowrap;">{{ row['대회 전적'] | e }}</td><td style="white-space:nowrap;">{{ row['대학 전적'] | e }}</td>
+                                    <td style="white-space:nowrap;">{{ row['미니 전적'] | e }}</td><td style="white-space:nowrap;">{{ row['CK 전적'] | e }}</td>
                                     <!-- 상세보기 표시: 얇은 쉐브런 아이콘 -->
                                     <td class="text-secondary" style="vertical-align:middle; width: 30px;">
                                         <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"></polyline></svg>
