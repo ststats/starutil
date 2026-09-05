@@ -2,12 +2,20 @@
     let currentPlayer = ''; 
     let currentIndivFilter = '전체';
 
+    // 구글시트 원본 텍스트를 innerHTML에 꽂을 때 깨지거나 마크업이 섞이지 않도록 이스케이프
+    function escapeHTML(str) {
+        if (str === null || str === undefined) return '';
+        return String(str).replace(/[&<>'"]/g, tag => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+        }[tag]));
+    }
+
     function switchPage(pageId) {
         document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
         document.querySelectorAll('#mainMenu .nav-item').forEach(el => el.classList.remove('active'));
         document.getElementById('page-' + pageId).classList.add('active');
-        
-        const targetNav = Array.from(document.querySelectorAll('#mainMenu .nav-item')).find(el => el.getAttribute('onclick').includes(`'${pageId}'`));
+
+        const targetNav = document.querySelector(`#mainMenu .nav-item[data-page="${pageId}"]`);
         if (targetNav) targetNav.classList.add('active');
     }
 
@@ -83,7 +91,11 @@
             else if (resText === '무' || resText === '무승부') badgeHtml = '<span class="match-badge badge-draw">DRAW</span>';
 
             const collapseId = `collapse-${containerId}-${idx}`;
-            const teamRounds = dbRounds.filter(r => r['_match_key'] === m['_match_key'] || (r['날짜'] === m['날짜'] && r['상대팀'] === m['상대팀']));
+            // _match_key가 있으면 그걸로 정확히 매칭(같은 날 여러 경기 구분), 없을 때만 날짜+상대팀으로 대체
+            const teamRounds = dbRounds.filter(r => {
+                if (m['_match_key'] && r['_match_key']) return r['_match_key'] === m['_match_key'];
+                return r['날짜'] === m['날짜'] && r['상대팀'] === m['상대팀'];
+            });
             
             let setDetailsHtml = '';
             if (teamRounds.length > 0) {
@@ -97,10 +109,10 @@
                     return `
                     <div class="d-flex align-items-center justify-content-center py-2" style="font-size:var(--fs-body); border-bottom:1px solid #f1f3f5; min-width: 480px;">
                         <div style="width:45px; font-weight:800; color:#888;">${i+1} SET</div>
-                        <div style="width:100px; text-align:center; color:#555;">${r['맵'] || '-'}</div>
-                        <div style="width:90px; text-align:right;" class="fw-bold ${isWin?'text-primary':'text-dark'}">${r['우리 선수']||'-'}</div>
+                        <div style="width:100px; text-align:center; color:#555;">${escapeHTML(r['맵']) || '-'}</div>
+                        <div style="width:90px; text-align:right;" class="fw-bold ${isWin?'text-primary':'text-dark'}">${escapeHTML(r['우리 선수'])||'-'}</div>
                         <div style="width:50px; text-align:center;">${resBadge}</div>
-                        <div style="width:90px; text-align:left;" class="fw-bold ${!isWin && !isDraw ?'text-primary':'text-dark'}">${r['상대 선수']||'-'}</div>
+                        <div style="width:90px; text-align:left;" class="fw-bold ${!isWin && !isDraw ?'text-primary':'text-dark'}">${escapeHTML(r['상대 선수'])||'-'}</div>
                     </div>`;
                 }).join('');
             } else {
@@ -111,8 +123,8 @@
             <div class="match-item-wrap">
                 <div class="match-row" data-bs-toggle="collapse" data-bs-target="#${collapseId}">
                     <div class="m-date">${m['날짜'] ? m['날짜'].split(' ')[0].substring(2) : ''}</div>
-                    <div class="m-type"><span class="tag-badge">${m['형식']}</span></div>
-                    <div class="m-opp-team">${m['상대팀']}</div>
+                    <div class="m-type"><span class="tag-badge">${escapeHTML(m['형식'])}</span></div>
+                    <div class="m-opp-team">${escapeHTML(m['상대팀'])}</div>
                     <div class="m-score">${m['세트 결과'] || '-'}</div>
                     <div class="m-res">${badgeHtml}</div>
                     <div class="m-arrow">▼</div>
@@ -147,7 +159,8 @@
     function getProfileImgUrl(soopId) {
         if (!soopId) return null;
         const id = String(soopId).trim().toLowerCase();
-        if (!id) return null;
+        // SOOP 아이디는 영문/숫자/일부 특수문자만 쓰이므로, 형식이 이상한 값은 URL/속성에 꽂지 않고 무시
+        if (!id || !/^[a-z0-9_-]+$/.test(id)) return null;
         const prefix = id.substring(0, 2);
         return `https://profile.img.sooplive.co.kr/LOGO/${prefix}/${id}/${id}.jpg`;
     }
@@ -188,7 +201,7 @@
         return `
         <div class="member-card${isActiveMember(m) ? '' : ' former'}" onclick="openMemberProfile('${m['이름']}')">
             ${avatarHtml(m['SOOP ID'], 'member-avatar-img')}
-            <div class="member-card-name">${m['이름']}</div>
+            <div class="member-card-name">${escapeHTML(m['이름'])}</div>
             <div class="member-card-tags">
                 <span class="tag-badge">${tierText}</span>
                 <span class="tag-badge">${raceShortLabel(m['종족'])}</span>
@@ -200,7 +213,7 @@
         const sorted = [...members].sort((a, b) =>
             tierIndex(a['티어']) - tierIndex(b['티어']) || String(a['이름']).localeCompare(String(b['이름']), 'ko'));
         return `
-        <div class="section-title">${title} <span class="text-secondary" style="font-size:var(--fs-body); font-weight:600;">${sorted.length}명</span></div>
+        <div class="section-title">${escapeHTML(title)} <span class="text-secondary" style="font-size:var(--fs-body); font-weight:600;">${sorted.length}명</span></div>
         <div class="member-grid mb-4">${sorted.map(memberCardHtml).join('')}</div>`;
     }
     function renderMembersPage() {
@@ -238,7 +251,7 @@
         container.innerHTML = `<div class="member-grid">${liveMembers.map(m => `
             <div class="member-card" onclick="openMemberProfile('${m['이름']}')">
                 ${avatarHtml(m['SOOP ID'], 'member-avatar-img')}
-                <div class="member-card-name">${m['이름']}</div>
+                <div class="member-card-name">${escapeHTML(m['이름'])}</div>
                 <div class="member-card-tags"><span class="tag-badge tag-badge-live">🔴 LIVE</span></div>
             </div>`).join('')}</div>`;
     }
@@ -263,14 +276,15 @@
         const daysLabel = days !== null ? ` (${days}일${active ? '째' : ''})` : '';
         const period = m['입단일'] ? `${m['입단일']} ~ ${active ? '현재' : (m['퇴단일'] || '-')}${daysLabel}` : '-';
         const soopId = m['SOOP ID'];
-        const broadcast = soopId
-            ? `<a href="https://www.sooplive.com/station/${soopId}" target="_blank" rel="noopener" style="display:inline-flex; align-items:center;">방송국</a>`
+        const isValidSoopId = soopId && /^[a-zA-Z0-9_-]+$/.test(String(soopId).trim());
+        const broadcast = isValidSoopId
+            ? `<a href="https://www.sooplive.com/station/${encodeURIComponent(String(soopId).trim())}" target="_blank" rel="noopener" style="display:inline-flex; align-items:center;">방송국</a>`
             : '-';
 
         const rows = [
-            ['성별', m['성별'] || '-'],
-            ['생년월일', m['생년월일'] || '-'],
-            ['MBTI', m['MBTI'] || '-'],
+            ['성별', escapeHTML(m['성별']) || '-'],
+            ['생년월일', escapeHTML(m['생년월일']) || '-'],
+            ['MBTI', escapeHTML(m['MBTI']) || '-'],
             ['활동기간', period],
             ['방송국', broadcast],
         ];
@@ -287,7 +301,7 @@
         const activeHtml = [], formerHtml = [];
         dbMembers.forEach(m => {
             const html = `<div class="player-item" id="side-player-${m['이름']}" onclick="selectPlayer('${m['이름']}')">
-                            <span>${m['이름']}</span> <span class="item-sub">${m['종족']||''}</span>
+                            <span>${escapeHTML(m['이름'])}</span> <span class="item-sub">${escapeHTML(m['종족'])||''}</span>
                           </div>`;
             if(!m['퇴단일'] || m['퇴단일'].trim() === '') activeHtml.push(html);
             else formerHtml.push(html);
@@ -311,7 +325,7 @@
             const pStat = playersStats.find(x => x['이름'] === m['이름']) || {};
             const name = m['이름'];
             html += `<tr style="border-bottom:1px solid #f1f3f5; cursor:pointer;" onclick="selectPlayer('${name}')">
-                <td class="text-start ps-4 fw-bold text-dark"><span class="d-flex align-items-center gap-2">${avatarHtml(m['SOOP ID'], 'player-avatar-sm')}${name}</span></td>
+                <td class="text-start ps-4 fw-bold text-dark"><span class="d-flex align-items-center gap-2">${avatarHtml(m['SOOP ID'], 'player-avatar-sm')}${escapeHTML(name)}</span></td>
                 <td>${pStat['대회 전적'] || '-'}</td>
                 <td>${pStat['대학 전적'] || '-'}</td>
                 <td>${pStat['미니 전적'] || '-'}</td>
@@ -388,10 +402,10 @@
             <div class="match-item-wrap">
                 <div class="match-row" style="cursor:default;">
                     <div class="m-date">${m['날짜'] ? m['날짜'].split(' ')[0].substring(2) : ''}</div>
-                    <div class="m-type"><span class="tag-badge">${m['형식']}</span></div>
-                    <div class="m-opp-team">${m['상대팀']}</div>
-                    <div class="m-opp-player">${m['상대 선수']}</div>
-                    <div class="m-map">${m['맵'] || '-'}</div>
+                    <div class="m-type"><span class="tag-badge">${escapeHTML(m['형식'])}</span></div>
+                    <div class="m-opp-team">${escapeHTML(m['상대팀'])}</div>
+                    <div class="m-opp-player">${escapeHTML(m['상대 선수'])}</div>
+                    <div class="m-map">${escapeHTML(m['맵']) || '-'}</div>
                     <div class="m-res">${badgeHtml}</div>
                 </div>
             </div>
@@ -411,10 +425,10 @@
         calculateTeamSummaries();
         renderMembersPage();
         renderLiveBroadcasts();
-        
-        const activeNav = document.querySelector('.page-section.active').id.replace('page-', '');
+
+        const activePageId = document.querySelector('.page-section.active').id.replace('page-', '');
         document.querySelectorAll('#mainMenu .nav-item').forEach(el => el.classList.remove('active'));
-        const targetNav = Array.from(document.querySelectorAll('#mainMenu .nav-item')).find(el => el.getAttribute('onclick').includes(`'${activeNav}'`));
+        const targetNav = document.querySelector(`#mainMenu .nav-item[data-page="${activePageId}"]`);
         if (targetNav) targetNav.classList.add('active');
 
         const today = new Date();
