@@ -10,6 +10,17 @@
         }[tag]));
     }
 
+    // 상대팀 로고: docs/images/{팀이름}.webp 로 관리. '내전'(자체 스크림)은
+    // 상대가 우리 팀 자신이므로 캄몬스타즈.webp를 대신 쓴다. 로고 파일이
+    // 없는 팀도 있을 수 있어 onerror로 조용히 숨긴다.
+    function teamLogoHtml(teamName, sizePx) {
+        const name = String(teamName || '').trim();
+        if (!name) return '';
+        const fileName = (name === '내전') ? '캄몬스타즈' : name;
+        const size = sizePx || 16;
+        return `<img src="images/${encodeURIComponent(fileName)}.webp" alt="" class="team-logo-icon" style="width:${size}px;height:${size}px;" onerror="this.remove();">`;
+    }
+
     function switchPage(pageId) {
         document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
         document.querySelectorAll('#mainMenu .nav-item').forEach(el => el.classList.remove('active'));
@@ -124,8 +135,7 @@
                 <div class="match-row" data-bs-toggle="collapse" data-bs-target="#${collapseId}">
                     <div class="m-date">${m['날짜'] ? m['날짜'].split(' ')[0].substring(2) : ''}</div>
                     <div class="m-type"><span class="tag-badge">${escapeHTML(m['형식'])}</span></div>
-                    <div class="m-opp-team">${escapeHTML(m['상대팀'])}</div>
-                    <div class="m-score">${m['세트 결과'] || '-'}</div>
+                    <div class="m-opp-team">${teamLogoHtml(m['상대팀'])}${escapeHTML(m['상대팀'])}</div>
                     <div class="m-res">${badgeHtml}</div>
                     <div class="m-arrow">
                         <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
@@ -149,7 +159,7 @@
     }
 
     function openTeamOpponentModal(opponent) {
-        document.getElementById('teamModalTitle').innerText = `vs ${opponent} 상세 전적`;
+        document.getElementById('teamModalTitle').innerHTML = `${teamLogoHtml(opponent, 20)} vs ${escapeHTML(opponent)} 전체 전적`;
         renderTeamMatchesList('team-modal-list', {format: '전체', opponent}, null);
         new bootstrap.Modal(document.getElementById('teamMatchesModal')).show();
     }
@@ -508,8 +518,7 @@
                 <div class="match-row" style="cursor:default;">
                     <div class="m-date">${m['날짜'] ? m['날짜'].split(' ')[0].substring(2) : ''}</div>
                     <div class="m-type"><span class="tag-badge">${escapeHTML(m['형식'])}</span></div>
-                    <div class="m-opp-team">${escapeHTML(m['상대팀'])}</div>
-                    <div class="m-opp-player">${escapeHTML(m['상대 선수'])}</div>
+                    <div class="m-opp-team">${teamLogoHtml(m['상대팀'])}${escapeHTML(m['상대팀'])}</div>
                     <div class="m-map">${escapeHTML(m['맵']) || '-'}</div>
                     <div class="m-res">${badgeHtml}</div>
                 </div>
@@ -585,11 +594,19 @@
         }
     }
 
+    const SYNERGY_METRIC_LABELS = {
+        balloons: '별풍선',
+        broadcast_seconds: '방송시간',
+        cumulative_viewers: '누적시청자',
+        sponsor: '스폰전적',
+    };
+
     function setSynergyMetric(metric) {
         synergyMetric = metric;
         document.querySelectorAll('#synergy-metric-filter .filter-item').forEach(el => {
             el.classList.toggle('active', el.dataset.metric === metric);
         });
+        document.getElementById('synergy-metric-label').innerText = SYNERGY_METRIC_LABELS[metric] || '';
         renderSynergyTable();
     }
 
@@ -612,7 +629,6 @@
         tbody.innerHTML = rows.map((m, idx) => {
             const ours = m.ourMember;
             const name = ours['이름'] || m.nickname;
-            const tierText = (ours['티어'] !== undefined && ours['티어'] !== '') ? `${ours['티어']}티어` : '-';
 
             let displayVal;
             if (synergyMetric === 'balloons') displayVal = (m.balloons || 0).toLocaleString('ko-KR') + '개';
@@ -627,7 +643,6 @@
                     <span class="d-flex align-items-center gap-2">
                         ${avatarHtml(ours['SOOP ID'], 'player-avatar-sm')}
                         <span class="fw-bold">${escapeHTML(name)}</span>
-                        <span class="tag-badge">${escapeHTML(tierText)}</span>
                     </span>
                 </td>
                 <td class="fw-bold" style="color:var(--color-primary);">${escapeHTML(displayVal)}</td>
