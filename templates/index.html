@@ -108,6 +108,16 @@
         .player-avatar-sm { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; background: #e9ecef; flex-shrink: 0; }
         .profile-avatar { width: 72px; height: 72px; border-radius: 50%; background: #f1f3f5; font-size: var(--fs-hero); display: flex; align-items: center; justify-content: center; margin-right: 20px; overflow: hidden; flex-shrink: 0; }
         .profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* 멤버 페이지 카드 */
+        .member-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 14px; }
+        .member-card { background: #fff; border: 1px solid var(--color-border); border-radius: 12px; padding: 18px 10px 14px; text-align: center; cursor: pointer; transition: box-shadow 0.15s, transform 0.15s, border-color 0.15s; }
+        .member-card:hover { box-shadow: 0 6px 16px rgba(41,121,255,0.10); transform: translateY(-2px); border-color: #b9cdf5; }
+        .member-card.former { opacity: 0.55; }
+        .member-card.former:hover { opacity: 0.85; }
+        .member-avatar-img, .member-avatar-fallback { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; background: #f1f3f5; display: flex; align-items: center; justify-content: center; font-size: 24px; margin: 0 auto 10px auto; }
+        .member-card-name { font-weight: 800; font-size: var(--fs-subheading); color: #222; margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .member-card-tags { display: flex; justify-content: center; gap: 4px; flex-wrap: wrap; }
         .player-item:hover, .player-item.active { background: var(--color-primary-tint); color: var(--color-primary); font-weight: 800; }
         
         /* 도넛 차트 */
@@ -122,6 +132,8 @@
         /* 전적 테이블 공통 (상대 전적 / 개인 요약) */
         .stat-table { font-size: var(--fs-subheading); }
         .stat-table thead th { background: #f4f5f7; border-bottom: 1px solid var(--color-border); font-size: var(--fs-body); color: #666; font-weight: 700; padding-top: 10px; padding-bottom: 10px; }
+        .team-row-clickable { cursor: pointer; transition: background 0.1s; }
+        .team-row-clickable:hover { background: var(--color-primary-tint) !important; }
     </style>
 </head>
 <body>
@@ -138,7 +150,9 @@
 
 <div id="page-home" class="page-section container"><h4 class="fw-bold">홈 페이지 준비중</h4></div>
 <div id="page-schedule" class="page-section container"><h4 class="fw-bold">일정 페이지 준비중</h4></div>
-<div id="page-members" class="page-section container"><h4 class="fw-bold">멤버 페이지 준비중</h4></div>
+<div id="page-members" class="page-section container">
+    <div id="members-groups"></div>
+</div>
 
 <div id="page-stats" class="page-section active container">
     <div class="sub-tabs">
@@ -161,14 +175,15 @@
                     <div class="table-responsive flex-grow-1" style="overflow-y: auto;">
                         <table class="table table-borderless table-hover mb-0 text-center stat-table">
                             <thead>
-                                <tr><th class="text-start ps-4">상대 크루</th><th>대회</th><th>대학대전</th><th>미니대전</th><th>CK</th></tr>
+                                <tr><th class="text-start ps-4">상대 크루</th><th>대회</th><th>대학대전</th><th>미니대전</th><th>CK</th><th></th></tr>
                             </thead>
                             <tbody>
                                 {% for row in crew_stats['전체'] %}
-                                <tr style="border-bottom:1px solid #f1f3f5;">
+                                <tr class="team-row-clickable" style="border-bottom:1px solid #f1f3f5;" data-team="{{ row['상대'] | e }}">
                                     <td class="text-start ps-4 fw-bold text-dark">{{ row['상대'] }}</td>
                                     <td>{{ row['대회 전적'] }}</td><td>{{ row['대학 전적'] }}</td>
                                     <td>{{ row['미니 전적'] }}</td><td>{{ row['CK 전적'] }}</td>
+                                    <td class="text-secondary" style="font-size:var(--fs-micro);">상세보기 ›</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -351,6 +366,29 @@
     </div>
 </div>
 
+<div class="modal fade" id="memberProfileModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 400px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="memberProfileTitle">이름</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="profile-avatar" id="mp-avatar" style="width:64px;height:64px;margin-right:16px;">👤</div>
+                    <div>
+                        <div class="fw-bold" id="mp-name" style="font-size:var(--fs-heading);">이름</div>
+                        <span class="tag-badge" id="mp-role-badge">직책</span>
+                    </div>
+                </div>
+                <table class="table table-borderless mb-0" style="font-size:var(--fs-body);">
+                    <tbody id="mp-info-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     const dbMembers = {{ members_list | tojson }};
@@ -411,11 +449,16 @@
             document.getElementById(`t-sum-${fmt}-w`).innerText = `${tStats[fmt].w}승 ${tStats[fmt].l}패`;
             document.getElementById(`t-sum-${fmt}-r`).innerText = getRateText(tStats[fmt].w, tStats[fmt].l);
         }
-        renderTeamMatchesList('team-recent-list', '전체', 10);
+        renderTeamMatchesList('team-recent-list', {format: '전체'}, 10);
     }
 
-    function renderTeamMatchesList(containerId, format, limit) {
-        const filtered = format === '전체' ? dbMatches : dbMatches.filter(m => m['형식'] === format);
+    function renderTeamMatchesList(containerId, filters, limit) {
+        filters = filters || {};
+        const format = filters.format || '전체';
+        const opponent = filters.opponent || null;
+
+        let filtered = format === '전체' ? dbMatches : dbMatches.filter(m => m['형식'] === format);
+        if (opponent) filtered = filtered.filter(m => m['상대팀'] === opponent);
         const sliced = limit ? filtered.slice(0, limit) : filtered;
         
         if (sliced.length === 0) {
@@ -477,9 +520,19 @@
 
     function openTeamMatchModal(format) {
         document.getElementById('teamModalTitle').innerText = format === '전체' ? '팀 전체 경기 결과' : `팀 ${format} 전적`;
-        renderTeamMatchesList('team-modal-list', format, null);
+        renderTeamMatchesList('team-modal-list', {format}, null);
         new bootstrap.Modal(document.getElementById('teamMatchesModal')).show();
     }
+
+    function openTeamOpponentModal(opponent) {
+        document.getElementById('teamModalTitle').innerText = `vs ${opponent} 상세 전적`;
+        renderTeamMatchesList('team-modal-list', {format: '전체', opponent}, null);
+        new bootstrap.Modal(document.getElementById('teamMatchesModal')).show();
+    }
+    document.addEventListener('click', function(e) {
+        const row = e.target.closest('.team-row-clickable');
+        if (row) openTeamOpponentModal(row.dataset.team);
+    });
 
     // SOOP(숲) 프로필 사진 URL 생성 - 예: brainzerg7 -> .../LOGO/br/brainzerg7/brainzerg7.jpg
     function getProfileImgUrl(soopId) {
@@ -495,11 +548,104 @@
         return `<img src="${url}" class="${cls}" onerror="this.outerHTML='<span class=\\'${cls} d-flex align-items-center justify-content-center\\'>👤</span>';">`;
     }
 
+    // ===== 멤버 페이지 =====
+    const TIER_ORDER = ['갓','킹','잭','조커','스페이드','0','1','2','3','4','5','6','7','8','베이비'];
+    function tierIndex(tier) {
+        const idx = TIER_ORDER.indexOf(String(tier));
+        return idx === -1 ? TIER_ORDER.length : idx;
+    }
+    function raceShortLabel(race) {
+        if (!race) return '-';
+        if (race.includes('테란')) return 'T';
+        if (race.includes('저그')) return 'Z';
+        if (race.includes('프로토스')) return 'P';
+        return race;
+    }
+    function isActiveMember(m) {
+        return !m['퇴단일'] || String(m['퇴단일']).trim() === '';
+    }
+    function memberCardHtml(m) {
+        const tierText = (m['티어'] !== undefined && m['티어'] !== '') ? `${m['티어']}티어` : '-';
+        return `
+        <div class="member-card${isActiveMember(m) ? '' : ' former'}" onclick="openMemberProfile('${m['이름']}')">
+            ${avatarHtml(m['SOOP ID'], 'member-avatar-img')}
+            <div class="member-card-name">${m['이름']}</div>
+            <div class="member-card-tags">
+                <span class="tag-badge">${tierText}</span>
+                <span class="tag-badge">${raceShortLabel(m['종족'])}</span>
+            </div>
+        </div>`;
+    }
+    function renderMemberGroup(title, members) {
+        if (members.length === 0) return '';
+        const sorted = [...members].sort((a, b) =>
+            tierIndex(a['티어']) - tierIndex(b['티어']) || String(a['이름']).localeCompare(String(b['이름']), 'ko'));
+        return `
+        <div class="section-title">${title} <span class="text-secondary" style="font-size:var(--fs-body); font-weight:600;">${sorted.length}명</span></div>
+        <div class="member-grid mb-4">${sorted.map(memberCardHtml).join('')}</div>`;
+    }
+    function renderMembersPage() {
+        const roleOrderBase = ['감독', '코치', '선수'];
+        const allRoles = [...new Set(dbMembers.map(m => m['직책'] || '기타'))];
+        const extraRoles = allRoles.filter(r => !roleOrderBase.includes(r));
+        const roleOrder = [...roleOrderBase, ...extraRoles];
+
+        const activeMembers = dbMembers.filter(isActiveMember);
+        const formerMembers = dbMembers.filter(m => !isActiveMember(m));
+
+        let html = '';
+        roleOrder.forEach(role => {
+            const group = activeMembers.filter(m => (m['직책'] || '기타') === role);
+            html += renderMemberGroup(role, group);
+        });
+        html += renderMemberGroup('이전 멤버', formerMembers);
+
+        document.getElementById('members-groups').innerHTML = html || '<div class="text-center text-muted py-5">등록된 멤버가 없습니다.</div>';
+    }
+    function openMemberProfile(name) {
+        const m = dbMembers.find(x => x['이름'] === name);
+        if (!m) return;
+
+        document.getElementById('memberProfileTitle').innerText = name;
+        document.getElementById('mp-name').innerText = name;
+        document.getElementById('mp-role-badge').innerText = m['직책'] || '미정';
+
+        const avatarUrl = getProfileImgUrl(m['SOOP ID']);
+        const avatarEl = document.getElementById('mp-avatar');
+        avatarEl.innerHTML = avatarUrl
+            ? `<img src="${avatarUrl}" onerror="this.parentElement.innerHTML='👤';">`
+            : '👤';
+
+        const active = isActiveMember(m);
+        const period = m['입단일'] ? `${m['입단일']} ~ ${active ? '현재' : (m['퇴단일'] || '-')}` : '-';
+        const soopId = m['SOOP ID'];
+        const broadcast = m['방송국'] || (soopId ? `SOOP (${soopId})` : '-');
+
+        const rows = [
+            ['성별', m['성별'] || '-'],
+            ['생년월일', m['생년월일'] || '-'],
+            ['MBTI', m['MBTI'] || '-'],
+            ['직책', m['직책'] || '-'],
+            ['종족', m['종족'] || '-'],
+            ['티어', m['티어'] || '-'],
+            ['입단일', m['입단일'] || '-'],
+            ['활동기간', period],
+            ['방송국', broadcast],
+        ];
+        document.getElementById('mp-info-body').innerHTML = rows.map(([label, val]) => `
+            <tr>
+                <td class="text-secondary" style="width:90px; font-weight:700; border-color:#f1f3f5;">${label}</td>
+                <td class="fw-bold text-dark" style="border-color:#f1f3f5;">${val}</td>
+            </tr>`).join('');
+
+        new bootstrap.Modal(document.getElementById('memberProfileModal')).show();
+    }
+
     function renderIndividualSidebar() {
         const activeHtml = [], formerHtml = [];
         dbMembers.forEach(m => {
             const html = `<div class="player-item" id="side-player-${m['이름']}" onclick="selectPlayer('${m['이름']}')">
-                            <span class="d-flex align-items-center gap-2">${avatarHtml(m['SOOP ID'], 'player-avatar-sm')}${m['이름']}</span> <span class="item-sub">${m['종족']||''}</span>
+                            <span>${m['이름']}</span> <span class="item-sub">${m['종족']||''}</span>
                           </div>`;
             if(!m['퇴단일'] || m['퇴단일'].trim() === '') activeHtml.push(html);
             else formerHtml.push(html);
@@ -615,6 +761,7 @@
 
     window.onload = function() {
         calculateTeamSummaries();
+        renderMembersPage();
     };
 </script>
 </body>
