@@ -20,8 +20,8 @@
             <a class="nav-item" data-page="schedule" onclick="switchPage('schedule')">일정</a>
             <a class="nav-item" data-page="members" onclick="switchPage('members')">멤버</a>
             <a class="nav-item" data-page="stats" onclick="switchPage('stats')">전적</a>
-            <a class="nav-item" onclick="alert('시너지표 메뉴는 준비중입니다.')">시너지표</a>
-            <a class="nav-item" onclick="alert('도구 메뉴는 준비중입니다.')">도구</a>
+            <a class="nav-item" data-page="synergy" onclick="switchPage('synergy')">시너지표</a>
+            <a class="nav-item" data-page="tools" onclick="switchPage('tools')">도구</a>
         </div>
     </div>
 </div>
@@ -79,6 +79,68 @@
 
 <div id="page-members" class="page-section container">
     <div id="members-groups"></div>
+</div>
+
+<!-- 시너지표: ststats(외부) 데이터에서 우리 로스터만 뽑아 방송 활동 랭킹 표시 -->
+<div id="page-synergy" class="page-section container">
+    <div class="section-title">
+        시너지표
+        <div class="filter-nav" id="synergy-metric-filter">
+            <div class="filter-item active" data-metric="balloons" onclick="setSynergyMetric('balloons')">별풍선</div>
+            <div class="filter-item" data-metric="broadcast_seconds" onclick="setSynergyMetric('broadcast_seconds')">방송시간</div>
+            <div class="filter-item" data-metric="cumulative_viewers" onclick="setSynergyMetric('cumulative_viewers')">누적시청자</div>
+            <div class="filter-item" data-metric="sponsor" onclick="setSynergyMetric('sponsor')">스폰전적</div>
+        </div>
+    </div>
+    <div class="clean-card p-0 overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-borderless table-hover mb-0 text-center stat-table">
+                <thead>
+                    <tr>
+                        <th class="text-start ps-4" style="width:50px;">순위</th>
+                        <th class="text-start">멤버</th>
+                        <th style="width:140px;">수치</th>
+                    </tr>
+                </thead>
+                <tbody id="synergy-tbody">
+                    <tr><td colspan="3" class="text-center text-muted py-4">불러오는 중...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="text-center text-muted mt-2" id="synergy-updated" style="font-size:11px;"></div>
+</div>
+
+<!-- 도구 페이지: 외부 링크 카드 모음 -->
+<div id="page-tools" class="page-section container">
+    <div class="section-title">도구</div>
+    <div class="tool-grid">
+        <a class="tool-card" href="https://calm-hoxy.vercel.app/" target="_blank" rel="noopener">
+            <span class="tool-card-ext">↗</span>
+            <div class="tool-card-icon">혹</div>
+            <div class="tool-card-name">혹시</div>
+        </a>
+        <a class="tool-card" href="https://prena.io/brain/" target="_blank" rel="noopener">
+            <span class="tool-card-ext">↗</span>
+            <div class="tool-card-icon">암</div>
+            <div class="tool-card-name">암다리</div>
+        </a>
+        <a class="tool-card" href="https://lazygyu.github.io/roulette/" target="_blank" rel="noopener">
+            <span class="tool-card-ext">↗</span>
+            <div class="tool-card-icon">핀</div>
+            <div class="tool-card-name">핀볼</div>
+        </a>
+        <a class="tool-card" href="https://search.naver.com/search.naver?where=nexearch&query=%EC%82%AC%EB%8B%A4%EB%A6%AC%EA%B2%8C%EC%9E%84" target="_blank" rel="noopener">
+            <span class="tool-card-ext">↗</span>
+            <div class="tool-card-icon">네</div>
+            <div class="tool-card-name">네이버 사다리</div>
+        </a>
+        <a class="tool-card" href="https://ygosu.com/board/pan_monstarz" target="_blank" rel="noopener">
+            <span class="tool-card-ext">↗</span>
+            <div class="tool-card-icon">스</div>
+            <div class="tool-card-name">스대게</div>
+        </a>
+    </div>
 </div>
 
 <!-- 전적 페이지 -->
@@ -594,7 +656,7 @@
                 <div class="mt-3 pt-3" style="border-top:1px solid var(--color-border);">
                     <div class="section-title-sm" style="margin-bottom:10px;">
                         이번 달 방송 활동
-                        <span class="text-secondary" style="font-size:var(--fs-body); font-weight:600;">데이터 준비중</span>
+                        <span class="text-secondary" id="mp-activity-status" style="font-size:var(--fs-body); font-weight:600;">데이터 준비중</span>
                     </div>
                     <div class="row g-2">
                         <div class="col-6">
