@@ -102,33 +102,32 @@ def build_member_stats():
             
             player_data = {'이름': str(player).strip()}
             
-            # 1. 형식별 전적
+            # 1. 형식별 전적 ('결과' 열 사용)
             for fmt in ['대회', '대학', '미니', 'CK']:
                 fmt_group = group[group['형식'] == fmt]
-                wins = (fmt_group['승패'] == '승').sum()
-                losses = (fmt_group['승패'] == '패').sum()
+                wins = (fmt_group['결과'] == '승').sum()
+                losses = (fmt_group['결과'] == '패').sum()
                 player_data[f'{fmt} 전적'] = fmt_wl_rate(wins, losses)
                 
-            # 2. 종족전 전적 (T, Z, P)
+            # 2. 종족전 전적 (T, Z, P) ('결과' 열 사용)
             for race, col_name in [('T', '테란전'), ('Z', '저그전'), ('P', '프로토스전')]:
                 race_group = group[group['상대 종족'].str.upper() == race]
-                wins = (race_group['승패'] == '승').sum()
-                losses = (race_group['승패'] == '패').sum()
+                wins = (race_group['결과'] == '승').sum()
+                losses = (race_group['결과'] == '패').sum()
                 player_data[f'{col_name} 전적'] = fmt_wl_rate(wins, losses)
                 
-            # 3. 맵 전적 (최다 플레이 맵 3개만 추출)
-            map_stats = group.groupby('맵')['승패'].value_counts().unstack(fill_value=0)
+            # 3. 맵 전적 ('결과' 열 사용)
+            map_stats = group.groupby('맵')['결과'].value_counts().unstack(fill_value=0)
             if '승' not in map_stats: map_stats['승'] = 0
             if '패' not in map_stats: map_stats['패'] = 0
             map_stats['총전적'] = map_stats['승'] + map_stats['패']
             
-            # 많이 한 맵 순으로 정렬
             top_maps = map_stats.sort_values('총전적', ascending=False).head(3)
             map_strings = [f"{m}({r['승']}승{r['패']}패)" for m, r in top_maps.iterrows()]
             player_data['맵 전적'] = " · ".join(map_strings) if map_strings else "-"
             
-            # 4. 최다 상대 전적 (가장 많이 만난 상대 3명)
-            opp_stats = group.groupby('상대 선수')['승패'].value_counts().unstack(fill_value=0)
+            # 4. 최다 상대 전적 ('결과' 열 사용)
+            opp_stats = group.groupby('상대 선수')['결과'].value_counts().unstack(fill_value=0)
             if '승' not in opp_stats: opp_stats['승'] = 0
             if '패' not in opp_stats: opp_stats['패'] = 0
             opp_stats['총전적'] = opp_stats['승'] + opp_stats['패']
