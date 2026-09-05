@@ -361,7 +361,45 @@
                 <td class="fw-bold text-dark" style="border-color:#f1f3f5;">${val}</td>
             </tr>`).join('');
 
+        renderMemberActivitySummary(m);
+
         new bootstrap.Modal(document.getElementById('memberProfileModal')).show();
+    }
+
+    // 프로필 팝업의 "이번 달 방송 활동"을 시너지표(ststats)에서 가져온 데이터로 채운다.
+    function renderMemberActivitySummary(m) {
+        const statusEl = document.getElementById('mp-activity-status');
+        const balloonsEl = document.getElementById('mp-balloons');
+        const hoursEl = document.getElementById('mp-broadcast-hours');
+        const viewersEl = document.getElementById('mp-viewers');
+        const sponsorEl = document.getElementById('mp-sponsor-record');
+
+        if (!synergyData) {
+            statusEl.innerText = '데이터 불러오는 중';
+            balloonsEl.innerText = '-';
+            hoursEl.innerText = '-';
+            viewersEl.innerText = '-';
+            sponsorEl.innerText = '-';
+            return;
+        }
+
+        const soopId = String(m['SOOP ID'] || '').trim().toLowerCase();
+        const entry = synergyData.find(s => String(s.id || '').trim().toLowerCase() === soopId);
+
+        if (!entry) {
+            statusEl.innerText = '데이터 없음';
+            balloonsEl.innerText = '-';
+            hoursEl.innerText = '-';
+            viewersEl.innerText = '-';
+            sponsorEl.innerText = '-';
+            return;
+        }
+
+        statusEl.innerText = '(ststats 제공)';
+        balloonsEl.innerText = (entry.balloons || 0).toLocaleString('ko-KR') + '개';
+        hoursEl.innerText = formatSecondsToHM(entry.broadcast_seconds);
+        viewersEl.innerText = (entry.cumulative_viewers || 0).toLocaleString('ko-KR') + '명';
+        sponsorEl.innerText = `${entry.sponsor_wins || 0}승 ${entry.sponsor_losses || 0}패`;
     }
 
     function renderIndividualSidebar() {
