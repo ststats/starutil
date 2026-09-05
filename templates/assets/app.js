@@ -136,6 +136,7 @@
                     <div class="m-date">${m['날짜'] ? m['날짜'].split(' ')[0].substring(2) : ''}</div>
                     <div class="m-type"><span class="tag-badge">${escapeHTML(m['형식'])}</span></div>
                     <div class="m-opp-team">${teamLogoHtml(m['상대팀'])}${escapeHTML(m['상대팀'])}</div>
+                    <div class="m-score">${m['세트 결과'] || '-'}</div>
                     <div class="m-res">${badgeHtml}</div>
                     <div class="m-arrow">
                         <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
@@ -409,7 +410,7 @@
         balloonsEl.innerText = (entry.balloons || 0).toLocaleString('ko-KR') + '개';
         hoursEl.innerText = formatSecondsToHM(entry.broadcast_seconds);
         viewersEl.innerText = (entry.cumulative_viewers || 0).toLocaleString('ko-KR') + '명';
-        sponsorEl.innerText = `${entry.sponsor_wins || 0}승 ${entry.sponsor_losses || 0}패`;
+        sponsorEl.innerText = formatSponsorRecord(entry.sponsor_wins, entry.sponsor_losses);
     }
 
     function renderIndividualSidebar() {
@@ -605,7 +606,7 @@
 
     function setSynergyMetric(metric) {
         synergyMetric = metric;
-        document.querySelectorAll('#synergy-metric-filter .filter-item').forEach(el => {
+        document.querySelectorAll('#synergy-metric-filter .sub-tab').forEach(el => {
             el.classList.toggle('active', el.dataset.metric === metric);
         });
         document.querySelectorAll('.synergy-metric-label').forEach(el => {
@@ -622,7 +623,7 @@
         if (synergyMetric === 'balloons') displayVal = (m.balloons || 0).toLocaleString('ko-KR') + '개';
         else if (synergyMetric === 'broadcast_seconds') displayVal = formatSecondsToHM(m.broadcast_seconds);
         else if (synergyMetric === 'cumulative_viewers') displayVal = (m.cumulative_viewers || 0).toLocaleString('ko-KR') + '명';
-        else displayVal = `${m.sponsor_wins || 0}승 ${m.sponsor_losses || 0}패`;
+        else displayVal = formatSponsorRecord(m.sponsor_wins, m.sponsor_losses);
 
         return `
         <tr>
@@ -637,9 +638,19 @@
         </tr>`;
     }
 
+    function formatSponsorRecord(wins, losses) {
+        wins = wins || 0;
+        losses = losses || 0;
+        const total = wins + losses;
+        const rate = total > 0 ? (wins / total * 100).toFixed(1) : '0.0';
+        return `${wins}승 ${losses}패 (${rate}%)`;
+    }
+
     function sortSynergyRows(rows) {
         if (synergyMetric === 'sponsor') {
-            return rows.slice().sort((a, b) => (b.sponsor_wins || 0) - (a.sponsor_wins || 0));
+            // 표시는 승패/승률이지만, 정렬은 판수(승+패)가 많은 순 - 승수 기준이 아니다.
+            return rows.slice().sort((a, b) =>
+                ((b.sponsor_wins || 0) + (b.sponsor_losses || 0)) - ((a.sponsor_wins || 0) + (a.sponsor_losses || 0)));
         }
         return rows.slice().sort((a, b) => (b[synergyMetric] || 0) - (a[synergyMetric] || 0));
     }
