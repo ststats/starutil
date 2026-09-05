@@ -15,9 +15,14 @@ df_matches = pd.DataFrame(db.get('matches', []))
 df_rounds = pd.DataFrame(db.get('rounds', []))
 df_settings = pd.DataFrame(db.get('settings', []))
 
-# 날짜 포맷팅 및 정렬
-df_settings['날짜'] = pd.to_datetime(df_settings['날짜'])
-df_settings = df_settings.sort_values('날짜')
+# 형식 목록을 한 곳에서 관리 (추가/변경 시 여기만 수정)
+FORMATS = ['대회', '대학', '미니', 'CK']
+
+# 날짜 포맷팅 및 정렬 (형식이 어긋난 값은 NaT로 처리해 워크플로가 죽지 않도록 함)
+df_settings['날짜'] = pd.to_datetime(df_settings['날짜'], errors='coerce')
+if df_settings['날짜'].isna().any():
+    print(f"⚠️ '설정' 시트에 날짜 형식이 잘못된 행이 {df_settings['날짜'].isna().sum()}개 있습니다. 확인이 필요합니다.")
+df_settings = df_settings.dropna(subset=['날짜']).sort_values('날짜')
 df_matches['날짜'] = pd.to_datetime(df_matches['날짜'], errors='coerce')
 df_rounds['날짜'] = pd.to_datetime(df_rounds['날짜'], errors='coerce')
 
@@ -64,7 +69,7 @@ def build_crew_stats():
             team_data = {'상대': team}
             
             # 형식별 승패 (대회, 대학, 미니, CK)
-            for fmt in ['대회', '대학', '미니', 'CK']:
+            for fmt in FORMATS:
                 fmt_group = group[group['형식'] == fmt]
                 wins = (fmt_group['최종 결과'] == '승').sum()
                 losses = (fmt_group['최종 결과'] == '패').sum()
@@ -103,7 +108,7 @@ def build_member_stats():
             player_data = {'이름': str(player).strip()}
             
             # 1. 형식별 전적 ('결과' 열 사용)
-            for fmt in ['대회', '대학', '미니', 'CK']:
+            for fmt in FORMATS:
                 fmt_group = group[group['형식'] == fmt]
                 wins = (fmt_group['결과'] == '승').sum()
                 losses = (fmt_group['결과'] == '패').sum()

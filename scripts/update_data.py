@@ -26,14 +26,31 @@ sheet_mapping = {
     '매치 전적': 'rounds'
 }
 
+# 시트별 필수 컬럼 - 이 컬럼이 없으면 이후 통계 산출(generate_stats.py)이
+# KeyError로 조용히 죽기 때문에, 여기서 미리 잡아서 명확한 경고를 남긴다.
+required_columns = {
+    'settings': ['시즌', '날짜'],
+    'members': ['이름'],
+    'matches': ['날짜', '상대팀', '형식', '최종 결과'],
+    'rounds': ['날짜', '상대팀', '우리 선수', '결과', '상대 종족', '맵'],
+}
+
 print("데이터를 불러오는 중...")
 
 for sheet_name, key_name in sheet_mapping.items():
     try:
         worksheet = spreadsheet.worksheet(sheet_name)
         # 데이터를 리스트 형태의 딕셔너리로 바로 가져옴
-        db_dict[key_name] = worksheet.get_all_records()
-        print(f"✅ '{sheet_name}' 시트 불러오기 완료!")
+        records = worksheet.get_all_records()
+        db_dict[key_name] = records
+        print(f"✅ '{sheet_name}' 시트 불러오기 완료! ({len(records)}행)")
+
+        # 필수 컬럼 검증 (행이 있을 때만 확인 가능)
+        needed = required_columns.get(key_name)
+        if needed and records:
+            missing = [col for col in needed if col not in records[0]]
+            if missing:
+                print(f"⚠️ '{sheet_name}' 시트에 예상 컬럼이 없습니다: {missing} — 통계 산출 단계에서 오류가 날 수 있습니다.")
     except gspread.exceptions.WorksheetNotFound:
         print(f"❌ '{sheet_name}' 시트를 찾을 수 없습니다. 이름을 확인해주세요.")
 
