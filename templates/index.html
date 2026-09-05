@@ -112,8 +112,10 @@
                                     <td class="text-start ps-4 fw-bold text-dark">{{ row['상대'] | e }}</td>
                                     <td>{{ row['대회 전적'] | e }}</td><td>{{ row['대학 전적'] | e }}</td>
                                     <td>{{ row['미니 전적'] | e }}</td><td>{{ row['CK 전적'] | e }}</td>
-                                    <!-- 표 화살표 ▼ 로 통일 -->
-                                    <td class="text-secondary" style="font-size:10px; vertical-align:middle; width: 35px;">▼</td>
+                                    <!-- 상세보기 표시: 얇은 쉐브런 아이콘 -->
+                                    <td class="text-secondary" style="vertical-align:middle; width: 30px;">
+                                        <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"></polyline></svg>
+                                    </td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
