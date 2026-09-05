@@ -19,8 +19,10 @@ def sort_members(members):
     ))
 
 sorted_members = sort_members(db_data.get('members', []))
-# 최신 경기가 위로 오도록 역순 정렬
+
+# 최신 경기가 위로 오도록 역순 정렬 (팀 경기, 개인 라운드 경기)
 matches_list = sorted(db_data.get('matches', []), key=lambda x: str(x.get('날짜', '')), reverse=True)
+rounds_list = sorted(db_data.get('rounds', []), key=lambda x: str(x.get('날짜', '')), reverse=True)
 
 env = Environment(loader=FileSystemLoader('templates'))
 template = env.get_template('index.html')
@@ -29,7 +31,8 @@ html_output = template.render(
     crew_stats=stats_data['crew_stats'],
     member_stats=stats_data['member_stats'],
     members_list=sorted_members,
-    matches_list=matches_list  # 상세 매치 리스트 추가!
+    matches_list=matches_list,
+    rounds_list=rounds_list  # 개인별 상세 전적 추가!
 )
 
 os.makedirs('docs', exist_ok=True)
