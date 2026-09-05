@@ -16,6 +16,7 @@
             --color-primary: #2979ff;
             --color-win: #0066ff;
             --color-lose: #f03e3e;
+            --color-draw: #868e96; /* 무승부 회색 추가 */
         }
         body { font-family: 'Pretendard', sans-serif; background-color: var(--color-bg); color: var(--color-text-main); }
         a { text-decoration: none; color: inherit; cursor: pointer; }
@@ -53,21 +54,23 @@
         .stat-card-box .rate { font-size: 30px; font-weight: 800; line-height: 1.1; margin-bottom: 4px; color: var(--color-primary); }
         .stat-card-box .wl { font-size: 13px; color: #888; font-weight: 600; margin-bottom: 12px; }
 
-        /* 경기 내역 리스트 (간격 균일화 및 압축) */
-        .match-row { display: grid; grid-template-columns: 80px 70px 1fr 90px 60px 60px; align-items: center; justify-items: center; padding: 8px 10px; border-bottom: 1px solid var(--color-border); font-size: 13px; }
+        /* 경기 내역 리스트 (간격 대폭 압축 및 중앙 정렬) */
+        .match-row { display: flex; align-items: center; justify-content: center; gap: 15px; padding: 8px 0; border-bottom: 1px solid var(--color-border); font-size: 13px; }
         .match-row:last-child { border-bottom: none; }
-        .m-date { color: #888; text-align: center; }
-        .m-type { text-align: center; }
-        .m-opp { font-weight: 700; color: #222; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
-        .m-map { color: #666; text-align: center; }
-        .m-score { font-weight: 800; text-align: center; }
-        .m-res { text-align: center; }
+        .m-date { width: 65px; color: #888; text-align: center; flex-shrink: 0; }
+        .m-type { width: 50px; text-align: center; flex-shrink: 0; }
+        .m-opp-team { width: 120px; font-weight: 700; color: #222; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-shrink: 0; }
+        .m-opp-indiv { width: 180px; font-weight: 700; color: #222; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-shrink: 0; }
+        .m-map { width: 90px; color: #666; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-shrink: 0; }
+        .m-score { width: 45px; font-weight: 800; text-align: center; flex-shrink: 0; }
+        .m-res { width: 45px; text-align: center; flex-shrink: 0; }
 
         /* 뱃지 */
         .tag-badge { font-size: 11px; font-weight: 700; padding: 3px 6px; border-radius: 4px; background: #f1f3f5; color: #555; border: 1px solid #e9ecef; }
         .match-badge { display: inline-block; width: 44px; text-align: center; font-size: 11px; font-weight: 800; padding: 4px 0; border-radius: 4px; color: #fff; }
         .badge-win { background-color: var(--color-win); }
         .badge-lose { background-color: var(--color-lose); }
+        .badge-draw { background-color: var(--color-draw); } /* DRAW 뱃지 속성 추가 */
 
         /* 개인 사이드바 */
         .sidebar-list { border: 1px solid var(--color-border); border-radius: 10px; background: #fff; overflow: hidden; }
@@ -78,9 +81,6 @@
         .player-item { padding: 10px 20px; font-size: 14px; font-weight: 600; color: #444; cursor: pointer; border-bottom: 1px solid #f9f9f9; display: flex; justify-content: space-between; align-items: center; }
         .player-item:hover, .player-item.active { background: #f5f8ff; color: var(--color-primary); font-weight: 800; }
         
-        /* 전체 요약 강조 메뉴 */
-        .summary-menu { background: #f8f9fa; border-bottom: 2px solid var(--color-border); }
-
         /* 도넛 차트 */
         .donut-wrap { display: flex; justify-content: space-around; }
         .donut-box { text-align: center; }
@@ -89,9 +89,6 @@
         .donut-text { position: relative; font-size: 15px; font-weight: 800; color: #111; }
         .donut-label { font-size: 12px; font-weight: 700; color: #555; margin-bottom: 2px; }
         .donut-sub { font-size: 11px; color: #999; }
-        
-        /* 최근 10경기 리스트 영역 래퍼 */
-        .recent-list-wrapper { padding: 12px 20px; }
     </style>
 </head>
 <body>
@@ -302,9 +299,8 @@
                     최근 10경기
                     <button class="btn-clean" onclick="openTeamMatchModal('전체')">전체보기</button>
                 </div>
-                <!-- height 제한을 없애고 내용물에 맞게 컴팩트하게 출력 -->
                 <div class="clean-card flex-grow-0 p-0 overflow-hidden" style="border-radius: 10px;">
-                    <div class="recent-list-wrapper" id="team-recent-list"></div>
+                    <div style="padding: 12px 10px;" id="team-recent-list"></div>
                 </div>
             </div>
         </div>
@@ -318,12 +314,17 @@
             <!-- 좌측 사이드바 -->
             <div class="col-md-3">
                 <div class="sidebar-list mb-3">
-                    <div class="player-item summary-menu" id="side-btn-summary" onclick="showIndivSummary()">
-                        <span class="fw-bold" style="color:var(--color-primary);">📊 전체 요약</span>
+                    <div class="sidebar-header">종합 통계</div>
+                    <div class="player-item" id="side-btn-summary" onclick="showIndivSummary()">
+                        <span class="fw-bold">전체 요약</span>
                     </div>
+                </div>
+                
+                <div class="sidebar-list mb-3">
                     <div class="sidebar-header">현역 멤버</div>
                     <div class="sidebar-scroll" id="active-player-list"></div>
                 </div>
+                
                 <div class="sidebar-list">
                     <div class="sidebar-header">이전 멤버</div>
                     <div class="sidebar-scroll" id="former-player-list"></div>
@@ -406,7 +407,7 @@
                         </div>
                     </div>
                     <div class="clean-card p-0 overflow-hidden" style="border-radius: 10px;">
-                        <div class="recent-list-wrapper" id="indiv-recent-list"></div>
+                        <div style="padding: 12px 10px;" id="indiv-recent-list"></div>
                     </div>
                 </div>
                 
@@ -416,30 +417,30 @@
 </div>
 
 <!-- ========================================== -->
-<!-- 팝업 모달 -->
+<!-- 팝업 모달 (가로 너비 컴팩트하게 축소) -->
 <div class="modal fade" id="teamMatchesModal" tabindex="-1">
-    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-dialog modal-dialog-scrollable" style="max-width: 500px;">
         <div class="modal-content">
             <div class="modal-header border-bottom-0 pb-0">
                 <h5 class="modal-title fw-bold" id="teamModalTitle">전체 경기 결과</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body p-0">
-                <div class="recent-list-wrapper" id="team-modal-list"></div>
+                <div style="padding: 12px 10px;" id="team-modal-list"></div>
             </div>
         </div>
     </div>
 </div>
 
 <div class="modal fade" id="indivMatchesModal" tabindex="-1">
-    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-dialog modal-dialog-scrollable" style="max-width: 600px;">
         <div class="modal-content">
             <div class="modal-header border-bottom-0 pb-0">
                 <h5 class="modal-title fw-bold" id="indivModalTitle">개인 전체 경기 결과</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body p-0">
-                <div class="recent-list-wrapper" id="indiv-modal-list"></div>
+                <div style="padding: 12px 10px;" id="indiv-modal-list"></div>
             </div>
         </div>
     </div>
@@ -512,6 +513,7 @@
         renderTeamMatchesList('team-recent-list', '전체', 10);
     }
 
+    // DRAW 뱃지 반영한 렌더러 (팀)
     function renderTeamMatchesList(containerId, format, limit) {
         const filtered = format === '전체' ? dbMatches : dbMatches.filter(m => m['형식'] === format);
         const sliced = limit ? filtered.slice(0, limit) : filtered;
@@ -519,19 +521,22 @@
             document.getElementById(containerId).innerHTML = '<div class="text-center text-muted py-3">경기 기록이 없습니다.</div>';
             return;
         }
-        // map 파라미터를 추가하여 팀 기록에 없는 맵 영역을 빈값 처리 (그리드 유지용)
-        const html = sliced.map(m => `
+        const html = sliced.map(m => {
+            let resText = m['최종 결과'] || m['최근 결과'] || '';
+            let badgeHtml = '<span class="match-badge badge-lose">LOSE</span>';
+            if (resText === '승') badgeHtml = '<span class="match-badge badge-win">WIN</span>';
+            else if (resText === '무' || resText === '무승부') badgeHtml = '<span class="match-badge badge-draw">DRAW</span>';
+
+            return `
             <div class="match-row">
                 <div class="m-date">${m['날짜'] ? m['날짜'].split(' ')[0].substring(2) : ''}</div>
                 <div class="m-type"><span class="tag-badge">${m['형식']}</span></div>
-                <div class="m-opp">${m['상대팀']}</div>
-                <div class="m-map"></div>
+                <div class="m-opp-team">${m['상대팀']}</div>
                 <div class="m-score">${m['세트 결과'] || '-'}</div>
-                <div class="m-res">
-                    ${m['최근 결과'] === '승' || m['최종 결과'] === '승' ? '<span class="match-badge badge-win">WIN</span>' : '<span class="match-badge badge-lose">LOSE</span>'}
-                </div>
+                <div class="m-res">${badgeHtml}</div>
             </div>
-        `).join('');
+            `;
+        }).join('');
         document.getElementById(containerId).innerHTML = html;
     }
 
@@ -587,6 +592,7 @@
         document.getElementById('statContent').style.display = 'block';
 
         document.querySelectorAll('.player-item').forEach(el => el.classList.remove('active'));
+        document.getElementById('side-btn-summary').classList.remove('active');
         const sideItem = document.getElementById(`side-player-${name}`);
         if(sideItem) sideItem.classList.add('active');
 
@@ -618,6 +624,7 @@
         renderIndivMatchesList('indiv-recent-list', format, 10);
     }
 
+    // DRAW 뱃지 반영한 렌더러 (개인)
     function renderIndivMatchesList(containerId, format, limit) {
         let filtered = dbRounds.filter(m => m['우리 선수'] === currentPlayer);
         if (format !== '전체') filtered = filtered.filter(m => m['형식'] === format);
@@ -628,18 +635,22 @@
             return;
         }
 
-        const html = sliced.map(m => `
+        const html = sliced.map(m => {
+            let resText = m['결과'] || '';
+            let badgeHtml = '<span class="match-badge badge-lose">LOSE</span>';
+            if (resText === '승') badgeHtml = '<span class="match-badge badge-win">WIN</span>';
+            else if (resText === '무' || resText === '무승부') badgeHtml = '<span class="match-badge badge-draw">DRAW</span>';
+
+            return `
             <div class="match-row">
                 <div class="m-date">${m['날짜'] ? m['날짜'].split(' ')[0].substring(2) : ''}</div>
                 <div class="m-type"><span class="tag-badge">${m['형식']}</span></div>
-                <div class="m-opp">${m['상대팀']} <span style="font-weight:normal;color:#7a828e;">/ ${m['상대 선수']}(${m['상대 종족']})</span></div>
+                <div class="m-opp-indiv">${m['상대팀']} <span style="font-weight:normal;color:#7a828e;">/ ${m['상대 선수']}(${m['상대 종족']})</span></div>
                 <div class="m-map">${m['맵'] || '-'}</div>
-                <div class="m-score"></div>
-                <div class="m-res">
-                    ${m['결과'] === '승' ? '<span class="match-badge badge-win">WIN</span>' : '<span class="match-badge badge-lose">LOSE</span>'}
-                </div>
+                <div class="m-res">${badgeHtml}</div>
             </div>
-        `).join('');
+            `;
+        }).join('');
         document.getElementById(containerId).innerHTML = html;
     }
 
