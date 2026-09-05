@@ -107,8 +107,8 @@
                     if(isDraw) resBadge = '<span class="text-secondary fw-bold">무</span>';
 
                     return `
-                    <div class="d-flex align-items-center justify-content-center py-2" style="font-size:var(--fs-body); border-bottom:1px solid #f1f3f5; min-width: 480px;">
-                        <div style="width:45px; font-weight:800; color:#888;">${i+1} SET</div>
+                    <div class="d-flex align-items-center justify-content-center py-2" style="font-size:var(--fs-body); border-bottom:1px solid #f1f3f5; min-width: 500px;">
+                        <div style="width:70px; font-weight:800; color:#888; white-space:nowrap;">${escapeHTML(r['세트']) || ''} ${escapeHTML(r['라운드']) || (i+1) + '라'}</div>
                         <div style="width:100px; text-align:center; color:#555;">${escapeHTML(r['맵']) || '-'}</div>
                         <div style="width:90px; text-align:right;" class="fw-bold ${isWin?'text-primary':'text-dark'}">${escapeHTML(r['우리 선수'])||'-'}</div>
                         <div style="width:50px; text-align:center;">${resBadge}</div>
