@@ -16,7 +16,7 @@
             --color-primary: #2979ff;
             --color-win: #0066ff;
             --color-lose: #f03e3e;
-            --color-draw: #868e96; /* 무승부 회색 추가 */
+            --color-draw: #868e96;
         }
         body { font-family: 'Pretendard', sans-serif; background-color: var(--color-bg); color: var(--color-text-main); }
         a { text-decoration: none; color: inherit; cursor: pointer; }
@@ -54,23 +54,30 @@
         .stat-card-box .rate { font-size: 30px; font-weight: 800; line-height: 1.1; margin-bottom: 4px; color: var(--color-primary); }
         .stat-card-box .wl { font-size: 13px; color: #888; font-weight: 600; margin-bottom: 12px; }
 
-        /* 경기 내역 리스트 (간격 대폭 압축 및 중앙 정렬) */
-        .match-row { display: flex; align-items: center; justify-content: center; gap: 15px; padding: 8px 0; border-bottom: 1px solid var(--color-border); font-size: 13px; }
+        /* 경기 내역 리스트 (간격 균일화 및 양옆 여백 활용) */
+        .match-row { display: flex; align-items: center; padding: 12px 20px; border-bottom: 1px solid var(--color-border); font-size: 13.5px; background: #fff; transition: background 0.1s; }
+        .match-row:hover { background: #fdfdfd; }
         .match-row:last-child { border-bottom: none; }
-        .m-date { width: 65px; color: #888; text-align: center; flex-shrink: 0; }
+        .m-date { width: 65px; color: #888; font-size: 12.5px; text-align: left; flex-shrink: 0; }
         .m-type { width: 50px; text-align: center; flex-shrink: 0; }
-        .m-opp-team { width: 120px; font-weight: 700; color: #222; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-shrink: 0; }
-        .m-opp-indiv { width: 180px; font-weight: 700; color: #222; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-shrink: 0; }
-        .m-map { width: 90px; color: #666; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-shrink: 0; }
-        .m-score { width: 45px; font-weight: 800; text-align: center; flex-shrink: 0; }
-        .m-res { width: 45px; text-align: center; flex-shrink: 0; }
+        .m-opp-team { flex: 1; font-weight: 700; color: #222; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 10px; }
+        .m-opp-indiv { flex: 1; font-weight: 700; color: #222; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 10px; }
+        .m-map { width: 85px; color: #666; text-align: center; font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-shrink: 0; }
+        .m-score { width: 50px; font-weight: 900; text-align: center; font-size: 14px; flex-shrink: 0; }
+        .m-res { width: 55px; display: flex; justify-content: flex-end; flex-shrink: 0; }
 
         /* 뱃지 */
         .tag-badge { font-size: 11px; font-weight: 700; padding: 3px 6px; border-radius: 4px; background: #f1f3f5; color: #555; border: 1px solid #e9ecef; }
         .match-badge { display: inline-block; width: 44px; text-align: center; font-size: 11px; font-weight: 800; padding: 4px 0; border-radius: 4px; color: #fff; }
         .badge-win { background-color: var(--color-win); }
         .badge-lose { background-color: var(--color-lose); }
-        .badge-draw { background-color: var(--color-draw); } /* DRAW 뱃지 속성 추가 */
+        .badge-draw { background-color: var(--color-draw); }
+
+        /* 모달 (팝업창) 디자인 교정 */
+        .modal-header { position: relative; display: flex; align-items: center; justify-content: center; padding: 18px; border-bottom: 1px solid var(--color-border) !important; background: #fff; }
+        .modal-title { font-size: 16px; font-weight: 800; text-align: center; width: 100%; margin: 0; color: #111; }
+        .modal-header .btn-close { position: absolute; right: 18px; top: 50%; transform: translateY(-50%); margin: 0; }
+        .modal-body { padding: 0; background: #fcfcfc; }
 
         /* 개인 사이드바 */
         .sidebar-list { border: 1px solid var(--color-border); border-radius: 10px; background: #fff; overflow: hidden; }
@@ -107,16 +114,12 @@
 <div id="page-schedule" class="page-section container"><h4 class="fw-bold">일정 페이지 준비중</h4></div>
 <div id="page-members" class="page-section container"><h4 class="fw-bold">멤버 페이지 준비중</h4></div>
 
-<!-- 전적 메인 페이지 -->
 <div id="page-stats" class="page-section active container">
     <div class="sub-tabs">
         <div class="sub-tab active" id="tab-team" onclick="switchStatView('team')">팀</div>
         <div class="sub-tab" id="tab-individual" onclick="switchStatView('individual')">개인</div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- 1. 팀 뷰 -->
-    <!-- ========================================== -->
     <div id="view-team-stat">
         <div class="row g-3 mb-4">
             <div class="col-6 col-md-3"><div class="clean-card stat-card-box"><div class="label">대회</div><div class="rate" id="t-sum-대회-r">0%</div><div class="wl" id="t-sum-대회-w">0승 0패</div><button class="btn-clean w-100" onclick="openTeamMatchModal('대회')">상세 전적</button></div></div>
@@ -126,8 +129,7 @@
         </div>
 
         <div class="row g-4 align-items-stretch mb-4">
-            <!-- 상대 전적 -->
-            <div class="col-lg-7 d-flex flex-column">
+            <div class="col-lg-8 d-flex flex-column">
                 <div class="section-title">상대 전적</div>
                 <div class="clean-card p-0 overflow-hidden d-flex flex-column flex-grow-1">
                     <div class="table-responsive flex-grow-1" style="overflow-y: auto;">
@@ -293,25 +295,20 @@
                 </div>
             </div>
 
-            <!-- 최근 10경기 -->
-            <div class="col-lg-5 d-flex flex-column">
+            <div class="col-lg-4 d-flex flex-column">
                 <div class="section-title">
                     최근 10경기
                     <button class="btn-clean" onclick="openTeamMatchModal('전체')">전체보기</button>
                 </div>
                 <div class="clean-card flex-grow-0 p-0 overflow-hidden" style="border-radius: 10px;">
-                    <div style="padding: 12px 10px;" id="team-recent-list"></div>
+                    <div id="team-recent-list"></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- 2. 개인 뷰 -->
-    <!-- ========================================== -->
     <div id="view-indiv-stat" style="display: none;">
         <div class="row g-4">
-            <!-- 좌측 사이드바 -->
             <div class="col-md-3">
                 <div class="sidebar-list mb-3">
                     <div class="sidebar-header">종합 통계</div>
@@ -331,10 +328,8 @@
                 </div>
             </div>
             
-            <!-- 우측 대시보드 -->
             <div class="col-md-9">
                 
-                <!-- 2-A. 전체 요약 화면 -->
                 <div id="indiv-summary-content">
                     <div class="section-title">현역 멤버 전체 요약</div>
                     <div class="clean-card p-0 overflow-hidden">
@@ -350,14 +345,12 @@
                                     </tr>
                                 </thead>
                                 <tbody id="indiv-summary-tbody">
-                                    <!-- JS 렌더링 -->
                                 </tbody>
                             </table>
                         </div>
                     </div>
                 </div>
 
-                <!-- 2-B. 개인 상세 프로필 화면 -->
                 <div id="statContent" style="display: none;">
                     <div class="clean-card d-flex align-items-center mb-4 p-4">
                         <div style="width:72px;height:72px;border-radius:50%;background:#f1f3f5;font-size:30px;display:flex;align-items:center;justify-content:center;margin-right:20px;">👤</div>
@@ -377,7 +370,7 @@
                                 <div class="donut-wrap">
                                     <div class="donut-box"><div class="donut" id="d-fmt-1"><span class="donut-text" id="dt-fmt-1">0%</span></div><div class="donut-label">대회</div><div class="donut-sub" id="dw-fmt-1">-</div></div>
                                     <div class="donut-box"><div class="donut" id="d-fmt-2"><span class="donut-text" id="dt-fmt-2">0%</span></div><div class="donut-label">대학</div><div class="donut-sub" id="dw-fmt-2">-</div></div>
-                                    <div class="donut-box"><div class="donut" id="d-fmt-3"><span class="donut-text" id="dt-fmt-3">0%</span></div><div class="donut-label">미니/CK</div><div class="donut-sub" id="dw-fmt-3">-</div></div>
+                                    <div class="donut-box"><div class="donut" id="d-fmt-3"><span class="donut-text" id="dt-fmt-3">0%</span></div><div class="donut-label">미니</div><div class="donut-sub" id="dw-fmt-3">-</div></div>
                                 </div>
                             </div>
                         </div>
@@ -407,7 +400,7 @@
                         </div>
                     </div>
                     <div class="clean-card p-0 overflow-hidden" style="border-radius: 10px;">
-                        <div style="padding: 12px 10px;" id="indiv-recent-list"></div>
+                        <div id="indiv-recent-list"></div>
                     </div>
                 </div>
                 
@@ -416,36 +409,33 @@
     </div>
 </div>
 
-<!-- ========================================== -->
-<!-- 팝업 모달 (가로 너비 컴팩트하게 축소) -->
 <div class="modal fade" id="teamMatchesModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-scrollable" style="max-width: 500px;">
         <div class="modal-content">
-            <div class="modal-header border-bottom-0 pb-0">
-                <h5 class="modal-title fw-bold" id="teamModalTitle">전체 경기 결과</h5>
+            <div class="modal-header">
+                <h5 class="modal-title" id="teamModalTitle">전체 경기 결과</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body p-0">
-                <div style="padding: 12px 10px;" id="team-modal-list"></div>
+                <div id="team-modal-list"></div>
             </div>
         </div>
     </div>
 </div>
 
 <div class="modal fade" id="indivMatchesModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-scrollable" style="max-width: 600px;">
+    <div class="modal-dialog modal-dialog-scrollable" style="max-width: 550px;">
         <div class="modal-content">
-            <div class="modal-header border-bottom-0 pb-0">
-                <h5 class="modal-title fw-bold" id="indivModalTitle">개인 전체 경기 결과</h5>
+            <div class="modal-header">
+                <h5 class="modal-title" id="indivModalTitle">개인 전체 경기 결과</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body p-0">
-                <div style="padding: 12px 10px;" id="indiv-modal-list"></div>
+                <div id="indiv-modal-list"></div>
             </div>
         </div>
     </div>
 </div>
-<!-- ========================================== -->
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
@@ -457,7 +447,6 @@
     let currentPlayer = ''; 
     let currentIndivFilter = '전체';
 
-    // 1. GNB 탭 전환
     function switchPage(pageId) {
         document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
         document.querySelectorAll('#mainMenu .nav-item').forEach(el => el.classList.remove('active'));
@@ -465,7 +454,6 @@
         event.currentTarget.classList.add('active');
     }
 
-    // 2. 전적 내부 탭 전환
     function switchStatView(viewType) {
         document.querySelectorAll('.sub-tab').forEach(el => el.classList.remove('active'));
         document.getElementById('tab-' + viewType).classList.add('active');
@@ -497,7 +485,6 @@
         document.getElementById(elId).style.background = `conic-gradient(${color} ${stat.rate}%, #eee 0)`;
     }
 
-    // 팀 통계
     function calculateTeamSummaries() {
         let tStats = { '대회': {w:0, l:0}, '대학': {w:0, l:0}, '미니': {w:0, l:0}, 'CK': {w:0, l:0} };
         dbMatches.forEach(m => {
@@ -513,12 +500,11 @@
         renderTeamMatchesList('team-recent-list', '전체', 10);
     }
 
-    // DRAW 뱃지 반영한 렌더러 (팀)
     function renderTeamMatchesList(containerId, format, limit) {
         const filtered = format === '전체' ? dbMatches : dbMatches.filter(m => m['형식'] === format);
         const sliced = limit ? filtered.slice(0, limit) : filtered;
         if (sliced.length === 0) {
-            document.getElementById(containerId).innerHTML = '<div class="text-center text-muted py-3">경기 기록이 없습니다.</div>';
+            document.getElementById(containerId).innerHTML = '<div class="text-center text-muted py-4">경기 기록이 없습니다.</div>';
             return;
         }
         const html = sliced.map(m => {
@@ -546,7 +532,6 @@
         new bootstrap.Modal(document.getElementById('teamMatchesModal')).show();
     }
 
-    // 개인 전적 사이드바 렌더링
     function renderIndividualSidebar() {
         const activeHtml = [], formerHtml = [];
         dbMembers.forEach(m => {
@@ -560,7 +545,6 @@
         document.getElementById('former-player-list').innerHTML = formerHtml.join('');
     }
 
-    // 전체 요약 보기 화면
     function showIndivSummary() {
         currentPlayer = '';
         document.getElementById('statContent').style.display = 'none';
@@ -585,7 +569,6 @@
         document.getElementById('indiv-summary-tbody').innerHTML = html;
     }
 
-    // 선수 상세 보기
     function selectPlayer(name) {
         currentPlayer = name;
         document.getElementById('indiv-summary-content').style.display = 'none';
@@ -605,10 +588,7 @@
 
         updateDonut('d-fmt-1', 'dt-fmt-1', 'dw-fmt-1', parseStat(pStat['대회 전적']), 'var(--color-primary)');
         updateDonut('d-fmt-2', 'dt-fmt-2', 'dw-fmt-2', parseStat(pStat['대학 전적']), 'var(--color-primary)');
-        const ms = parseStat(pStat['미니 전적']), cs = parseStat(pStat['CK 전적']);
-        const mcs = { wins: ms.wins+cs.wins, losses: ms.losses+cs.losses, text: `${ms.wins+cs.wins}승 ${ms.losses+cs.losses}패` };
-        mcs.rate = (mcs.wins+mcs.losses) > 0 ? (mcs.wins/(mcs.wins+mcs.losses)*100) : 0;
-        updateDonut('d-fmt-3', 'dt-fmt-3', 'dw-fmt-3', mcs, 'var(--color-primary)');
+        updateDonut('d-fmt-3', 'dt-fmt-3', 'dw-fmt-3', parseStat(pStat['미니 전적']), 'var(--color-primary)');
 
         updateDonut('d-race-t', 'dt-race-t', 'dw-race-t', parseStat(pStat['테란전 전적']), '#1976d2');
         updateDonut('d-race-z', 'dt-race-z', 'dw-race-z', parseStat(pStat['저그전 전적']), '#7b1fa2');
@@ -624,7 +604,6 @@
         renderIndivMatchesList('indiv-recent-list', format, 10);
     }
 
-    // DRAW 뱃지 반영한 렌더러 (개인)
     function renderIndivMatchesList(containerId, format, limit) {
         let filtered = dbRounds.filter(m => m['우리 선수'] === currentPlayer);
         if (format !== '전체') filtered = filtered.filter(m => m['형식'] === format);
@@ -655,7 +634,7 @@
     }
 
     function openIndivMatchModal() {
-        document.getElementById('indivModalTitle').innerText = `${currentPlayer} 전체 경기 결과 (${currentIndivFilter})`;
+        document.getElementById('indivModalTitle').innerText = `${currentPlayer} 경기 결과 (${currentIndivFilter})`;
         renderIndivMatchesList('indiv-modal-list', currentIndivFilter, null);
         new bootstrap.Modal(document.getElementById('indivMatchesModal')).show();
     }
