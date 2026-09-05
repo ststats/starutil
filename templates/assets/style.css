@@ -112,16 +112,16 @@
         /* 홈 화면 - 현재 방송중 카드 */
         .live-broadcast-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
         .live-broadcast-card { display: block; border: 1px solid var(--color-border); border-radius: 10px; overflow: hidden; text-decoration: none; color: inherit; background: #fff; transition: box-shadow 0.15s, transform 0.15s; }
-        .live-broadcast-card:hover { box-shadow: 0 6px 16px rgba(41,121,255,0.12); transform: translateY(-2px); }
-        .live-thumb-wrap { position: relative; background: #1a1d29; }
-        .live-thumb { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; background: #1a1d29; }
-        .live-badge { position: absolute; top: 6px; left: 6px; background: var(--color-lose); color: #fff; font-size: var(--fs-badge); font-weight: 800; padding: 2px 6px; border-radius: 3px; letter-spacing: 0.5px; }
+        .live-broadcast-card:hover { box-shadow: 0 4px 12px rgba(41,121,255,0.10); transform: translateY(-1px); border-color: #b9cdf5; }
+        .live-thumb-wrap { position: relative; background: #e9ecef; }
+        .live-thumb { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; background: #e9ecef; }
+        .live-badge { position: absolute; top: 6px; left: 6px; background: var(--color-lose); color: #fff; font-size: 9px; font-weight: 800; padding: 1px 5px; border-radius: 3px; letter-spacing: 0.3px; }
         .live-card-body { padding: 8px 10px; display: flex; align-items: center; gap: 8px; }
         .live-card-avatar { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; background: #f1f3f5; flex-shrink: 0; }
         .live-card-info { min-width: 0; flex: 1; }
-        .live-card-name { font-weight: 800; font-size: var(--fs-body); color: #222; }
-        .live-card-title { font-size: var(--fs-body); color: var(--color-text-sub); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .live-card-meta { font-size: var(--fs-badge); color: #999; margin-top: 2px; }
+        .live-card-name { font-weight: 800; font-size: var(--fs-body); color: #222; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .live-card-title { font-size: 11px; color: var(--color-text-sub); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+        .live-card-meta { font-size: 10px; color: #aaa; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .match-badge { display: inline-block; width: 44px; text-align: center; font-size: 11px; font-weight: 800; padding: 4px 0; border-radius: 4px; color: #fff; }
         .badge-win { background-color: var(--color-win); }
         .badge-lose { background-color: var(--color-lose); }
