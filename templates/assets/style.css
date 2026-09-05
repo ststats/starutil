@@ -132,6 +132,14 @@
         .live-card-stats { display: flex; flex-direction: column; align-items: flex-end; flex-shrink: 0; }
         .live-card-viewers { font-weight: 700; font-size: var(--fs-body); color: #222; }
         .live-card-elapsed { font-size: 10px; color: #999; margin-top: 1px; }
+
+        /* 도구 페이지 카드 */
+        .tool-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; }
+        .tool-card { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; background: #fff; border: 1px solid var(--color-border); border-radius: 12px; padding: 26px 12px; text-decoration: none; color: inherit; position: relative; transition: box-shadow 0.15s, transform 0.15s, border-color 0.15s; }
+        .tool-card:hover { box-shadow: 0 6px 16px rgba(41,121,255,0.10); transform: translateY(-2px); border-color: #b9cdf5; }
+        .tool-card-icon { width: 44px; height: 44px; border-radius: 50%; background: var(--color-primary-tint); color: var(--color-primary); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: var(--fs-heading); }
+        .tool-card-name { font-weight: 800; font-size: var(--fs-body); color: #222; text-align: center; }
+        .tool-card-ext { position: absolute; top: 10px; right: 12px; color: #ccc; font-size: 12px; }
         .match-badge { display: inline-block; width: 44px; text-align: center; font-size: 11px; font-weight: 800; padding: 4px 0; border-radius: 4px; color: #fff; }
         .badge-win { background-color: var(--color-win); }
         .badge-lose { background-color: var(--color-lose); }
