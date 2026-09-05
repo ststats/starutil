@@ -97,7 +97,7 @@
 
         /* 개인 사이드바 */
         .sidebar-list { border: 1px solid var(--color-border); border-radius: 10px; background: #fff; overflow: hidden; }
-        .sidebar-header { background: var(--color-primary-tint); padding: 12px 20px; font-size: var(--fs-body); font-weight: 800; color: #2c5cc9; border-bottom: 1px solid var(--color-primary-tint-strong); }
+        .sidebar-header { background: #f8f9fa; padding: 12px 20px; font-size: var(--fs-body); font-weight: 800; color: #666; border-bottom: 1px solid var(--color-border); }
         .sidebar-scroll { max-height: 250px; overflow-y: auto; }
         .sidebar-scroll::-webkit-scrollbar { width: 6px; }
         .sidebar-scroll::-webkit-scrollbar-thumb { background: #c7d6f5; border-radius: 3px; }
@@ -116,7 +116,7 @@
 
         /* 전적 테이블 공통 (상대 전적 / 개인 요약) */
         .stat-table { font-size: var(--fs-subheading); }
-        .stat-table thead th { background: var(--color-primary-tint); border-bottom: 1px solid var(--color-primary-tint-strong); font-size: var(--fs-body); color: #2c5cc9; font-weight: 700; padding-top: 10px; padding-bottom: 10px; }
+        .stat-table thead th { background: #f4f5f7; border-bottom: 1px solid var(--color-border); font-size: var(--fs-body); color: #666; font-weight: 700; padding-top: 10px; padding-bottom: 10px; }
     </style>
 </head>
 <body>
@@ -393,7 +393,7 @@
             else if (resText === '무' || resText === '무승부') badgeHtml = '<span class="match-badge badge-draw">DRAW</span>';
 
             const collapseId = `collapse-${containerId}-${idx}`;
-            const teamRounds = dbRounds.filter(r => r['날짜'] === m['날짜'] && r['상대팀'] === m['상대팀']);
+            const teamRounds = dbRounds.filter(r => r['_match_key'] === m['_match_key']);
             
             let setDetailsHtml = '';
             if (teamRounds.length > 0) {
