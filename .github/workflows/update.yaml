@@ -1,0 +1,41 @@
+name: Update Starcraft Stats
+
+on:
+  schedule:
+    - cron: '0 15 * * *'  # 매일 한국 시간 자정(UTC 15:00)에 자동 실행
+  workflow_dispatch:      # 깃허브 웹에서 수동 버튼으로 언제든 실행 가능하게 함
+
+permissions:
+  contents: write         # 봇이 저장소에 파일을 쓰고 푸시할 수 있는 권한 부여
+
+jobs:
+  fetch-and-update:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 저장소 체크아웃
+      uses: actions/checkout@v3
+
+    - name: 파이썬 환경 세팅
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: 필요 라이브러리 설치
+      run: |
+        pip install pandas gspread
+
+    - name: 구글 시트 연동 스크립트 실행
+      env:
+        GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_CREDENTIALS_JSON }}
+        GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
+      run: python scripts/update_data.py
+
+    - name: 변경된 데이터를 깃허브에 자동 커밋 및 푸시
+      run: |
+        git config --global user.name "GitHub Actions Bot"
+        git config --global user.email "actions@github.com"
+        git add data/*.json
+        # 변경사항이 있을 때만 커밋하도록 설정
+        git diff --quiet && git diff --staged --quiet || git commit -m "📊 구글 시트 데이터 자동 업데이트"
+        git push
