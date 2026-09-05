@@ -30,6 +30,13 @@
         .top-navbar { background-color: #fff; height: 64px; border-bottom: 1px solid var(--color-border); }
         .top-navbar .navbar-inner { height: 100%; display: flex; align-items: center; width: 100%; }
         .top-navbar .logo { font-size: 20px; font-weight: 800; margin-right: 30px; display: flex; align-items: center; flex-shrink: 0; }
+        .logo-black { color: #141821; }
+        .logo-accent { color: var(--color-primary); }
+
+        .home-wordmark { padding-top: 32px; padding-bottom: 32px; }
+        .home-wordmark-title { font-size: 32px; font-weight: 800; letter-spacing: -1px; }
+        .home-wordmark-title::after { content: ''; display: block; width: 60px; height: 3px; background: var(--color-primary); margin: 10px auto 0; border-radius: 2px; }
+        .home-wordmark-sub { font-size: 12px; font-weight: 700; letter-spacing: 3px; color: var(--color-text-sub); margin-top: 10px; }
         .top-navbar .logo img { height: 28px; margin-right: 10px; }
         
         .nav-menu { display: flex; height: 100%; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; margin-left: auto; }
