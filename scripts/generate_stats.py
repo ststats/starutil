@@ -1,6 +1,7 @@
 import json
 import os
 import pandas as pd
+from match_link import link_rounds_to_matches
 
 # 1. db.json 불러오기
 try:
@@ -10,9 +11,13 @@ except FileNotFoundError:
     print("❌ data/db.json 파일을 찾을 수 없습니다. update_data.py를 먼저 실행하세요.")
     exit(1)
 
+# 같은 날 같은 상대와 여러 경기를 치른 경우를 구분하기 위해 매치/라운드에
+# 고유 순번을 부여하고, 라운드에 형식을 채운다 (자세한 내용은 match_link.py 참고)
+linked_matches, linked_rounds = link_rounds_to_matches(db.get('matches', []), db.get('rounds', []))
+
 # 리스트 딕셔너리를 Pandas DataFrame으로 변환
-df_matches = pd.DataFrame(db.get('matches', []))
-df_rounds = pd.DataFrame(db.get('rounds', []))
+df_matches = pd.DataFrame(linked_matches)
+df_rounds = pd.DataFrame(linked_rounds)
 df_settings = pd.DataFrame(db.get('settings', []))
 
 # 형식 목록을 한 곳에서 관리 (추가/변경 시 여기만 수정)
@@ -36,10 +41,6 @@ def get_season(date_val):
 
 df_matches['시즌'] = df_matches['날짜'].apply(get_season)
 df_rounds['시즌'] = df_rounds['날짜'].apply(get_season)
-
-# 라운드 데이터에 매치 '형식' 결합 (대회, CK 등)
-match_info = df_matches[['날짜', '상대팀', '형식']].drop_duplicates()
-df_rounds = pd.merge(df_rounds, match_info, on=['날짜', '상대팀'], how='left')
 
 # 3. 승패 텍스트 포맷팅 헬퍼
 def fmt_wl(wins, losses):
