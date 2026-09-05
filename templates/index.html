@@ -16,10 +16,10 @@
         <div class="logo">스타대학</div>
         <div class="nav-menu" id="mainMenu">
             <!-- 기본 접속 화면: 홈 탭 -->
-            <a class="nav-item active" onclick="switchPage('home')">홈</a>
-            <a class="nav-item" onclick="switchPage('schedule')">일정</a>
-            <a class="nav-item" onclick="switchPage('members')">멤버</a>
-            <a class="nav-item" onclick="switchPage('stats')">전적</a>
+            <a class="nav-item active" data-page="home" onclick="switchPage('home')">홈</a>
+            <a class="nav-item" data-page="schedule" onclick="switchPage('schedule')">일정</a>
+            <a class="nav-item" data-page="members" onclick="switchPage('members')">멤버</a>
+            <a class="nav-item" data-page="stats" onclick="switchPage('stats')">전적</a>
             <a class="nav-item" onclick="alert('시너지표 메뉴는 준비중입니다.')">시너지표</a>
             <a class="nav-item" onclick="alert('도구 메뉴는 준비중입니다.')">도구</a>
         </div>
@@ -109,9 +109,9 @@
                             <tbody>
                                 {% for row in crew_stats['전체'] %}
                                 <tr class="team-row-clickable" style="border-bottom:1px solid #f1f3f5;" data-team="{{ row['상대'] | e }}">
-                                    <td class="text-start ps-4 fw-bold text-dark">{{ row['상대'] }}</td>
-                                    <td>{{ row['대회 전적'] }}</td><td>{{ row['대학 전적'] }}</td>
-                                    <td>{{ row['미니 전적'] }}</td><td>{{ row['CK 전적'] }}</td>
+                                    <td class="text-start ps-4 fw-bold text-dark">{{ row['상대'] | e }}</td>
+                                    <td>{{ row['대회 전적'] | e }}</td><td>{{ row['대학 전적'] | e }}</td>
+                                    <td>{{ row['미니 전적'] | e }}</td><td>{{ row['CK 전적'] | e }}</td>
                                     <!-- 표 화살표 ▼ 로 통일 -->
                                     <td class="text-secondary" style="font-size:10px; vertical-align:middle; width: 35px;">▼</td>
                                 </tr>
