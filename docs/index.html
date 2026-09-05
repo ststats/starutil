@@ -95,7 +95,8 @@
         .modal-header { position: relative; display: flex; align-items: center; justify-content: center; padding: 18px; border-bottom: 1px solid var(--color-border) !important; background: #fff; }
         .modal-title { font-size: var(--fs-heading); font-weight: 800; text-align: center; width: 100%; margin: 0; color: #111; }
         .modal-header .btn-close { position: absolute; right: 18px; top: 50%; transform: translateY(-50%); margin: 0; }
-        .modal-body { padding: 0; background: #fcfcfc; }
+        .modal-body { background: #fcfcfc; }
+        .modal-body.p-0 { background: #fcfcfc; }
 
         /* 개인 사이드바 */
         .sidebar-list { border: 1px solid var(--color-border); border-radius: 10px; background: #fff; overflow: hidden; }
@@ -541,7 +542,7 @@
                 <h5 class="modal-title" id="memberProfileTitle">이름</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body" style="padding: 22px 26px;">
                 <div class="d-flex align-items-center mb-3">
                     <div class="profile-avatar" id="mp-avatar" style="width:64px;height:64px;margin-right:16px;">👤</div>
                     <div>
@@ -552,6 +553,39 @@
                 <table class="table table-borderless mb-0" style="font-size:var(--fs-body);">
                     <tbody id="mp-info-body"></tbody>
                 </table>
+
+                <div class="mt-3 pt-3" style="border-top:1px solid var(--color-border);">
+                    <div class="section-title-sm" style="margin-bottom:10px;">
+                        이번 달 방송 활동
+                        <span class="text-secondary" style="font-size:var(--fs-micro); font-weight:600;">데이터 준비중</span>
+                    </div>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <div class="clean-card text-center py-2">
+                                <div class="text-secondary" style="font-size:var(--fs-micro); font-weight:700;">별풍선</div>
+                                <div class="fw-bold" id="mp-balloons" style="font-size:var(--fs-subheading);">-</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="clean-card text-center py-2">
+                                <div class="text-secondary" style="font-size:var(--fs-micro); font-weight:700;">방송시간</div>
+                                <div class="fw-bold" id="mp-broadcast-hours" style="font-size:var(--fs-subheading);">-</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="clean-card text-center py-2">
+                                <div class="text-secondary" style="font-size:var(--fs-micro); font-weight:700;">누적시청자</div>
+                                <div class="fw-bold" id="mp-viewers" style="font-size:var(--fs-subheading);">-</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="clean-card text-center py-2">
+                                <div class="text-secondary" style="font-size:var(--fs-micro); font-weight:700;">스폰전적</div>
+                                <div class="fw-bold" id="mp-sponsor-record" style="font-size:var(--fs-subheading);">-</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -732,6 +766,16 @@
     function isActiveMember(m) {
         return !m['퇴단일'] || String(m['퇴단일']).trim() === '';
     }
+    function todayStr() {
+        return new Date().toISOString().split('T')[0];
+    }
+    function daysBetween(startStr, endStr) {
+        if (!startStr || !endStr) return null;
+        const start = new Date(startStr);
+        const end = new Date(endStr);
+        if (isNaN(start.getTime()) || isNaN(end.getTime())) return null;
+        return Math.floor((end - start) / 86400000) + 1;
+    }
     function memberCardHtml(m) {
         const tierText = (m['티어'] !== undefined && m['티어'] !== '') ? `${m['티어']}티어` : '-';
         return `
@@ -785,9 +829,14 @@
             : '👤';
 
         const active = isActiveMember(m);
-        const period = m['입단일'] ? `${m['입단일']} ~ ${active ? '현재' : (m['퇴단일'] || '-')}` : '-';
+        const days = m['입단일'] ? daysBetween(m['입단일'], active ? todayStr() : (m['퇴단일'] || null)) : null;
+        const daysLabel = days !== null ? ` (${days}일${active ? '째' : ''})` : '';
+        const period = m['입단일'] ? `${m['입단일']} ~ ${active ? '현재' : (m['퇴단일'] || '-')}${daysLabel}` : '-';
         const soopId = m['SOOP ID'];
-        const broadcast = m['방송국'] || (soopId ? `SOOP (${soopId})` : '-');
+        const broadcastLabel = m['방송국'] || (soopId ? `SOOP (${soopId})` : '-');
+        const broadcast = soopId
+            ? `<a href="https://www.sooplive.com/station/${soopId}" target="_blank" rel="noopener" style="color:var(--color-primary); text-decoration:underline;">${broadcastLabel}</a>`
+            : broadcastLabel;
 
         const rows = [
             ['성별', m['성별'] || '-'],
@@ -796,7 +845,6 @@
             ['직책', m['직책'] || '-'],
             ['종족', m['종족'] || '-'],
             ['티어', m['티어'] || '-'],
-            ['입단일', m['입단일'] || '-'],
             ['활동기간', period],
             ['방송국', broadcast],
         ];
