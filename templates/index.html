@@ -324,3 +324,127 @@
         } else {
             document.getElementById('view-team-stat').style.display = 'none';
             document.getElementById('view-indiv-stat').style.display = 'block';
+            renderIndividualSidebar();
+            showIndivSummary(); 
+        }
+    }
+
+    function parseStat(statStr) {
+        if (!statStr || statStr === "-") return { wins: 0, losses: 0, rate: 0, text: "-" };
+        const match = statStr.match(/(\d+)승 (\d+)패/);
+        if (match) {
+            const w = parseInt(match[1]), l = parseInt(match[2]);
+            return { wins: w, losses: l, rate: (w+l) > 0 ? (w/(w+l)*100) : 0, text: `${w}승 ${l}패` };
+        }
+        return { wins: 0, losses: 0, rate: 0, text: "-" };
+    }
+    function getRateText(w, l) { return (w+l) > 0 ? (w/(w+l)*100).toFixed(1) + "%" : "-"; }
+    function updateDonut(elId, txtId, subId, stat, color) {
+        document.getElementById(txtId).innerText = stat.text === "-" ? "-" : stat.rate.toFixed(1) + "%";
+        document.getElementById(subId).innerText = stat.text;
+        document.getElementById(elId).style.background = `conic-gradient(${color} ${stat.rate}%, #eee 0)`;
+    }
+
+    function calculateTeamSummaries() {
+        let tStats = { '대회': {w:0, l:0}, '대학': {w:0, l:0}, '미니': {w:0, l:0}, 'CK': {w:0, l:0} };
+        dbMatches.forEach(m => {
+            if (tStats[m['형식']] && m['최종 결과']) {
+                if (m['최종 결과'] === '승') tStats[m['형식']].w++;
+                if (m['최종 결과'] === '패') tStats[m['형식']].l++;
+            }
+        });
+        for (let fmt in tStats) {
+            document.getElementById(`t-sum-${fmt}-w`).innerText = `${tStats[fmt].w}승 ${tStats[fmt].l}패`;
+            document.getElementById(`t-sum-${fmt}-r`).innerText = getRateText(tStats[fmt].w, tStats[fmt].l);
+        }
+        renderTeamMatchesList('team-recent-list', '전체', 10);
+    }
+
+    // 팀 경기 리스트 렌더러 (아코디언 기능 추가)
+    function renderTeamMatchesList(containerId, format, limit) {
+        const filtered = format === '전체' ? dbMatches : dbMatches.filter(m => m['형식'] === format);
+        const sliced = limit ? filtered.slice(0, limit) : filtered;
+        
+        if (sliced.length === 0) {
+            document.getElementById(containerId).innerHTML = '<div class="text-center text-muted py-4">경기 기록이 없습니다.</div>';
+            return;
+        }
+
+        const html = sliced.map((m, idx) => {
+            let resText = m['최종 결과'] || m['최근 결과'] || '';
+            let badgeHtml = '<span class="match-badge badge-lose">LOSE</span>';
+            if (resText === '승') badgeHtml = '<span class="match-badge badge-win">WIN</span>';
+            else if (resText === '무' || resText === '무승부') badgeHtml = '<span class="match-badge badge-draw">DRAW</span>';
+
+            const collapseId = `collapse-${containerId}-${idx}`;
+            const teamRounds = dbRounds.filter(r => r['날짜'] === m['날짜'] && r['상대팀'] === m['상대팀']);
+            
+            let setDetailsHtml = '';
+            if (teamRounds.length > 0) {
+                setDetailsHtml = teamRounds.map((r, i) => {
+                    const isWin = r['결과'] === '승';
+                    const isDraw = r['결과'] === '무' || r['결과'] === '무승부';
+                    
+                    let resBadge = '<span class="text-danger fw-bold">패</span>';
+                    if(isWin) resBadge = '<span class="text-primary fw-bold">승</span>';
+                    if(isDraw) resBadge = '<span class="text-secondary fw-bold">무</span>';
+
+                    return `
+                    <div class="d-flex align-items-center justify-content-center py-2" style="font-size:12.5px; border-bottom:1px solid #f1f3f5;">
+                        <div style="width:45px; font-weight:800; color:#888;">${i+1} SET</div>
+                        <div style="width:100px; text-align:center; color:#555;">${r['맵'] || '-'}</div>
+                        <div style="width:90px; text-align:right;" class="fw-bold ${isWin?'text-primary':'text-dark'}">${r['우리 선수']||'-'}</div>
+                        <div style="width:50px; text-align:center;">${resBadge}</div>
+                        <div style="width:90px; text-align:left;" class="fw-bold ${!isWin && !isDraw ?'text-primary':'text-dark'}">${r['상대 선수']||'-'}</div>
+                    </div>`;
+                }).join('');
+            } else {
+                setDetailsHtml = '<div class="text-center text-muted py-2" style="font-size:12px;">상세 세트 기록이 없습니다.</div>';
+            }
+
+            return `
+            <div class="match-item-wrap">
+                <div class="match-row" data-bs-toggle="collapse" data-bs-target="#${collapseId}">
+                    <div class="m-date">${m['날짜'] ? m['날짜'].split(' ')[0].substring(2) : ''}</div>
+                    <div class="m-type"><span class="tag-badge">${m['형식']}</span></div>
+                    <div class="m-opp-team">${m['상대팀']}</div>
+                    <div class="m-score">${m['세트 결과'] || '-'}</div>
+                    <div class="m-res">${badgeHtml}</div>
+                    <div class="m-arrow">▼</div>
+                </div>
+                <div class="collapse" id="${collapseId}">
+                    <div class="px-4 py-2" style="background-color:#fcfcfd; border-top:1px dashed #eaedf2;">
+                        ${setDetailsHtml}
+                    </div>
+                </div>
+            </div>
+            `;
+        }).join('');
+        document.getElementById(containerId).innerHTML = html;
+    }
+
+    function openTeamMatchModal(format) {
+        document.getElementById('teamModalTitle').innerText = format === '전체' ? '팀 전체 경기 결과' : `팀 ${format} 전적`;
+        renderTeamMatchesList('team-modal-list', format, null);
+        new bootstrap.Modal(document.getElementById('teamMatchesModal')).show();
+    }
+
+    function renderIndividualSidebar() {
+        const activeHtml = [], formerHtml = [];
+        dbMembers.forEach(m => {
+            const html = `<div class="player-item" id="side-player-${m['이름']}" onclick="selectPlayer('${m['이름']}')">
+                            <span>${m['이름']}</span> <span style="font-size:11px;color:#888;">${m['종족']||''}</span>
+                          </div>`;
+            if(!m['퇴단일'] || m['퇴단일'].trim() === '') activeHtml.push(html);
+            else formerHtml.push(html);
+        });
+        document.getElementById('active-player-list').innerHTML = activeHtml.join('');
+        document.getElementById('former-player-list').innerHTML = formerHtml.join('');
+    }
+
+    function showIndivSummary() {
+        currentPlayer = '';
+        document.getElementById('statContent').style.display = 'none';
+        document.getElementById('indiv-summary-content').style.display = 'block';
+        
+        document.querySelectorAll('.player
