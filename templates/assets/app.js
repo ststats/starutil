@@ -488,10 +488,120 @@
         new bootstrap.Modal(document.getElementById('indivMatchesModal')).show();
     }
 
+    // ===== 시너지표 (ststats 외부 데이터에서 우리 로스터만 추려서 표시) =====
+    const STSTATS_BASE = 'https://ststats.github.io/staruniv';
+    let synergyData = null;
+    let synergyMetric = 'balloons';
+
+    function formatSecondsToHM(sec) {
+        sec = sec || 0;
+        const h = Math.floor(sec / 3600);
+        const m = Math.floor((sec % 3600) / 60);
+        return `${h}시간 ${m}분`;
+    }
+
+    async function loadSynergyData() {
+        const tbody = document.getElementById('synergy-tbody');
+        try {
+            const datesRes = await fetch(`${STSTATS_BASE}/data/dates.js`, { cache: 'no-store' });
+            const datesText = await datesRes.text();
+            const match = datesText.match(/window\.AVAILABLE_DATES\s*=\s*(\[[^\]]*\])/);
+            if (!match) throw new Error('날짜 목록 형식을 읽을 수 없습니다.');
+            const dates = JSON.parse(match[1]);
+            const latestDate = dates[0];
+            if (!latestDate) throw new Error('사용 가능한 날짜가 없습니다.');
+
+            const dataRes = await fetch(`${STSTATS_BASE}/data/daily/${latestDate}.json`, { cache: 'no-store' });
+            if (!dataRes.ok) throw new Error(`daily json HTTP ${dataRes.status}`);
+            const data = await dataRes.json();
+
+            // team 이름이 아니라 SOOP ID로 매칭한다 - 외부 쪽 team 표기가
+            // 우리 쪽 개편(예: 캄몬스타즈 -> 스타대학)과 항상 동기화된다는
+            // 보장이 없기 때문.
+            const idToMember = {};
+            dbMembers.forEach(m => {
+                const soopId = String(m['SOOP ID'] || '').trim().toLowerCase();
+                if (soopId) idToMember[soopId] = m;
+            });
+
+            synergyData = (data.members || [])
+                .map(m => {
+                    const key = String(m.id || '').trim().toLowerCase();
+                    const ours = idToMember[key];
+                    if (!ours) return null;
+                    return {
+                        ...m,
+                        ourMember: ours,
+                        active: isActiveMember(ours),
+                    };
+                })
+                .filter(Boolean);
+
+            const updatedText = data.updated_at ? `업데이트: ${data.updated_at} (외부 데이터: ststats)` : '';
+            document.getElementById('synergy-updated').innerText = updatedText;
+
+            renderSynergyTable();
+        } catch (e) {
+            console.error(e);
+            tbody.innerHTML = `<tr><td colspan="3" class="text-center text-muted py-4">데이터를 불러오지 못했습니다.</td></tr>`;
+        }
+    }
+
+    function setSynergyMetric(metric) {
+        synergyMetric = metric;
+        document.querySelectorAll('#synergy-metric-filter .filter-item').forEach(el => {
+            el.classList.toggle('active', el.dataset.metric === metric);
+        });
+        renderSynergyTable();
+    }
+
+    function renderSynergyTable() {
+        const tbody = document.getElementById('synergy-tbody');
+        if (!synergyData) return;
+
+        let rows = synergyData.filter(m => m.active);
+        if (rows.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="3" class="text-center text-muted py-4">표시할 멤버가 없습니다.</td></tr>`;
+            return;
+        }
+
+        if (synergyMetric === 'sponsor') {
+            rows = rows.slice().sort((a, b) => (b.sponsor_wins || 0) - (a.sponsor_wins || 0));
+        } else {
+            rows = rows.slice().sort((a, b) => (b[synergyMetric] || 0) - (a[synergyMetric] || 0));
+        }
+
+        tbody.innerHTML = rows.map((m, idx) => {
+            const ours = m.ourMember;
+            const name = ours['이름'] || m.nickname;
+            const tierText = (ours['티어'] !== undefined && ours['티어'] !== '') ? `${ours['티어']}티어` : '-';
+
+            let displayVal;
+            if (synergyMetric === 'balloons') displayVal = (m.balloons || 0).toLocaleString('ko-KR') + '개';
+            else if (synergyMetric === 'broadcast_seconds') displayVal = formatSecondsToHM(m.broadcast_seconds);
+            else if (synergyMetric === 'cumulative_viewers') displayVal = (m.cumulative_viewers || 0).toLocaleString('ko-KR') + '명';
+            else displayVal = `${m.sponsor_wins || 0}승 ${m.sponsor_losses || 0}패`;
+
+            return `
+            <tr>
+                <td class="text-start ps-4 text-secondary fw-bold">${idx + 1}</td>
+                <td class="text-start">
+                    <span class="d-flex align-items-center gap-2">
+                        ${avatarHtml(ours['SOOP ID'], 'player-avatar-sm')}
+                        <span class="fw-bold">${escapeHTML(name)}</span>
+                        <span class="tag-badge">${escapeHTML(tierText)}</span>
+                    </span>
+                </td>
+                <td class="fw-bold" style="color:var(--color-primary);">${escapeHTML(displayVal)}</td>
+            </tr>`;
+        }).join('');
+    }
+
     window.onload = function() {
         calculateTeamSummaries();
         renderMembersPage();
         renderLiveBroadcasts();
+        loadSynergyData();
 
         const activePageId = document.querySelector('.page-section.active').id.replace('page-', '');
         document.querySelectorAll('#mainMenu .nav-item').forEach(el => el.classList.remove('active'));
