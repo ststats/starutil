@@ -1,5 +1,6 @@
 import json
 import os
+import shutil
 from jinja2 import Environment, FileSystemLoader
 from match_link import link_rounds_to_matches
 
@@ -44,5 +45,13 @@ html_output = template.render(
 os.makedirs('docs', exist_ok=True)
 with open('docs/index.html', 'w', encoding='utf-8') as f:
     f.write(html_output)
+
+# 정적 자산(style.css / app.js / calendar.js)은 데이터와 무관하게 그대로 복사.
+# templates/assets/ 아래에 두고 소스로 관리, 빌드마다 docs/로 동기화.
+static_src = os.path.join('templates', 'assets')
+if os.path.isdir(static_src):
+    for filename in os.listdir(static_src):
+        shutil.copyfile(os.path.join(static_src, filename), os.path.join('docs', filename))
+    print(f"✅ 정적 자산 {os.listdir(static_src)} 을(를) docs/로 복사했습니다.")
 
 print("✅ 성공적으로 화이트&블루 통합 웹페이지가 구워졌습니다!")
