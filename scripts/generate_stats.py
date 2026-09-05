@@ -23,6 +23,23 @@ df_settings = pd.DataFrame(db.get('settings', []))
 # 형식 목록을 한 곳에서 관리 (추가/변경 시 여기만 수정)
 FORMATS = ['대회', '대학', '미니', 'CK']
 
+# 필수 컬럼이 없으면 아래에서 pandas KeyError로 알아보기 힘들게 죽는 대신,
+# 여기서 미리 원인을 명확히 알려주고 중단한다.
+REQUIRED_MATCH_COLS = ['날짜', '상대팀', '형식', '최종 결과']
+REQUIRED_ROUND_COLS = ['날짜', '상대팀', '형식', '우리 선수', '결과', '상대 종족', '맵', '상대 선수']
+missing_match_cols = [c for c in REQUIRED_MATCH_COLS if c not in df_matches.columns]
+missing_round_cols = [c for c in REQUIRED_ROUND_COLS if c not in df_rounds.columns]
+if missing_match_cols or missing_round_cols:
+    if missing_match_cols:
+        print(f"❌ '매치 목록' 시트에 필요한 컬럼이 없습니다: {missing_match_cols}")
+    if missing_round_cols:
+        print(f"❌ '매치 전적' 시트에 필요한 컬럼이 없습니다: {missing_round_cols}")
+    exit(1)
+
+def numeric_sum(df, col):
+    """컬럼이 아예 없을 수도 있는 선택적 숫자 필드(펀딩/지원금/사비 등)를 안전하게 합산."""
+    return pd.to_numeric(df[col], errors='coerce').sum() if col in df.columns else 0
+
 # 날짜 포맷팅 및 정렬 (형식이 어긋난 값은 NaT로 처리해 워크플로가 죽지 않도록 함)
 df_settings['날짜'] = pd.to_datetime(df_settings['날짜'], errors='coerce')
 if df_settings['날짜'].isna().any():
@@ -76,10 +93,10 @@ def build_crew_stats():
                 losses = (fmt_group['최종 결과'] == '패').sum()
                 team_data[f'{fmt} 전적'] = fmt_wl(wins, losses)
                 
-            # 자금 정보 계산 (숫자가 없는 경우 0 처리)
-            funding = pd.to_numeric(group['펀딩'], errors='coerce').sum()
-            support = pd.to_numeric(group['지원금'], errors='coerce').sum()
-            sabi = pd.to_numeric(group['사비'], errors='coerce').sum()
+            # 자금 정보 계산 (숫자가 없거나 컬럼 자체가 없어도 죽지 않게 처리)
+            funding = numeric_sum(group, '펀딩')
+            support = numeric_sum(group, '지원금')
+            sabi = numeric_sum(group, '사비')
             
             team_data['상금/펀딩'] = f"{funding:,.0f}" if funding > 0 else "-"
             team_data['상금/지원금'] = f"{support:,.0f}" if support > 0 else "-"
