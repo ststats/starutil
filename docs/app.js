@@ -1,0 +1,437 @@
+
+    let currentPlayer = ''; 
+    let currentIndivFilter = '전체';
+
+    // 구글시트 원본 텍스트를 innerHTML에 꽂을 때 깨지거나 마크업이 섞이지 않도록 이스케이프
+    function escapeHTML(str) {
+        if (str === null || str === undefined) return '';
+        return String(str).replace(/[&<>'"]/g, tag => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+        }[tag]));
+    }
+
+    function switchPage(pageId) {
+        document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('#mainMenu .nav-item').forEach(el => el.classList.remove('active'));
+        document.getElementById('page-' + pageId).classList.add('active');
+
+        const targetNav = document.querySelector(`#mainMenu .nav-item[data-page="${pageId}"]`);
+        if (targetNav) targetNav.classList.add('active');
+    }
+
+    function switchStatView(viewType) {
+        document.querySelectorAll('.sub-tab').forEach(el => el.classList.remove('active'));
+        document.getElementById('tab-' + viewType).classList.add('active');
+
+        if(viewType === 'team') {
+            document.getElementById('view-team-stat').style.display = 'block';
+            document.getElementById('view-indiv-stat').style.display = 'none';
+        } else {
+            document.getElementById('view-team-stat').style.display = 'none';
+            document.getElementById('view-indiv-stat').style.display = 'block';
+            renderIndividualSidebar();
+            showIndivSummary(); 
+        }
+    }
+
+    function toggleIndivSidebar(open) {
+        document.getElementById('indivSidebarPanel').classList.toggle('mobile-open', open);
+        document.getElementById('indivSidebarBackdrop').classList.toggle('show', open);
+    }
+
+    function parseStat(statStr) {
+        if (!statStr || statStr === "-") return { wins: 0, losses: 0, rate: 0, text: "-" };
+        const match = statStr.match(/(\d+)승 (\d+)패/);
+        if (match) {
+            const w = parseInt(match[1]), l = parseInt(match[2]);
+            return { wins: w, losses: l, rate: (w+l) > 0 ? (w/(w+l)*100) : 0, text: `${w}승 ${l}패` };
+        }
+        return { wins: 0, losses: 0, rate: 0, text: "-" };
+    }
+    function getRateText(w, l) { return (w+l) > 0 ? (w/(w+l)*100).toFixed(1) + "%" : "-"; }
+    function updateDonut(elId, txtId, subId, stat, color) {
+        document.getElementById(txtId).innerText = stat.text === "-" ? "-" : stat.rate.toFixed(1) + "%";
+        document.getElementById(subId).innerText = stat.text;
+        document.getElementById(elId).style.background = `conic-gradient(${color} ${stat.rate}%, #eee 0)`;
+    }
+
+    function calculateTeamSummaries() {
+        let tStats = { '대회': {w:0, l:0}, '대학': {w:0, l:0}, '미니': {w:0, l:0}, 'CK': {w:0, l:0} };
+        dbMatches.forEach(m => {
+            if (tStats[m['형식']] && m['최종 결과']) {
+                if (m['최종 결과'] === '승') tStats[m['형식']].w++;
+                if (m['최종 결과'] === '패') tStats[m['형식']].l++;
+            }
+        });
+        for (let fmt in tStats) {
+            document.getElementById(`t-sum-${fmt}-w`).innerText = `${tStats[fmt].w}승 ${tStats[fmt].l}패`;
+            document.getElementById(`t-sum-${fmt}-r`).innerText = getRateText(tStats[fmt].w, tStats[fmt].l);
+        }
+        renderTeamMatchesList('team-recent-list', {format: '전체'}, 10);
+    }
+
+    function renderTeamMatchesList(containerId, filters, limit) {
+        filters = filters || {};
+        const format = filters.format || '전체';
+        const opponent = filters.opponent || null;
+
+        let filtered = format === '전체' ? dbMatches : dbMatches.filter(m => m['형식'] === format);
+        if (opponent) filtered = filtered.filter(m => m['상대팀'] === opponent);
+        const sliced = limit ? filtered.slice(0, limit) : filtered;
+        
+        if (sliced.length === 0) {
+            document.getElementById(containerId).innerHTML = '<div class="text-center text-muted py-4">경기 기록이 없습니다.</div>';
+            return;
+        }
+
+        const html = sliced.map((m, idx) => {
+            let resText = m['최종 결과'] || m['최근 결과'] || '';
+            let badgeHtml = '<span class="match-badge badge-lose">LOSE</span>';
+            if (resText === '승') badgeHtml = '<span class="match-badge badge-win">WIN</span>';
+            else if (resText === '무' || resText === '무승부') badgeHtml = '<span class="match-badge badge-draw">DRAW</span>';
+
+            const collapseId = `collapse-${containerId}-${idx}`;
+            // _match_key가 있으면 그걸로 정확히 매칭(같은 날 여러 경기 구분), 없을 때만 날짜+상대팀으로 대체
+            const teamRounds = dbRounds.filter(r => {
+                if (m['_match_key'] && r['_match_key']) return r['_match_key'] === m['_match_key'];
+                return r['날짜'] === m['날짜'] && r['상대팀'] === m['상대팀'];
+            });
+            
+            let setDetailsHtml = '';
+            if (teamRounds.length > 0) {
+                setDetailsHtml = teamRounds.map((r, i) => {
+                    const isWin = r['결과'] === '승';
+                    const isDraw = r['결과'] === '무' || r['결과'] === '무승부';
+                    let resBadge = '<span class="text-danger fw-bold">패</span>';
+                    if(isWin) resBadge = '<span class="text-primary fw-bold">승</span>';
+                    if(isDraw) resBadge = '<span class="text-secondary fw-bold">무</span>';
+
+                    return `
+                    <div class="d-flex align-items-center justify-content-center py-2" style="font-size:var(--fs-body); border-bottom:1px solid #f1f3f5; min-width: 480px;">
+                        <div style="width:45px; font-weight:800; color:#888;">${i+1} SET</div>
+                        <div style="width:100px; text-align:center; color:#555;">${escapeHTML(r['맵']) || '-'}</div>
+                        <div style="width:90px; text-align:right;" class="fw-bold ${isWin?'text-primary':'text-dark'}">${escapeHTML(r['우리 선수'])||'-'}</div>
+                        <div style="width:50px; text-align:center;">${resBadge}</div>
+                        <div style="width:90px; text-align:left;" class="fw-bold ${!isWin && !isDraw ?'text-primary':'text-dark'}">${escapeHTML(r['상대 선수'])||'-'}</div>
+                    </div>`;
+                }).join('');
+            } else {
+                setDetailsHtml = '<div class="text-center text-muted py-2" style="font-size:var(--fs-body);">상세 세트 기록이 없습니다.</div>';
+            }
+
+            return `
+            <div class="match-item-wrap">
+                <div class="match-row" data-bs-toggle="collapse" data-bs-target="#${collapseId}">
+                    <div class="m-date">${m['날짜'] ? m['날짜'].split(' ')[0].substring(2) : ''}</div>
+                    <div class="m-type"><span class="tag-badge">${escapeHTML(m['형식'])}</span></div>
+                    <div class="m-opp-team">${escapeHTML(m['상대팀'])}</div>
+                    <div class="m-score">${m['세트 결과'] || '-'}</div>
+                    <div class="m-res">${badgeHtml}</div>
+                    <div class="m-arrow">▼</div>
+                </div>
+                <div class="collapse" id="${collapseId}">
+                    <div class="px-4 py-2" style="background-color:#fcfcfd; border-top:1px dashed #eaedf2;">
+                        ${setDetailsHtml}
+                    </div>
+                </div>
+            </div>
+            `;
+        }).join('');
+        document.getElementById(containerId).innerHTML = html;
+    }
+
+    function openTeamMatchModal(format) {
+        document.getElementById('teamModalTitle').innerText = format === '전체' ? '팀 전체 전적' : `팀 ${format} 전적`;
+        renderTeamMatchesList('team-modal-list', {format}, null);
+        new bootstrap.Modal(document.getElementById('teamMatchesModal')).show();
+    }
+
+    function openTeamOpponentModal(opponent) {
+        document.getElementById('teamModalTitle').innerText = `vs ${opponent} 상세 전적`;
+        renderTeamMatchesList('team-modal-list', {format: '전체', opponent}, null);
+        new bootstrap.Modal(document.getElementById('teamMatchesModal')).show();
+    }
+    document.addEventListener('click', function(e) {
+        const row = e.target.closest('.team-row-clickable');
+        if (row) openTeamOpponentModal(row.dataset.team);
+    });
+
+    function getProfileImgUrl(soopId) {
+        if (!soopId) return null;
+        const id = String(soopId).trim().toLowerCase();
+        // SOOP 아이디는 영문/숫자/일부 특수문자만 쓰이므로, 형식이 이상한 값은 URL/속성에 꽂지 않고 무시
+        if (!id || !/^[a-z0-9_-]+$/.test(id)) return null;
+        const prefix = id.substring(0, 2);
+        return `https://profile.img.sooplive.co.kr/LOGO/${prefix}/${id}/${id}.jpg`;
+    }
+    function avatarHtml(soopId, cls) {
+        const url = getProfileImgUrl(soopId);
+        if (!url) return `<span class="${cls} d-flex align-items-center justify-content-center">👤</span>`;
+        return `<img src="${url}" class="${cls}" onerror="this.outerHTML='<span class=\\'${cls} d-flex align-items-center justify-content-center\\'>👤</span>';">`;
+    }
+
+    // 멤버 탭 렌더링
+    const TIER_ORDER = ['갓','킹','잭','조커','스페이드','0','1','2','3','4','5','6','7','8','베이비'];
+    function tierIndex(tier) {
+        const idx = TIER_ORDER.indexOf(String(tier));
+        return idx === -1 ? TIER_ORDER.length : idx;
+    }
+    function raceShortLabel(race) {
+        if (!race) return '-';
+        if (race.includes('테란')) return 'T';
+        if (race.includes('저그')) return 'Z';
+        if (race.includes('프로토스')) return 'P';
+        return race;
+    }
+    function isActiveMember(m) {
+        return !m['퇴단일'] || String(m['퇴단일']).trim() === '';
+    }
+    function todayStr() {
+        return new Date().toISOString().split('T')[0];
+    }
+    function daysBetween(startStr, endStr) {
+        if (!startStr || !endStr) return null;
+        const start = new Date(startStr);
+        const end = new Date(endStr);
+        if (isNaN(start.getTime()) || isNaN(end.getTime())) return null;
+        return Math.floor((end - start) / 86400000) + 1;
+    }
+    function memberCardHtml(m) {
+        const tierText = (m['티어'] !== undefined && m['티어'] !== '') ? `${m['티어']}티어` : '-';
+        return `
+        <div class="member-card${isActiveMember(m) ? '' : ' former'}" onclick="openMemberProfile('${m['이름']}')">
+            ${avatarHtml(m['SOOP ID'], 'member-avatar-img')}
+            <div class="member-card-name">${escapeHTML(m['이름'])}</div>
+            <div class="member-card-tags">
+                <span class="tag-badge">${tierText}</span>
+                <span class="tag-badge">${raceShortLabel(m['종족'])}</span>
+            </div>
+        </div>`;
+    }
+    function renderMemberGroup(title, members) {
+        if (members.length === 0) return '';
+        const sorted = [...members].sort((a, b) =>
+            tierIndex(a['티어']) - tierIndex(b['티어']) || String(a['이름']).localeCompare(String(b['이름']), 'ko'));
+        return `
+        <div class="section-title">${escapeHTML(title)} <span class="text-secondary" style="font-size:var(--fs-body); font-weight:600;">${sorted.length}명</span></div>
+        <div class="member-grid mb-4">${sorted.map(memberCardHtml).join('')}</div>`;
+    }
+    function renderMembersPage() {
+        const roleOrderBase = ['감독', '코치', '선수'];
+        const allRoles = [...new Set(dbMembers.map(m => m['직책'] || '기타'))];
+        const extraRoles = allRoles.filter(r => !roleOrderBase.includes(r));
+        const roleOrder = [...roleOrderBase, ...extraRoles];
+
+        const activeMembers = dbMembers.filter(isActiveMember);
+        const formerMembers = dbMembers.filter(m => !isActiveMember(m));
+
+        let html = '';
+        roleOrder.forEach(role => {
+            const group = activeMembers.filter(m => (m['직책'] || '기타') === role);
+            html += renderMemberGroup(role, group);
+        });
+        html += renderMemberGroup('이전 멤버', formerMembers);
+
+        document.getElementById('members-groups').innerHTML = html || '<div class="text-center text-muted py-5">등록된 멤버가 없습니다.</div>';
+    }
+
+    function renderLiveBroadcasts() {
+        const container = document.getElementById('home-live-broadcast');
+        const liveMembers = dbMembers.filter(m => {
+            if (!isActiveMember(m)) return false;
+            const v = String(m['방송중'] || '').trim().toUpperCase();
+            return v === 'TRUE' || v === '방송중' || v === 'Y' || v === 'O';
+        });
+
+        if (liveMembers.length === 0) {
+            container.innerHTML = `<div class="text-center text-muted py-4" style="font-size:var(--fs-body);">현재 방송 중인 멤버가 없습니다.</div>`;
+            return;
+        }
+
+        container.innerHTML = `<div class="member-grid">${liveMembers.map(m => `
+            <div class="member-card" onclick="openMemberProfile('${m['이름']}')">
+                ${avatarHtml(m['SOOP ID'], 'member-avatar-img')}
+                <div class="member-card-name">${escapeHTML(m['이름'])}</div>
+                <div class="member-card-tags"><span class="tag-badge tag-badge-live">🔴 LIVE</span></div>
+            </div>`).join('')}</div>`;
+    }
+
+    function openMemberProfile(name) {
+        const m = dbMembers.find(x => x['이름'] === name);
+        if (!m) return;
+
+        document.getElementById('mp-name').innerText = name;
+        document.getElementById('mp-role-badge').innerText = m['직책'] || '미정';
+        document.getElementById('mp-race-badge').innerText = raceShortLabel(m['종족']);
+        document.getElementById('mp-tier-badge').innerText = (m['티어'] !== undefined && m['티어'] !== '') ? `${m['티어']}티어` : '티어 미정';
+
+        const avatarUrl = getProfileImgUrl(m['SOOP ID']);
+        const avatarEl = document.getElementById('mp-avatar');
+        avatarEl.innerHTML = avatarUrl
+            ? `<img src="${avatarUrl}" onerror="this.parentElement.innerHTML='👤';">`
+            : '👤';
+
+        const active = isActiveMember(m);
+        const days = m['입단일'] ? daysBetween(m['입단일'], active ? todayStr() : (m['퇴단일'] || null)) : null;
+        const daysLabel = days !== null ? ` (${days}일${active ? '째' : ''})` : '';
+        const period = m['입단일'] ? `${m['입단일']} ~ ${active ? '현재' : (m['퇴단일'] || '-')}${daysLabel}` : '-';
+        const soopId = m['SOOP ID'];
+        const isValidSoopId = soopId && /^[a-zA-Z0-9_-]+$/.test(String(soopId).trim());
+        const broadcast = isValidSoopId
+            ? `<a href="https://www.sooplive.com/station/${encodeURIComponent(String(soopId).trim())}" target="_blank" rel="noopener" style="display:inline-flex; align-items:center;">방송국</a>`
+            : '-';
+
+        const rows = [
+            ['성별', escapeHTML(m['성별']) || '-'],
+            ['생년월일', escapeHTML(m['생년월일']) || '-'],
+            ['MBTI', escapeHTML(m['MBTI']) || '-'],
+            ['활동기간', period],
+            ['방송국', broadcast],
+        ];
+        document.getElementById('mp-info-body').innerHTML = rows.map(([label, val]) => `
+            <tr>
+                <td class="text-secondary" style="width:90px; font-weight:700; border-color:#f1f3f5; padding-left:0;">${label}</td>
+                <td class="fw-bold text-dark" style="border-color:#f1f3f5;">${val}</td>
+            </tr>`).join('');
+
+        new bootstrap.Modal(document.getElementById('memberProfileModal')).show();
+    }
+
+    function renderIndividualSidebar() {
+        const activeHtml = [], formerHtml = [];
+        dbMembers.forEach(m => {
+            const html = `<div class="player-item" id="side-player-${m['이름']}" onclick="selectPlayer('${m['이름']}')">
+                            <span>${escapeHTML(m['이름'])}</span> <span class="item-sub">${escapeHTML(m['종족'])||''}</span>
+                          </div>`;
+            if(!m['퇴단일'] || m['퇴단일'].trim() === '') activeHtml.push(html);
+            else formerHtml.push(html);
+        });
+        document.getElementById('active-player-list').innerHTML = activeHtml.join('');
+        document.getElementById('former-player-list').innerHTML = formerHtml.join('');
+    }
+
+    function showIndivSummary() {
+        currentPlayer = '';
+        toggleIndivSidebar(false);
+        document.getElementById('statContent').style.display = 'none';
+        document.getElementById('indiv-summary-content').style.display = 'block';
+        
+        document.querySelectorAll('.player-item').forEach(el => el.classList.remove('active'));
+        document.getElementById('side-btn-summary').classList.add('active');
+
+        const activeMembers = dbMembers.filter(m => !m['퇴단일'] || m['퇴단일'].trim() === '');
+        let html = '';
+        activeMembers.forEach(m => {
+            const pStat = playersStats.find(x => x['이름'] === m['이름']) || {};
+            const name = m['이름'];
+            html += `<tr style="border-bottom:1px solid #f1f3f5; cursor:pointer;" onclick="selectPlayer('${name}')">
+                <td class="text-start ps-4 fw-bold text-dark"><span class="d-flex align-items-center gap-2">${avatarHtml(m['SOOP ID'], 'player-avatar-sm')}${escapeHTML(name)}</span></td>
+                <td>${pStat['대회 전적'] || '-'}</td>
+                <td>${pStat['대학 전적'] || '-'}</td>
+                <td>${pStat['미니 전적'] || '-'}</td>
+                <td>${pStat['CK 전적'] || '-'}</td>
+            </tr>`;
+        });
+        document.getElementById('indiv-summary-tbody').innerHTML = html;
+    }
+
+    function selectPlayer(name) {
+        currentPlayer = name;
+        toggleIndivSidebar(false);
+        document.getElementById('indiv-summary-content').style.display = 'none';
+        document.getElementById('statContent').style.display = 'block';
+
+        document.querySelectorAll('.player-item').forEach(el => el.classList.remove('active'));
+        document.getElementById('side-btn-summary').classList.remove('active');
+        const sideItem = document.getElementById(`side-player-${name}`);
+        if(sideItem) sideItem.classList.add('active');
+
+        const pStat = playersStats.find(x => x['이름'] === name) || {};
+        const pDb = dbMembers.find(x => x['이름'] === name) || {};
+
+        document.getElementById('p-name').innerText = name;
+        document.getElementById('p-tier').innerText = (pDb['티어'] || pDb['입단 티어'] || pDb['직책'] || '미정') + (pDb['직책'] === '선수' ? ' 티어' : '');
+        document.getElementById('p-race').innerText = pDb['종족'] || '종족 미정';
+
+        const avatarUrl = getProfileImgUrl(pDb['SOOP ID']);
+        const avatarEl = document.getElementById('p-avatar');
+        if (avatarUrl) {
+            avatarEl.innerHTML = `<img src="${avatarUrl}" onerror="this.parentElement.innerHTML='👤';">`;
+        } else {
+            avatarEl.innerHTML = '👤';
+        }
+
+        updateDonut('d-fmt-1', 'dt-fmt-1', 'dw-fmt-1', parseStat(pStat['대회 전적']), 'var(--color-primary)');
+        updateDonut('d-fmt-2', 'dt-fmt-2', 'dw-fmt-2', parseStat(pStat['대학 전적']), 'var(--color-primary)');
+        updateDonut('d-fmt-3', 'dt-fmt-3', 'dw-fmt-3', parseStat(pStat['미니 전적']), 'var(--color-primary)');
+
+        updateDonut('d-race-t', 'dt-race-t', 'dw-race-t', parseStat(pStat['테란전 전적']), '#1976d2');
+        updateDonut('d-race-z', 'dt-race-z', 'dw-race-z', parseStat(pStat['저그전 전적']), '#7b1fa2');
+        updateDonut('d-race-p', 'dt-race-p', 'dw-race-p', parseStat(pStat['프로토스전 전적']), '#f57f17');
+
+        renderIndivMatchesList('indiv-recent-list', currentIndivFilter, 10);
+    }
+
+    function setIndivFilter(format) {
+        currentIndivFilter = format;
+        document.querySelectorAll('#indiv-filters .filter-item').forEach(el => el.classList.remove('active'));
+        
+        const activeNavEl = Array.from(document.querySelectorAll('#indiv-filters .filter-item')).find(el => el.innerText === format);
+        if(activeNavEl) activeNavEl.classList.add('active');
+
+        renderIndivMatchesList('indiv-recent-list', format, 10);
+    }
+
+    function renderIndivMatchesList(containerId, format, limit) {
+        let filtered = dbRounds.filter(m => m['우리 선수'] === currentPlayer);
+        if (format !== '전체') filtered = filtered.filter(m => m['형식'] === format);
+        const sliced = limit ? filtered.slice(0, limit) : filtered;
+
+        if (sliced.length === 0) {
+            document.getElementById(containerId).innerHTML = '<div class="text-center text-muted py-4">경기 기록이 없습니다.</div>';
+            return;
+        }
+
+        const html = sliced.map(m => {
+            let resText = m['결과'] || '';
+            let badgeHtml = '<span class="match-badge badge-lose">LOSE</span>';
+            if (resText === '승') badgeHtml = '<span class="match-badge badge-win">WIN</span>';
+            else if (resText === '무' || resText === '무승부') badgeHtml = '<span class="match-badge badge-draw">DRAW</span>';
+
+            return `
+            <div class="match-item-wrap">
+                <div class="match-row" style="cursor:default;">
+                    <div class="m-date">${m['날짜'] ? m['날짜'].split(' ')[0].substring(2) : ''}</div>
+                    <div class="m-type"><span class="tag-badge">${escapeHTML(m['형식'])}</span></div>
+                    <div class="m-opp-team">${escapeHTML(m['상대팀'])}</div>
+                    <div class="m-opp-player">${escapeHTML(m['상대 선수'])}</div>
+                    <div class="m-map">${escapeHTML(m['맵']) || '-'}</div>
+                    <div class="m-res">${badgeHtml}</div>
+                </div>
+            </div>
+            `;
+        }).join('');
+        document.getElementById(containerId).innerHTML = html;
+    }
+
+    function openIndivMatchModal() {
+        const titleText = currentIndivFilter === '전체' ? `${currentPlayer} 개인 전체 전적` : `${currentPlayer} 전체 전적 (${currentIndivFilter})`;
+        document.getElementById('indivModalTitle').innerText = titleText;
+        renderIndivMatchesList('indiv-modal-list', currentIndivFilter, null);
+        new bootstrap.Modal(document.getElementById('indivMatchesModal')).show();
+    }
+
+    window.onload = function() {
+        calculateTeamSummaries();
+        renderMembersPage();
+        renderLiveBroadcasts();
+
+        const activePageId = document.querySelector('.page-section.active').id.replace('page-', '');
+        document.querySelectorAll('#mainMenu .nav-item').forEach(el => el.classList.remove('active'));
+        const targetNav = document.querySelector(`#mainMenu .nav-item[data-page="${activePageId}"]`);
+        if (targetNav) targetNav.classList.add('active');
+
+        const today = new Date();
+        calSelectedDateStr = calGetFormatDate(today.getFullYear(), today.getMonth() + 1, today.getDate());
+        calLoadPublicData();
+    };
