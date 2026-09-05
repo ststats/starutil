@@ -1,155 +1,194 @@
 <!DOCTYPE html>
-<html lang="ko" data-bs-theme="dark">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>스타크래프트 팀 전적 통계</title>
-    <!-- Bootstrap 5 CSS -->
+    <title>스타크래프트 전적 검색</title>
+    <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- DataTables CSS (표 정렬 기능) -->
-    <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
-    <!-- 폰트: Pretendard -->
+    <!-- Pretendard Font -->
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
     <style>
-        body { font-family: 'Pretendard', sans-serif; background-color: #121212; }
-        .header-title { font-weight: 800; color: #00d2ff; text-shadow: 0 0 10px rgba(0, 210, 255, 0.5); }
-        .nav-pills .nav-link.active { background-color: #00d2ff; color: #000; font-weight: bold; }
-        .nav-pills .nav-link { color: #fff; }
-        .nav-tabs .nav-link.active { border-color: #00d2ff #00d2ff #121212; color: #00d2ff; font-weight: bold; }
-        .nav-tabs .nav-link { color: #888; border-bottom: 1px solid #444; }
-        .table { font-size: 0.9rem; }
-        .table th { background-color: #1e1e1e; color: #00d2ff; text-align: center; vertical-align: middle; }
-        .table td { text-align: center; vertical-align: middle; }
-        .stat-cell { color: #aaa; font-size: 0.85rem; }
-        .card { background-color: #1a1a1a; border: 1px solid #333; }
+        body { font-family: 'Pretendard', sans-serif; background-color: #f1f3f5; color: #202124; }
+        
+        /* Layout */
+        .sidebar { background-color: #fff; height: 100vh; overflow-y: auto; border-right: 1px solid #e9ecef; }
+        .main-content { padding: 30px; height: 100vh; overflow-y: auto; }
+        
+        /* Sidebar Player List */
+        .search-box { background-color: #f1f3f5; border: none; border-radius: 8px; padding: 10px 15px; width: 100%; outline: none; }
+        .player-item { padding: 12px 20px; cursor: pointer; border-bottom: 1px solid #f8f9fa; display: flex; align-items: center; transition: background 0.1s; }
+        .player-item:hover, .player-item.active { background-color: #f8f9fa; }
+        
+        /* Race Badges */
+        .race-badge { width: 22px; height: 22px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 900; color: white; margin-right: 10px; }
+        .race-Z { background-color: #8432a8; } /* 저그: 보라 */
+        .race-T { background-color: #2979ff; } /* 테란: 파랑 */
+        .race-P { background-color: #fbc02d; } /* 토스: 노랑 */
+        
+        /* Cards */
+        .stat-card { background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); padding: 24px; margin-bottom: 20px; border: 1px solid #e9ecef; }
+        
+        /* Profile Area */
+        .profile-img-placeholder { width: 90px; height: 90px; border-radius: 50%; background-color: #e9ecef; margin-right: 24px; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: #adb5bd; }
+        .profile-name { font-size: 32px; font-weight: 800; letter-spacing: -1px; margin-bottom: 8px; }
+        
+        /* Stat Items */
+        .stat-box { padding: 15px; border-radius: 8px; background-color: #f8f9fa; text-align: center; }
+        .stat-label { font-size: 13px; color: #868e96; font-weight: 600; margin-bottom: 5px; }
+        .stat-rate { font-size: 24px; font-weight: 800; color: #212529; line-height: 1.2; }
+        .stat-detail { font-size: 13px; color: #868e96; margin-top: 2px; }
+        
+        /* Maps & Opponents */
+        .list-box-title { font-size: 14px; font-weight: 700; color: #495057; border-bottom: 2px solid #212529; padding-bottom: 8px; margin-bottom: 12px; }
+        .list-box-text { font-size: 14px; color: #495057; line-height: 1.8; }
     </style>
 </head>
 <body>
 
-<div class="container my-5">
-    <div class="text-center mb-5">
-        <h1 class="header-title mb-3">⚔️ STARCRAFT STATS BOARD</h1>
-        <p class="text-secondary">팀 크루표 및 멤버 전적 상황판</p>
-    </div>
-
-    <!-- 메인 탭 (크루표 / 멤버표) -->
-    <ul class="nav nav-pills justify-content-center mb-4" id="mainTabs" role="tablist">
-        <li class="nav-item" role="presentation">
-            <button class="nav-link active px-5" data-bs-toggle="pill" data-bs-target="#crew-tab" type="button">🏢 크루표</button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link px-5" data-bs-toggle="pill" data-bs-target="#member-tab" type="button">👤 멤버표</button>
-        </li>
-    </ul>
-
-    <div class="tab-content" id="mainTabsContent">
-        <!-- 🏢 크루표 섹션 -->
-        <div class="tab-pane fade show active" id="crew-tab">
-            <div class="card p-4">
-                <ul class="nav nav-tabs mb-4">
-                    {% for season in crew_stats.keys() %}
-                    <li class="nav-item">
-                        <button class="nav-link {% if loop.first %}active{% endif %}" data-bs-toggle="tab" data-bs-target="#crew-{{ season | replace(' ', '') }}">{{ season }}</button>
-                    </li>
-                    {% endfor %}
-                </ul>
-                <div class="tab-content">
-                    {% for season, stats in crew_stats.items() %}
-                    <div class="tab-pane fade {% if loop.first %}show active{% endif %}" id="crew-{{ season | replace(' ', '') }}">
-                        <div class="table-responsive">
-                            <table class="table table-dark table-hover table-bordered datatable">
-                                <thead>
-                                    <tr>
-                                        <th>상대 크루</th><th>대회</th><th>대학</th><th>미니</th><th>CK</th>
-                                        <th>상금(펀딩)</th><th>지원금</th><th>사비</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for row in stats %}
-                                    <tr>
-                                        <td class="fw-bold text-light">{{ row['상대'] }}</td>
-                                        <td>{{ row['대회 전적'] }}</td>
-                                        <td>{{ row['대학 전적'] }}</td>
-                                        <td>{{ row['미니 전적'] }}</td>
-                                        <td>{{ row['CK 전적'] }}</td>
-                                        <td class="text-warning">{{ row['상금/펀딩'] }}</td>
-                                        <td class="text-info">{{ row['상금/지원금'] }}</td>
-                                        <td class="text-danger">{{ row['사비'] }}</td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    {% endfor %}
+<div class="container-fluid p-0">
+    <div class="row g-0">
+        <!-- 1. 좌측 사이드바 (멤버 리스트) -->
+        <div class="col-md-3 col-lg-2 sidebar d-none d-md-block">
+            <div class="p-3 border-bottom sticky-top bg-white">
+                <h6 class="fw-bold mb-3">팀 로스터 (시즌 전체)</h6>
+                <input type="text" id="searchInput" class="search-box" placeholder="🔍 멤버 검색..." onkeyup="filterPlayers()">
+            </div>
+            <div id="playerList">
+                {% for player in member_stats['전체'] %}
+                <div class="player-item" onclick="selectPlayer('{{ player.이름 }}')">
+                    <!-- 종족 아이콘은 이름에서 유추하거나 기본값 세팅 -->
+                    <div class="race-badge race-P" id="badge-{{ player.이름 }}">P</div> 
+                    <span class="fw-bold text-dark player-name-text">{{ player.이름 }}</span>
                 </div>
+                {% endfor %}
             </div>
         </div>
 
-        <!-- 👤 멤버표 섹션 -->
-        <div class="tab-pane fade" id="member-tab">
-            <div class="card p-4">
-                <ul class="nav nav-tabs mb-4">
-                    {% for season in member_stats.keys() %}
-                    <li class="nav-item">
-                        <button class="nav-link {% if loop.first %}active{% endif %}" data-bs-toggle="tab" data-bs-target="#member-{{ season | replace(' ', '') }}">{{ season }}</button>
-                    </li>
-                    {% endfor %}
-                </ul>
-                <div class="tab-content">
-                    {% for season, stats in member_stats.items() %}
-                    <div class="tab-pane fade {% if loop.first %}show active{% endif %}" id="member-{{ season | replace(' ', '') }}">
-                        <div class="table-responsive">
-                            <table class="table table-dark table-hover table-bordered datatable">
-                                <thead>
-                                    <tr>
-                                        <th>이름</th><th>대회</th><th>대학</th><th>미니</th><th>CK</th>
-                                        <th class="text-primary">vs 테란</th><th class="text-danger">vs 저그</th><th class="text-warning">vs 토스</th>
-                                        <th>주력 맵</th><th>주요 상대</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for row in stats %}
-                                    <tr>
-                                        <td class="fw-bold text-light">{{ row['이름'] }}</td>
-                                        <td>{{ row['대회 전적'] }}</td>
-                                        <td>{{ row['대학 전적'] }}</td>
-                                        <td>{{ row['미니 전적'] }}</td>
-                                        <td>{{ row['CK 전적'] }}</td>
-                                        <td class="text-primary">{{ row['테란전 전적'] }}</td>
-                                        <td class="text-danger">{{ row['저그전 전적'] }}</td>
-                                        <td class="text-warning">{{ row['프로토스전 전적'] }}</td>
-                                        <td class="stat-cell">{{ row['맵 전적'] }}</td>
-                                        <td class="stat-cell">{{ row['상대전적'] }}</td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
+        <!-- 2. 우측 메인 대시보드 -->
+        <div class="col-md-9 col-lg-10 main-content" id="mainDashboard" style="display: none;">
+            
+            <!-- 상단 프로필 카드 -->
+            <div class="stat-card d-flex align-items-center">
+                <div class="profile-img-placeholder">👤</div>
+                <div>
+                    <div class="profile-name" id="p-name">이름</div>
+                    <div class="d-flex gap-2">
+                        <span class="badge bg-dark px-3 py-2 rounded-pill fs-6 fw-normal">전체 시즌 스탯</span>
                     </div>
-                    {% endfor %}
                 </div>
             </div>
+
+            <div class="row">
+                <!-- 좌측 메인 통계: 형식별 전적 -->
+                <div class="col-xl-8">
+                    <div class="stat-card">
+                        <h5 class="fw-bold mb-4">매치 형식별 전적</h5>
+                        <div class="row g-3">
+                            <div class="col-sm-6 col-md-3"><div class="stat-box"><div class="stat-label">대회 전적</div><div class="stat-rate" id="p-fmt-1-r">0%</div><div class="stat-detail" id="p-fmt-1-w">-</div></div></div>
+                            <div class="col-sm-6 col-md-3"><div class="stat-box"><div class="stat-label">대학대전 전적</div><div class="stat-rate" id="p-fmt-2-r">0%</div><div class="stat-detail" id="p-fmt-2-w">-</div></div></div>
+                            <div class="col-sm-6 col-md-3"><div class="stat-box"><div class="stat-label">미니대전 전적</div><div class="stat-rate" id="p-fmt-3-r">0%</div><div class="stat-detail" id="p-fmt-3-w">-</div></div></div>
+                            <div class="col-sm-6 col-md-3"><div class="stat-box"><div class="stat-label">CK 전적</div><div class="stat-rate" id="p-fmt-4-r">0%</div><div class="stat-detail" id="p-fmt-4-w">-</div></div></div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <h5 class="fw-bold mb-4">종족전 전적</h5>
+                        <div class="row g-3">
+                            <div class="col-md-4"><div class="stat-box" style="border-top: 3px solid #2979ff;"><div class="stat-label">VS 테란 (T)</div><div class="stat-rate" id="p-race-t-r">0%</div><div class="stat-detail" id="p-race-t-w">-</div></div></div>
+                            <div class="col-md-4"><div class="stat-box" style="border-top: 3px solid #8432a8;"><div class="stat-label">VS 저그 (Z)</div><div class="stat-rate" id="p-race-z-r">0%</div><div class="stat-detail" id="p-race-z-w">-</div></div></div>
+                            <div class="col-md-4"><div class="stat-box" style="border-top: 3px solid #fbc02d;"><div class="stat-label">VS 토스 (P)</div><div class="stat-rate" id="p-race-p-r">0%</div><div class="stat-detail" id="p-race-p-w">-</div></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 우측 서브 통계: 맵 & 주요 상대 -->
+                <div class="col-xl-4">
+                    <div class="stat-card h-100">
+                        <div class="mb-4">
+                            <div class="list-box-title">주력 맵 TOP 3</div>
+                            <div class="list-box-text" id="p-maps">데이터 없음</div>
+                        </div>
+                        <div>
+                            <div class="list-box-title">주요 상대 TOP 3</div>
+                            <div class="list-box-text" id="p-opps">데이터 없음</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
+        
+        <!-- 대시보드 로딩 전 안내 화면 -->
+        <div class="col-md-9 col-lg-10 d-flex justify-content-center align-items-center bg-light" id="welcomeScreen" style="height: 100vh;">
+            <div class="text-center text-muted">
+                <h3>👈 좌측에서 멤버를 선택해주세요.</h3>
+                <p>선택한 멤버의 상세 스탯 대시보드가 이곳에 나타납니다.</p>
+            </div>
+        </div>
+
     </div>
 </div>
 
-<!-- JS Scripts -->
-<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 <script>
-    $(document).ready(function() {
-        // 테이블 자동 정렬 및 페이징 기능 활성화
-        $('.datatable').DataTable({
-            "language": { "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/ko.json" },
-            "pageLength": 25,
-            "ordering": true,
-            "info": false,
-            "lengthChange": false
+    // 파이썬 Jinja2가 넘겨준 데이터를 자바스크립트 변수로 안전하게 저장
+    const playersData = {{ member_stats['전체'] | tojson }};
+    
+    // "3승 2패 (60.0%)" 같은 문자열을 분리해서 예쁘게 보여주기 위한 헬퍼 함수
+    function parseStat(statStr) {
+        if (!statStr || statStr === "-") return { wl: "-", rate: "-" };
+        // 정규식으로 승, 패, 승률 추출
+        const match = statStr.match(/(\d+승 \d+패) \(([\d.]+%)\)/);
+        if (match) {
+            return { wl: match[1], rate: match[2] };
+        }
+        return { wl: statStr, rate: "-" };
+    }
+
+    function selectPlayer(name) {
+        // UI 처리
+        document.getElementById('welcomeScreen').style.display = 'none';
+        document.getElementById('mainDashboard').style.display = 'block';
+        document.querySelectorAll('.player-item').forEach(el => el.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+
+        // 데이터 찾기
+        const p = playersData.find(x => x['이름'] === name);
+        if (!p) return;
+
+        // 이름 세팅
+        document.getElementById('p-name').innerText = p['이름'];
+
+        // 형식별 전적 파싱 및 세팅
+        const f1 = parseStat(p['대회 전적']); document.getElementById('p-fmt-1-r').innerText = f1.rate; document.getElementById('p-fmt-1-w').innerText = f1.wl;
+        const f2 = parseStat(p['대학 전적']); document.getElementById('p-fmt-2-r').innerText = f2.rate; document.getElementById('p-fmt-2-w').innerText = f2.wl;
+        const f3 = parseStat(p['미니 전적']); document.getElementById('p-fmt-3-r').innerText = f3.rate; document.getElementById('p-fmt-3-w').innerText = f3.wl;
+        const f4 = parseStat(p['CK 전적']);  document.getElementById('p-fmt-4-r').innerText = f4.rate; document.getElementById('p-fmt-4-w').innerText = f4.wl;
+
+        // 종족전 전적 파싱 및 세팅
+        const rT = parseStat(p['테란전 전적']); document.getElementById('p-race-t-r').innerText = rT.rate; document.getElementById('p-race-t-w').innerText = rT.wl;
+        const rZ = parseStat(p['저그전 전적']); document.getElementById('p-race-z-r').innerText = rZ.rate; document.getElementById('p-race-z-w').innerText = rZ.wl;
+        const rP = parseStat(p['프로토스전 전적']); document.getElementById('p-race-p-r').innerText = rP.rate; document.getElementById('p-race-p-w').innerText = rP.wl;
+
+        // 맵 & 상대 (가운데 점(·)을 줄바꿈(<br>)으로 변경해서 세로로 예쁘게 정렬)
+        document.getElementById('p-maps').innerHTML = (p['맵 전적'] || "-").replace(/ · /g, "<br>");
+        document.getElementById('p-opps').innerHTML = (p['상대전적'] || "-").replace(/ · /g, "<br>");
+    }
+
+    // 좌측 사이드바 검색 필터링 기능
+    function filterPlayers() {
+        const input = document.getElementById('searchInput').value.toLowerCase();
+        const items = document.querySelectorAll('.player-item');
+        items.forEach(item => {
+            const name = item.querySelector('.player-name-text').innerText.toLowerCase();
+            if (name.includes(input)) {
+                item.style.display = "flex";
+            } else {
+                item.style.display = "none";
+            }
         });
-    });
+    }
 </script>
+
 </body>
 </html>
