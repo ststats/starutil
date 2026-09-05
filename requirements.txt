@@ -1,0 +1,4 @@
+pandas
+gspread
+jinja2
+openpyxl
