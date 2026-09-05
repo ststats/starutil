@@ -56,9 +56,9 @@
                     <div class="section-title">
                         이달의 일정
                         <div class="cal-nav-group">
-                            <button class="cal-nav-btn" onclick="changeMonth(-1)">‹</button>
+                            <button class="cal-nav-btn" onclick="changeMonth(-1)"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
                             <div id="monthTitle" class="cal-nav-badge"></div>
-                            <button class="cal-nav-btn" onclick="changeMonth(1)">›</button>
+                            <button class="cal-nav-btn" onclick="changeMonth(1)"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
                         </div>
                     </div>
                     <!-- 가로 스크롤 허용 캘린더 구역 -->
@@ -367,7 +367,7 @@
             <div class="col-lg-5 d-flex flex-column">
                 <div class="section-title">
                     최근 전적
-                    <button class="btn-view-all" onclick="openTeamMatchModal('전체')">전체보기 ›</button>
+                    <button class="btn-view-all" onclick="openTeamMatchModal('전체')">전체보기<svg width="7" height="7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="margin-left:2px; vertical-align:middle;"><polyline points="9 6 15 12 9 18"></polyline></svg></button>
                 </div>
                 <div class="clean-card flex-grow-0 p-0 overflow-hidden" style="border-radius: 10px;">
                     <div class="match-list-scroll">
@@ -392,7 +392,7 @@
             <div class="col-md-3">
                 <button class="btn-clean w-100 d-md-none mb-2 d-flex justify-content-between align-items-center" type="button" onclick="toggleIndivSidebar(true)">
                     <span>선수 목록</span>
-                    <span>▸</span>
+                    <span><svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"></polyline></svg></span>
                 </button>
 
                 <div class="indiv-sidebar-backdrop" id="indivSidebarBackdrop" onclick="toggleIndivSidebar(false)"></div>
@@ -403,7 +403,7 @@
                     </div>
                     <div class="sidebar-list">
                         <div class="sidebar-header sidebar-header-toggle" data-bs-toggle="collapse" data-bs-target="#sec-summary">
-                            종합 통계 <span class="sidebar-chevron">▾</span>
+                            종합 통계 <svg class="sidebar-chevron" width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
                         </div>
                         <div class="collapse show" id="sec-summary">
                             <div class="player-item" id="side-btn-summary" onclick="showIndivSummary()">
@@ -412,14 +412,14 @@
                         </div>
 
                         <div class="sidebar-header sidebar-header-toggle" data-bs-toggle="collapse" data-bs-target="#sec-active">
-                            현역 멤버 <span class="sidebar-chevron">▾</span>
+                            현역 멤버 <svg class="sidebar-chevron" width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
                         </div>
                         <div class="collapse show" id="sec-active">
                             <div class="sidebar-scroll" id="active-player-list"></div>
                         </div>
 
                         <div class="sidebar-header sidebar-header-toggle" data-bs-toggle="collapse" data-bs-target="#sec-former">
-                            이전 멤버 <span class="sidebar-chevron">▾</span>
+                            이전 멤버 <svg class="sidebar-chevron" width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
                         </div>
                         <div class="collapse" id="sec-former">
                             <div class="sidebar-scroll" id="former-player-list"></div>
@@ -496,7 +496,7 @@
                                 <div class="filter-item" onclick="setIndivFilter('CK')">CK</div>
                             </div>
                         </div>
-                        <button class="btn-view-all" onclick="openIndivMatchModal()">전체보기 ›</button>
+                        <button class="btn-view-all" onclick="openIndivMatchModal()">전체보기<svg width="7" height="7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="margin-left:2px; vertical-align:middle;"><polyline points="9 6 15 12 9 18"></polyline></svg></button>
                     </div>
 
                     <div class="clean-card p-0 overflow-hidden" style="border-radius: 10px;">

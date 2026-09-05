@@ -237,25 +237,86 @@
         document.getElementById('members-groups').innerHTML = html || '<div class="text-center text-muted py-5">등록된 멤버가 없습니다.</div>';
     }
 
-    function renderLiveBroadcasts() {
+    // 홈 화면 - 현재 방송중 목록.
+    // 참고 프로젝트(ststats)의 개인페이지 패턴 그대로: bjapi.afreecatv.com을
+    // 브라우저에서 직접 fetch한다 (CORS 허용됨, 확인됨). 활성 멤버가 소수라
+    // 프록시/백엔드 배치 작업 없이 페이지 로드 시점에 병렬로 바로 체크한다 -
+    // 그래서 워크플로를 몇 분마다 돌릴 필요가 없고, 열 때마다 최신 상태.
+    async function checkIsLiveRealtime(soopId) {
+        try {
+            const res = await fetch(`https://bjapi.afreecatv.com/api/${soopId}/station`);
+            if (!res.ok) return null;
+            const data = await res.json();
+            if (!data || !data.broad) return null;
+            return {
+                broad: data.broad,
+                broadStart: (data.station && data.station.broad_start) || null,
+            };
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function formatLiveElapsed(broadStart) {
+        if (!broadStart) return '';
+        const startDate = new Date(String(broadStart).replace(' ', 'T'));
+        if (isNaN(startDate.getTime())) return '';
+        const elapsedSec = Math.max(0, Math.floor((Date.now() - startDate.getTime()) / 1000));
+        const eh = Math.floor(elapsedSec / 3600);
+        const em = Math.floor((elapsedSec % 3600) / 60);
+        return (eh > 0 ? `${eh}시간 ${em}분` : `${em}분`) + ' 방송중';
+    }
+
+    async function renderLiveBroadcasts() {
         const container = document.getElementById('home-live-broadcast');
-        const liveMembers = dbMembers.filter(m => {
+        const activeMembers = dbMembers.filter(m => {
             if (!isActiveMember(m)) return false;
-            const v = String(m['방송중'] || '').trim().toUpperCase();
-            return v === 'TRUE' || v === '방송중' || v === 'Y' || v === 'O';
+            const soopId = m['SOOP ID'];
+            return soopId && /^[a-zA-Z0-9_-]+$/.test(String(soopId).trim());
         });
 
-        if (liveMembers.length === 0) {
+        if (activeMembers.length === 0) {
             container.innerHTML = `<div class="text-center text-muted py-4" style="font-size:var(--fs-body);">현재 방송 중인 멤버가 없습니다.</div>`;
             return;
         }
 
-        container.innerHTML = `<div class="member-grid">${liveMembers.map(m => `
-            <div class="member-card" onclick="openMemberProfile('${m['이름']}')">
-                ${avatarHtml(m['SOOP ID'], 'member-avatar-img')}
-                <div class="member-card-name">${escapeHTML(m['이름'])}</div>
-                <div class="member-card-tags"><span class="tag-badge tag-badge-live">🔴 LIVE</span></div>
-            </div>`).join('')}</div>`;
+        container.innerHTML = `<div class="text-center text-muted py-4" style="font-size:var(--fs-body);">방송 상태 확인 중...</div>`;
+
+        const settled = await Promise.allSettled(
+            activeMembers.map(m => checkIsLiveRealtime(m['SOOP ID']).then(live => ({ member: m, live })))
+        );
+        const liveList = settled
+            .filter(r => r.status === 'fulfilled' && r.value.live)
+            .map(r => r.value);
+
+        if (liveList.length === 0) {
+            container.innerHTML = `<div class="text-center text-muted py-4" style="font-size:var(--fs-body);">현재 방송 중인 멤버가 없습니다.</div>`;
+            return;
+        }
+
+        container.innerHTML = `<div class="live-broadcast-grid">${liveList.map(({ member: m, live }) => {
+            const { broad, broadStart } = live;
+            const soopId = m['SOOP ID'];
+            const viewerText = broad.current_sum_viewer != null ? broad.current_sum_viewer.toLocaleString('ko-KR') + '명 시청' : '';
+            const elapsedText = formatLiveElapsed(broadStart);
+            const metaText = [viewerText, elapsedText].filter(Boolean).join(' · ');
+
+            return `
+            <a class="live-broadcast-card" href="https://play.sooplive.co.kr/${encodeURIComponent(soopId)}" target="_blank" rel="noopener">
+                <div class="live-thumb-wrap">
+                    <img class="live-thumb" src="https://liveimg.sooplive.co.kr/m/${broad.broad_no}" alt="방송 화면" onerror="this.style.display='none';">
+                    <span class="live-badge">LIVE</span>
+                </div>
+                <div class="live-card-body">
+                    ${avatarHtml(soopId, 'live-card-avatar')}
+                    <div class="live-card-info">
+                        <div class="live-card-name">${escapeHTML(m['이름'])}</div>
+                        <div class="live-card-title">${escapeHTML(broad.broad_title || '')}</div>
+                        <div class="live-card-meta">${escapeHTML(metaText)}</div>
+                    </div>
+                </div>
+            </a>`;
+        }).join('')}</div>`;
     }
 
     function openMemberProfile(name) {
