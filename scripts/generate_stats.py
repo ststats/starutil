@@ -40,6 +40,18 @@ def numeric_sum(df, col):
     """컬럼이 아예 없을 수도 있는 선택적 숫자 필드(펀딩/지원금/사비 등)를 안전하게 합산."""
     return pd.to_numeric(df[col], errors='coerce').sum() if col in df.columns else 0
 
+def clean_str_col(df, col):
+    """문자열로 정확히 비교(== '승' 등)하는 컬럼은 양 끝 공백을 제거해둔다.
+    시트 셀에 실수로 공백이 붙으면('승 ') 비교가 조용히 실패해서 그 경기가
+    승패 집계에서 통째로 빠지는 사고로 이어질 수 있다."""
+    if col in df.columns:
+        df[col] = df[col].apply(lambda v: str(v).strip() if pd.notna(v) else v)
+
+for col in ['결과', '형식', '세트', '라운드', '우리 선수', '상대 선수', '상대 종족', '맵']:
+    clean_str_col(df_rounds, col)
+for col in ['최종 결과', '형식', '상대팀']:
+    clean_str_col(df_matches, col)
+
 # 날짜 포맷팅 및 정렬 (형식이 어긋난 값은 NaT로 처리해 워크플로가 죽지 않도록 함)
 df_settings['날짜'] = pd.to_datetime(df_settings['날짜'], errors='coerce')
 if df_settings['날짜'].isna().any():
