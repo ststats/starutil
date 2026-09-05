@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ko" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>스타크래프트 팀 전적 통계</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- DataTables CSS (표 정렬 기능) -->
+    <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    <!-- 폰트: Pretendard -->
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
+    <style>
+        body { font-family: 'Pretendard', sans-serif; background-color: #121212; }
+        .header-title { font-weight: 800; color: #00d2ff; text-shadow: 0 0 10px rgba(0, 210, 255, 0.5); }
+        .nav-pills .nav-link.active { background-color: #00d2ff; color: #000; font-weight: bold; }
+        .nav-pills .nav-link { color: #fff; }
+        .nav-tabs .nav-link.active { border-color: #00d2ff #00d2ff #121212; color: #00d2ff; font-weight: bold; }
+        .nav-tabs .nav-link { color: #888; border-bottom: 1px solid #444; }
+        .table { font-size: 0.9rem; }
+        .table th { background-color: #1e1e1e; color: #00d2ff; text-align: center; vertical-align: middle; }
+        .table td { text-align: center; vertical-align: middle; }
+        .stat-cell { color: #aaa; font-size: 0.85rem; }
+        .card { background-color: #1a1a1a; border: 1px solid #333; }
+    </style>
+</head>
+<body>
+
+<div class="container my-5">
+    <div class="text-center mb-5">
+        <h1 class="header-title mb-3">⚔️ STARCRAFT STATS BOARD</h1>
+        <p class="text-secondary">팀 크루표 및 멤버 전적 상황판</p>
+    </div>
+
+    <!-- 메인 탭 (크루표 / 멤버표) -->
+    <ul class="nav nav-pills justify-content-center mb-4" id="mainTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active px-5" data-bs-toggle="pill" data-bs-target="#crew-tab" type="button">🏢 크루표</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link px-5" data-bs-toggle="pill" data-bs-target="#member-tab" type="button">👤 멤버표</button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="mainTabsContent">
+        <!-- 🏢 크루표 섹션 -->
+        <div class="tab-pane fade show active" id="crew-tab">
+            <div class="card p-4">
+                <ul class="nav nav-tabs mb-4">
+                    {% for season in crew_stats.keys() %}
+                    <li class="nav-item">
+                        <button class="nav-link {% if loop.first %}active{% endif %}" data-bs-toggle="tab" data-bs-target="#crew-{{ season | replace(' ', '') }}">{{ season }}</button>
+                    </li>
+                    {% endfor %}
+                </ul>
+                <div class="tab-content">
+                    {% for season, stats in crew_stats.items() %}
+                    <div class="tab-pane fade {% if loop.first %}show active{% endif %}" id="crew-{{ season | replace(' ', '') }}">
+                        <div class="table-responsive">
+                            <table class="table table-dark table-hover table-bordered datatable">
+                                <thead>
+                                    <tr>
+                                        <th>상대 크루</th><th>대회</th><th>대학</th><th>미니</th><th>CK</th>
+                                        <th>상금(펀딩)</th><th>지원금</th><th>사비</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for row in stats %}
+                                    <tr>
+                                        <td class="fw-bold text-light">{{ row['상대'] }}</td>
+                                        <td>{{ row['대회 전적'] }}</td>
+                                        <td>{{ row['대학 전적'] }}</td>
+                                        <td>{{ row['미니 전적'] }}</td>
+                                        <td>{{ row['CK 전적'] }}</td>
+                                        <td class="text-warning">{{ row['상금/펀딩'] }}</td>
+                                        <td class="text-info">{{ row['상금/지원금'] }}</td>
+                                        <td class="text-danger">{{ row['사비'] }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- 👤 멤버표 섹션 -->
+        <div class="tab-pane fade" id="member-tab">
+            <div class="card p-4">
+                <ul class="nav nav-tabs mb-4">
+                    {% for season in member_stats.keys() %}
+                    <li class="nav-item">
+                        <button class="nav-link {% if loop.first %}active{% endif %}" data-bs-toggle="tab" data-bs-target="#member-{{ season | replace(' ', '') }}">{{ season }}</button>
+                    </li>
+                    {% endfor %}
+                </ul>
+                <div class="tab-content">
+                    {% for season, stats in member_stats.items() %}
+                    <div class="tab-pane fade {% if loop.first %}show active{% endif %}" id="member-{{ season | replace(' ', '') }}">
+                        <div class="table-responsive">
+                            <table class="table table-dark table-hover table-bordered datatable">
+                                <thead>
+                                    <tr>
+                                        <th>이름</th><th>대회</th><th>대학</th><th>미니</th><th>CK</th>
+                                        <th class="text-primary">vs 테란</th><th class="text-danger">vs 저그</th><th class="text-warning">vs 토스</th>
+                                        <th>주력 맵</th><th>주요 상대</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for row in stats %}
+                                    <tr>
+                                        <td class="fw-bold text-light">{{ row['이름'] }}</td>
+                                        <td>{{ row['대회 전적'] }}</td>
+                                        <td>{{ row['대학 전적'] }}</td>
+                                        <td>{{ row['미니 전적'] }}</td>
+                                        <td>{{ row['CK 전적'] }}</td>
+                                        <td class="text-primary">{{ row['테란전 전적'] }}</td>
+                                        <td class="text-danger">{{ row['저그전 전적'] }}</td>
+                                        <td class="text-warning">{{ row['프로토스전 전적'] }}</td>
+                                        <td class="stat-cell">{{ row['맵 전적'] }}</td>
+                                        <td class="stat-cell">{{ row['상대전적'] }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JS Scripts -->
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+<script>
+    $(document).ready(function() {
+        // 테이블 자동 정렬 및 페이징 기능 활성화
+        $('.datatable').DataTable({
+            "language": { "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/ko.json" },
+            "pageLength": 25,
+            "ordering": true,
+            "info": false,
+            "lengthChange": false
+        });
+    });
+</script>
+</body>
+</html>
