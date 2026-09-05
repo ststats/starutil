@@ -405,7 +405,7 @@
             return;
         }
 
-        statusEl.innerText = '(ststats 제공)';
+        statusEl.innerText = '';
         balloonsEl.innerText = (entry.balloons || 0).toLocaleString('ko-KR') + '개';
         hoursEl.innerText = formatSecondsToHM(entry.broadcast_seconds);
         viewersEl.innerText = (entry.cumulative_viewers || 0).toLocaleString('ko-KR') + '명';
@@ -584,7 +584,7 @@
                 })
                 .filter(Boolean);
 
-            const updatedText = data.updated_at ? `업데이트: ${data.updated_at} (외부 데이터: ststats)` : '';
+            const updatedText = data.updated_at ? `업데이트: ${data.updated_at}` : '';
             document.getElementById('synergy-updated').innerText = updatedText;
 
             renderSynergyTable();
@@ -638,14 +638,14 @@
 
             return `
             <tr>
-                <td class="text-start ps-4 text-secondary fw-bold">${idx + 1}</td>
-                <td class="text-start">
+                <td class="text-start ps-4 text-secondary fw-bold" style="white-space:nowrap;">${idx + 1}</td>
+                <td class="text-start ps-3">
                     <span class="d-flex align-items-center gap-2">
                         ${avatarHtml(ours['SOOP ID'], 'player-avatar-sm')}
                         <span class="fw-bold">${escapeHTML(name)}</span>
                     </span>
                 </td>
-                <td class="fw-bold" style="color:var(--color-primary);">${escapeHTML(displayVal)}</td>
+                <td class="fw-bold" style="color:var(--color-primary); white-space:nowrap;">${escapeHTML(displayVal)}</td>
             </tr>`;
         }).join('');
     }
