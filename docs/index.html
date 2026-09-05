@@ -39,7 +39,9 @@
         .page-section { display: none; padding: 30px 0; }
         .page-section.active { display: block; animation: fadeIn 0.2s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .section-title { font-size: 17px; font-weight: 800; color: #111; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+        
+        /* 섹션 제목 (높이를 32px로 강제 고정하여 양옆 카드의 시작 높이를 완벽하게 맞춤) */
+        .section-title { font-size: 17px; font-weight: 800; color: #111; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; height: 32px; }
         .clean-card { background: var(--color-card); border: 1px solid var(--color-border); border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.015); }
         
         /* 버튼 */
@@ -52,15 +54,15 @@
         .stat-card-box .rate { font-size: 30px; font-weight: 800; line-height: 1.1; margin-bottom: 4px; color: var(--color-primary); }
         .stat-card-box .wl { font-size: 13px; color: #888; font-weight: 600; margin-bottom: 12px; }
 
-        /* 그리드 리스트 (경기 내역 좁게 압축) */
-        .match-row { display: flex; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--color-border); font-size: 13px; }
+        /* 경기 내역 리스트 (간격을 확 줄이고 중앙으로 예쁘게 뭉치게 수정) */
+        .match-row { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--color-border); font-size: 13px; }
         .match-row:last-child { border-bottom: none; }
-        .m-date { width: 70px; color: #888; }
-        .m-type { width: 55px; text-align: center; }
-        .m-opp { flex: 1; font-weight: 700; color: #222; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 8px; }
-        .m-map { width: 90px; color: #666; text-align: center; }
-        .m-score { width: 45px; font-weight: 800; text-align: center; }
-        .m-res { width: 50px; text-align: right; }
+        .m-date { width: 65px; color: #888; text-align: center; flex-shrink: 0; }
+        .m-type { width: 50px; text-align: center; flex-shrink: 0; }
+        .m-opp { width: 160px; font-weight: 700; color: #222; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-shrink: 0; }
+        .m-map { width: 90px; color: #666; text-align: center; flex-shrink: 0; }
+        .m-score { width: 45px; font-weight: 800; text-align: center; flex-shrink: 0; }
+        .m-res { width: 45px; text-align: center; flex-shrink: 0; }
 
         /* 뱃지 */
         .tag-badge { font-size: 11px; font-weight: 700; padding: 3px 6px; border-radius: 4px; background: #f1f3f5; color: #555; border: 1px solid #e9ecef; }
@@ -89,7 +91,6 @@
 </head>
 <body>
 
-<!-- 상단 GNB 복구 및 전적 선택 -->
 <div class="top-navbar">
     <div class="logo"><img src="images/캄몬스타즈.webp" alt="로고"> 캄몬스타즈</div>
     <div class="nav-menu" id="mainMenu">
@@ -100,14 +101,12 @@
     </div>
 </div>
 
-<!-- 임시 페이지 영역 -->
 <div id="page-home" class="page-section container"><h4 class="fw-bold">홈 페이지 준비중</h4></div>
 <div id="page-schedule" class="page-section container"><h4 class="fw-bold">일정 페이지 준비중</h4></div>
 <div id="page-members" class="page-section container"><h4 class="fw-bold">멤버 페이지 준비중</h4></div>
 
 <!-- 전적 메인 페이지 -->
 <div id="page-stats" class="page-section active container">
-    <!-- 서브 탭 변경: 팀 / 개인 -->
     <div class="sub-tabs">
         <div class="sub-tab active" id="tab-team" onclick="switchStatView('team')">팀</div>
         <div class="sub-tab" id="tab-individual" onclick="switchStatView('individual')">개인</div>
@@ -118,7 +117,6 @@
     <!-- ========================================== -->
     <div id="view-team-stat">
         <div class="row g-3 mb-4">
-            <!-- 4개 요약 카드 -->
             <div class="col-6 col-md-3">
                 <div class="clean-card stat-card-box">
                     <div class="label">대회</div>
@@ -149,7 +147,6 @@
             </div>
         </div>
 
-        <!-- 카드 높이 맞춤 (align-items-stretch, flex-column, flex-grow-1 사용) -->
         <div class="row g-4 align-items-stretch mb-4">
             <!-- 좌측: 상대 전적 -->
             <div class="col-lg-7 d-flex flex-column">
@@ -324,7 +321,6 @@
                     최근 10경기
                     <button class="btn-clean" onclick="openTeamMatchModal('전체')">전체보기</button>
                 </div>
-                <!-- 리스트 간격 축소를 위해 padding을 줄임 -->
                 <div class="clean-card flex-grow-1" style="padding: 16px 20px;">
                     <div id="team-recent-list">
                         <!-- JS 렌더링 -->
@@ -367,7 +363,7 @@
                 <div class="row g-3 mb-4">
                     <div class="col-md-6">
                         <div class="clean-card h-100 p-3">
-                            <div class="section-title mb-3" style="font-size:14px; padding-bottom:8px; border-bottom:1px solid #eee;">형식별 승률</div>
+                            <div class="section-title mb-3" style="font-size:14px; padding-bottom:8px; border-bottom:1px solid #eee; height:auto;">형식별 승률</div>
                             <div class="donut-wrap">
                                 <div class="donut-box"><div class="donut" id="d-fmt-1"><span class="donut-text" id="dt-fmt-1">0%</span></div><div class="donut-label">대회</div><div class="donut-sub" id="dw-fmt-1">-</div></div>
                                 <div class="donut-box"><div class="donut" id="d-fmt-2"><span class="donut-text" id="dt-fmt-2">0%</span></div><div class="donut-label">대학</div><div class="donut-sub" id="dw-fmt-2">-</div></div>
@@ -377,7 +373,7 @@
                     </div>
                     <div class="col-md-6">
                         <div class="clean-card h-100 p-3">
-                            <div class="section-title mb-3" style="font-size:14px; padding-bottom:8px; border-bottom:1px solid #eee;">종족전 승률</div>
+                            <div class="section-title mb-3" style="font-size:14px; padding-bottom:8px; border-bottom:1px solid #eee; height:auto;">종족전 승률</div>
                             <div class="donut-wrap">
                                 <div class="donut-box"><div class="donut" id="d-race-t"><span class="donut-text" id="dt-race-t">0%</span></div><div class="donut-label text-primary">vs T</div><div class="donut-sub" id="dw-race-t">-</div></div>
                                 <div class="donut-box"><div class="donut" id="d-race-z"><span class="donut-text" id="dt-race-z">0%</span></div><div class="donut-label" style="color:purple;">vs Z</div><div class="donut-sub" id="dw-race-z">-</div></div>
@@ -387,8 +383,7 @@
                     </div>
                 </div>
 
-                <!-- 개인 최근 10경기 -->
-                <div class="section-title mt-4">
+                <div class="section-title mt-4" style="height:auto;">
                     최근 10경기
                     <div class="d-flex gap-2 align-items-center">
                         <div id="indiv-filters" class="d-flex gap-1 me-3">
@@ -412,7 +407,7 @@
 </div>
 
 <!-- ========================================== -->
-<!-- 모달 팝업 영역 -->
+<!-- 팝업 모달 -->
 <div class="modal fade" id="teamMatchesModal" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
@@ -476,7 +471,6 @@
         }
     }
 
-    // 통계 헬퍼
     function parseStat(statStr) {
         if (!statStr || statStr === "-") return { wins: 0, losses: 0, rate: 0, text: "-" };
         const match = statStr.match(/(\d+)승 (\d+)패/);
@@ -600,7 +594,7 @@
             <div class="match-row">
                 <div class="m-date">${m['날짜'] ? m['날짜'].split(' ')[0].substring(2) : ''}</div>
                 <div class="m-type"><span class="tag-badge">${m['형식']}</span></div>
-                <div class="m-opp">${m['상대팀']} / <span class="text-secondary">${m['상대 선수']}(${m['상대 종족']})</span></div>
+                <div class="m-opp">${m['상대팀']} <span style="font-weight:normal;color:#7a828e;">/ ${m['상대 선수']}(${m['상대 종족']})</span></div>
                 <div class="m-map">${m['맵']}</div>
                 <div class="m-res">
                     ${m['결과'] === '승' ? '<span class="match-badge badge-win">WIN</span>' : '<span class="match-badge badge-lose">LOSE</span>'}
