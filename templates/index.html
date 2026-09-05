@@ -83,9 +83,9 @@
 
 <!-- 시너지표: ststats(외부) 데이터에서 우리 로스터만 뽑아 방송 활동 랭킹 표시 -->
 <div id="page-synergy" class="page-section container">
-    <div class="section-title">
+    <div class="section-title" style="height:auto; flex-wrap:wrap; gap:10px;">
         시너지표
-        <div class="filter-nav" id="synergy-metric-filter">
+        <div class="filter-nav" id="synergy-metric-filter" style="margin-left:0; border-left:none; padding-left:0;">
             <div class="filter-item active" data-metric="balloons" onclick="setSynergyMetric('balloons')">별풍선</div>
             <div class="filter-item" data-metric="broadcast_seconds" onclick="setSynergyMetric('broadcast_seconds')">방송시간</div>
             <div class="filter-item" data-metric="cumulative_viewers" onclick="setSynergyMetric('cumulative_viewers')">누적시청자</div>
@@ -99,7 +99,7 @@
                     <tr>
                         <th class="text-start ps-4" style="width:50px;">순위</th>
                         <th class="text-start">멤버</th>
-                        <th style="width:140px;">수치</th>
+                        <th style="width:140px;" id="synergy-metric-label">별풍선</th>
                     </tr>
                 </thead>
                 <tbody id="synergy-tbody">
@@ -117,27 +117,27 @@
     <div class="tool-grid">
         <a class="tool-card" href="https://calm-hoxy.vercel.app/" target="_blank" rel="noopener">
             <span class="tool-card-ext">↗</span>
-            <div class="tool-card-icon">혹</div>
+            <div class="tool-card-icon"><img src="https://www.google.com/s2/favicons?sz=64&domain=calm-hoxy.vercel.app" alt="" onerror="this.style.display='none';"></div>
             <div class="tool-card-name">혹시</div>
         </a>
         <a class="tool-card" href="https://prena.io/brain/" target="_blank" rel="noopener">
             <span class="tool-card-ext">↗</span>
-            <div class="tool-card-icon">암</div>
+            <div class="tool-card-icon"><img src="https://www.google.com/s2/favicons?sz=64&domain=prena.io" alt="" onerror="this.style.display='none';"></div>
             <div class="tool-card-name">암다리</div>
         </a>
         <a class="tool-card" href="https://lazygyu.github.io/roulette/" target="_blank" rel="noopener">
             <span class="tool-card-ext">↗</span>
-            <div class="tool-card-icon">핀</div>
+            <div class="tool-card-icon"><img src="https://www.google.com/s2/favicons?sz=64&domain=lazygyu.github.io" alt="" onerror="this.style.display='none';"></div>
             <div class="tool-card-name">핀볼</div>
         </a>
         <a class="tool-card" href="https://search.naver.com/search.naver?where=nexearch&query=%EC%82%AC%EB%8B%A4%EB%A6%AC%EA%B2%8C%EC%9E%84" target="_blank" rel="noopener">
             <span class="tool-card-ext">↗</span>
-            <div class="tool-card-icon">네</div>
+            <div class="tool-card-icon"><img src="https://www.google.com/s2/favicons?sz=64&domain=search.naver.com" alt="" onerror="this.style.display='none';"></div>
             <div class="tool-card-name">네이버 사다리</div>
         </a>
         <a class="tool-card" href="https://ygosu.com/board/pan_monstarz" target="_blank" rel="noopener">
             <span class="tool-card-ext">↗</span>
-            <div class="tool-card-icon">스</div>
+            <div class="tool-card-icon"><img src="https://www.google.com/s2/favicons?sz=64&domain=ygosu.com" alt="" onerror="this.style.display='none';"></div>
             <div class="tool-card-name">스대게</div>
         </a>
     </div>
@@ -172,7 +172,12 @@
                             <tbody>
                                 {% for row in crew_stats['전체'] %}
                                 <tr class="team-row-clickable" style="border-bottom:1px solid #f1f3f5;" data-team="{{ row['상대'] | e }}">
-                                    <td class="text-start ps-4 fw-bold text-dark">{{ row['상대'] | e }}</td>
+                                    <td class="text-start ps-4 fw-bold text-dark">
+                                        <span class="d-flex align-items-center gap-2">
+                                            <img src="images/{{ (row['상대'] if row['상대'] != '내전' else '캄몬스타즈') | e }}.webp" alt="" class="team-logo-icon" style="width:16px;height:16px;" onerror="this.remove();">
+                                            {{ row['상대'] | e }}
+                                        </span>
+                                    </td>
                                     <td>{{ row['대회 전적'] | e }}</td><td>{{ row['대학 전적'] | e }}</td>
                                     <td>{{ row['미니 전적'] | e }}</td><td>{{ row['CK 전적'] | e }}</td>
                                     <!-- 상세보기 표시: 얇은 쉐브런 아이콘 -->
