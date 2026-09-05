@@ -73,6 +73,8 @@
         /* 경기 내역 리스트 (간격 압축 및 팀/선수 완벽 분리) */
         .match-row { display: flex; align-items: center; justify-content: center; gap: 15px; padding: 10px 15px; font-size: var(--fs-body); background: #fff; transition: background 0.1s; cursor: pointer; }
         .match-row:hover { background: var(--color-primary-tint); }
+        .match-row.match-header { background: #f4f5f7 !important; cursor: default; font-weight: 700; color: #666; }
+        .match-row.match-header .m-opp-team, .match-row.match-header .m-opp-player { font-weight: 700; color: #666; }
         .m-date { width: 60px; color: #888; text-align: center; flex-shrink: 0; }
         .m-type { width: 45px; text-align: center; flex-shrink: 0; }
         .m-opp-team { flex: 1; font-weight: 700; color: #222; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 5px; }
@@ -103,6 +105,9 @@
         .sidebar-scroll::-webkit-scrollbar-thumb { background: #c7d6f5; border-radius: 3px; }
         .player-item { padding: 10px 20px; font-size: var(--fs-subheading); font-weight: 600; color: #444; cursor: pointer; border-bottom: 1px solid #f9f9f9; display: flex; justify-content: space-between; align-items: center; }
         .player-item .item-sub { font-size: var(--fs-micro); color: #888; }
+        .player-avatar-sm { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; background: #e9ecef; flex-shrink: 0; }
+        .profile-avatar { width: 72px; height: 72px; border-radius: 50%; background: #f1f3f5; font-size: var(--fs-hero); display: flex; align-items: center; justify-content: center; margin-right: 20px; overflow: hidden; flex-shrink: 0; }
+        .profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
         .player-item:hover, .player-item.active { background: var(--color-primary-tint); color: var(--color-primary); font-weight: 800; }
         
         /* 도넛 차트 */
@@ -322,6 +327,14 @@
                     <button class="btn-clean" onclick="openTeamMatchModal('전체')">전체보기</button>
                 </div>
                 <div class="clean-card flex-grow-0 p-0 overflow-hidden" style="border-radius: 10px;">
+                    <div class="match-row match-header">
+                        <div class="m-date">날짜</div>
+                        <div class="m-type">형식</div>
+                        <div class="m-opp-team">상대팀</div>
+                        <div class="m-score">스코어</div>
+                        <div class="m-res">결과</div>
+                        <div class="m-arrow"></div>
+                    </div>
                     <div id="team-recent-list"></div>
                 </div>
             </div>
@@ -374,7 +387,7 @@
 
                 <div id="statContent" style="display: none;">
                     <div class="clean-card d-flex align-items-center mb-4 p-4">
-                        <div style="width:72px;height:72px;border-radius:50%;background:#f1f3f5;font-size:var(--fs-hero);display:flex;align-items:center;justify-content:center;margin-right:20px;">👤</div>
+                        <div class="profile-avatar" id="p-avatar">👤</div>
                         <div>
                             <h3 class="fw-bold m-0 mb-2" id="p-name" style="letter-spacing:-1px;">이름</h3>
                             <div class="d-flex gap-2">
@@ -421,6 +434,14 @@
                         </div>
                     </div>
                     <div class="clean-card p-0 overflow-hidden" style="border-radius: 10px;">
+                        <div class="match-row match-header">
+                            <div class="m-date">날짜</div>
+                            <div class="m-type">형식</div>
+                            <div class="m-opp-team">상대팀</div>
+                            <div class="m-opp-player">상대 선수</div>
+                            <div class="m-map">맵</div>
+                            <div class="m-res">결과</div>
+                        </div>
                         <div id="indiv-recent-list"></div>
                     </div>
                 </div>
@@ -438,6 +459,14 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body p-0">
+                <div class="match-row match-header">
+                    <div class="m-date">날짜</div>
+                    <div class="m-type">형식</div>
+                    <div class="m-opp-team">상대팀</div>
+                    <div class="m-score">스코어</div>
+                    <div class="m-res">결과</div>
+                    <div class="m-arrow"></div>
+                </div>
                 <div id="team-modal-list"></div>
             </div>
         </div>
@@ -452,6 +481,14 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body p-0">
+                <div class="match-row match-header">
+                    <div class="m-date">날짜</div>
+                    <div class="m-type">형식</div>
+                    <div class="m-opp-team">상대팀</div>
+                    <div class="m-opp-player">상대 선수</div>
+                    <div class="m-map">맵</div>
+                    <div class="m-res">결과</div>
+                </div>
                 <div id="indiv-modal-list"></div>
             </div>
         </div>
@@ -588,11 +625,25 @@
         new bootstrap.Modal(document.getElementById('teamMatchesModal')).show();
     }
 
+    // SOOP(숲) 프로필 사진 URL 생성 - 예: brainzerg7 -> .../LOGO/br/brainzerg7/brainzerg7.jpg
+    function getProfileImgUrl(soopId) {
+        if (!soopId) return null;
+        const id = String(soopId).trim().toLowerCase();
+        if (!id) return null;
+        const prefix = id.substring(0, 2);
+        return `https://profile.img.sooplive.co.kr/LOGO/${prefix}/${id}/${id}.jpg`;
+    }
+    function avatarHtml(soopId, cls) {
+        const url = getProfileImgUrl(soopId);
+        if (!url) return `<span class="${cls} d-flex align-items-center justify-content-center">👤</span>`;
+        return `<img src="${url}" class="${cls}" onerror="this.outerHTML='<span class=\\'${cls} d-flex align-items-center justify-content-center\\'>👤</span>';">`;
+    }
+
     function renderIndividualSidebar() {
         const activeHtml = [], formerHtml = [];
         dbMembers.forEach(m => {
             const html = `<div class="player-item" id="side-player-${m['이름']}" onclick="selectPlayer('${m['이름']}')">
-                            <span>${m['이름']}</span> <span class="item-sub">${m['종족']||''}</span>
+                            <span class="d-flex align-items-center gap-2">${avatarHtml(m['SOOP ID'], 'player-avatar-sm')}${m['이름']}</span> <span class="item-sub">${m['종족']||''}</span>
                           </div>`;
             if(!m['퇴단일'] || m['퇴단일'].trim() === '') activeHtml.push(html);
             else formerHtml.push(html);
@@ -615,7 +666,7 @@
             const pStat = playersStats.find(x => x['이름'] === m['이름']) || {};
             const name = m['이름'];
             html += `<tr style="border-bottom:1px solid #f1f3f5; cursor:pointer;" onclick="selectPlayer('${name}')">
-                <td class="text-start ps-4 fw-bold text-dark">${name}</td>
+                <td class="text-start ps-4 fw-bold text-dark"><span class="d-flex align-items-center gap-2">${avatarHtml(m['SOOP ID'], 'player-avatar-sm')}${name}</span></td>
                 <td>${pStat['대회 전적'] || '-'}</td>
                 <td>${pStat['대학 전적'] || '-'}</td>
                 <td>${pStat['미니 전적'] || '-'}</td>
@@ -641,6 +692,14 @@
         document.getElementById('p-name').innerText = name;
         document.getElementById('p-tier').innerText = (pDb['티어'] || pDb['입단 티어'] || pDb['직책'] || '미정') + (pDb['직책'] === '선수' ? ' 티어' : '');
         document.getElementById('p-race').innerText = pDb['종족'] || '종족 미정';
+
+        const avatarUrl = getProfileImgUrl(pDb['SOOP ID']);
+        const avatarEl = document.getElementById('p-avatar');
+        if (avatarUrl) {
+            avatarEl.innerHTML = `<img src="${avatarUrl}" onerror="this.parentElement.innerHTML='👤';">`;
+        } else {
+            avatarEl.innerHTML = '👤';
+        }
 
         updateDonut('d-fmt-1', 'dt-fmt-1', 'dw-fmt-1', parseStat(pStat['대회 전적']), 'var(--color-primary)');
         updateDonut('d-fmt-2', 'dt-fmt-2', 'dw-fmt-2', parseStat(pStat['대학 전적']), 'var(--color-primary)');
