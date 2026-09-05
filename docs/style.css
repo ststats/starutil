@@ -101,7 +101,9 @@
         .m-res { width: 50px; display: flex; justify-content: center; flex-shrink: 0; }
         
         /* 아코디언 화살표 통일 */
-        .m-arrow { width: 20px; text-align: right; color: #adb5bd; font-size: 8px; transition: transform 0.2s; flex-shrink: 0; }
+        .m-arrow { width: 20px; text-align: right; color: #adb5bd; display: flex; justify-content: flex-end; transition: transform 0.2s; flex-shrink: 0; }
+        .m-arrow svg { display: block; }
+        .match-row[aria-expanded="true"] .m-arrow { transform: rotate(180deg); }
 
         /* 뱃지 */
         .tag-badge { font-size: 11px; font-weight: 700; padding: 3px 6px; border-radius: 4px; background: var(--color-primary-tint); color: #2c5cc9; border: 1px solid var(--color-primary-tint-strong); }
