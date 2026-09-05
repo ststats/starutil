@@ -45,7 +45,7 @@ jobs:
       run: |
         git config --global user.name "GitHub Actions Bot"
         git config --global user.email "actions@github.com"
-        # index.html 대신 docs/index.html 로 경로를 변경합니다!
-        git add data/*.json docs/index.html
+        # index.html 뿐 아니라 분리된 정적 자산(css/js)도 매번 갱신되므로 같이 add
+        git add data/*.json docs/index.html docs/style.css docs/app.js docs/calendar.js
         git diff --quiet && git diff --staged --quiet || git commit -m "🚀 통계 웹페이지 자동 업데이트"
         git push
