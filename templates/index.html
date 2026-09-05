@@ -10,11 +10,12 @@
     <style>
         body { font-family: 'Pretendard', sans-serif; background-color: #f8f9fa; color: #212529; }
         
-        /* 상단 네비게이션 (GNB) */
-        .navbar-custom { background-color: #111; padding: 0 20px; border-bottom: 3px solid #ff4757; }
-        .navbar-brand { font-size: 24px; font-weight: 900; color: #fff !important; letter-spacing: -1px; }
-        .nav-pills .nav-link { color: #aaa; font-weight: 600; padding: 20px 25px; border-radius: 0; }
-        .nav-pills .nav-link.active { background-color: transparent; color: #ff4757; border-bottom: 3px solid #ff4757; }
+        /* 상단 네비게이션 */
+        .navbar-custom { background-color: #111; padding: 0 20px; border-bottom: 3px solid #0056b3; }
+        .navbar-brand { font-size: 22px; font-weight: 900; color: #fff !important; letter-spacing: -1px; display: flex; align-items: center; }
+        .navbar-brand img { height: 36px; margin-right: 10px; }
+        .nav-pills .nav-link { color: #aaa; font-weight: 600; padding: 20px 25px; border-radius: 0; cursor: pointer; }
+        .nav-pills .nav-link.active { background-color: transparent; color: #fff; border-bottom: 3px solid #007bff; }
         .nav-pills .nav-link:hover { color: #fff; }
 
         /* 페이지 컨테이너 */
@@ -23,31 +24,41 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         /* 홈 - 로고 및 방송 */
-        .hero-logo-box { width: 100%; max-width: 900px; height: 250px; background-color: #2f3542; margin: 0 auto; display: flex; align-items: center; justify-content: center; border-radius: 16px; color: #fff; font-size: 2rem; font-weight: 900; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-        .stream-card { border: none; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); transition: transform 0.2s; }
+        .hero-banner { width: 100%; max-width: 1000px; margin: 0 auto; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .hero-banner img { width: 100%; height: auto; display: block; }
+        .stream-card { border: none; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); transition: transform 0.2s; background: #fff; }
         .stream-card:hover { transform: translateY(-5px); }
-        .stream-thumb { width: 100%; height: 180px; background-color: #ddd; display: flex; align-items: center; justify-content: center; position: relative; }
-        .live-badge { position: absolute; top: 10px; left: 10px; background-color: red; color: white; font-size: 11px; font-weight: bold; padding: 3px 8px; border-radius: 4px; }
+        .stream-thumb { width: 100%; height: 180px; background-color: #333; display: flex; align-items: center; justify-content: center; position: relative; color: #fff; }
+        .live-badge { position: absolute; top: 10px; left: 10px; background-color: #ff0000; color: white; font-size: 11px; font-weight: bold; padding: 3px 8px; border-radius: 4px; }
 
         /* 멤버 카드 */
         .member-card { text-align: center; background: #fff; border-radius: 16px; padding: 30px 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid #eee; margin-bottom: 20px; }
-        .member-pic { width: 100px; height: 100px; border-radius: 50%; background-color: #e9ecef; margin: 0 auto 15px auto; display: flex; align-items: center; justify-content: center; font-size: 30px; }
-        .tier-badge { background-color: #2ed573; color: #fff; font-size: 12px; padding: 4px 10px; border-radius: 20px; font-weight: 700; margin-bottom: 10px; display: inline-block; }
+        .member-pic { width: 90px; height: 90px; border-radius: 50%; background-color: #e9ecef; margin: 0 auto 15px auto; display: flex; align-items: center; justify-content: center; font-size: 30px; }
+        .tier-badge { background-color: #007bff; color: #fff; font-size: 12px; padding: 4px 10px; border-radius: 20px; font-weight: 700; margin-bottom: 10px; display: inline-block; }
 
-        /* 전적 페이지 레이아웃 (이전 코드 압축) */
-        .sidebar { background: #fff; height: calc(100vh - 70px); overflow-y: auto; border-right: 1px solid #dee2e6; }
+        /* 전적 페이지 레이아웃 */
+        .stat-subnav { margin-bottom: 25px; display: flex; gap: 10px; }
+        .stat-subnav .btn { border-radius: 30px; padding: 8px 24px; font-weight: 600; }
+        
+        /* 테이블 스타일 (팀 전적) */
+        .team-table th { background-color: #111; color: #fff; text-align: center; }
+        .team-table td { text-align: center; vertical-align: middle; background-color: #fff; }
+
+        /* 개인 전적 (사이드바 + 메인) */
+        .sidebar { background: #fff; height: calc(100vh - 200px); overflow-y: auto; border: 1px solid #dee2e6; border-radius: 12px; }
         .player-item { padding: 12px 20px; cursor: pointer; border-bottom: 1px solid #f8f9fa; }
-        .player-item:hover, .player-item.active { background-color: #f1f3f5; }
-        .stat-box { background: #fff; border: 1px solid #dee2e6; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+        .player-item:hover, .player-item.active { background-color: #f1f3f5; font-weight: bold; color: #007bff; }
+        .stat-box { background: #fff; border: 1px solid #dee2e6; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
     </style>
 </head>
 <body>
 
-<!-- 상단 GNB (글로벌 네비게이션 바) -->
+<!-- 상단 GNB -->
 <nav class="navbar navbar-custom sticky-top">
     <div class="container-fluid">
-        <a class="navbar-brand" href="#">🏆 캄몬스타즈</a>
-        <!-- 부트스트랩 nav-pills를 사용한 탭 메뉴 -->
+        <a class="navbar-brand" href="#">
+            <img src="images/캄몬스타즈.webp" alt="로고"> 캄몬스타즈
+        </a>
         <ul class="nav nav-pills" id="mainMenu">
             <li class="nav-item"><a class="nav-link active" onclick="switchPage('home')">홈</a></li>
             <li class="nav-item"><a class="nav-link" onclick="switchPage('schedule')">일정</a></li>
@@ -59,31 +70,28 @@
 
 <!-- 1. 홈 페이지 -->
 <div id="page-home" class="page-section active container">
-    <div class="hero-logo-box mb-5">
-        <!-- 나중에 진짜 이미지 태그 <img src="..."> 로 교체하시면 됩니다 -->
-        KAMMON STARS LOGO
+    <div class="hero-banner mb-5">
+        <img src="images/85971787349195374.png" alt="캄몬스타즈 배너">
     </div>
     
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h4 class="fw-bold m-0">🔴 라이브 방송 중인 멤버</h4>
-        <span class="text-muted">SOOP (아프리카TV) 연동 예정</span>
+        <h4 class="fw-bold m-0">🔴 라이브 방송</h4>
+        <span class="text-muted fs-6">SOOP 연동 대기중</span>
     </div>
 
     <div class="row g-4">
-        <!-- 임시 라이브 방송 카드 -->
         <div class="col-md-4 col-lg-3">
             <div class="stream-card">
                 <div class="stream-thumb">
                     <span class="live-badge">LIVE</span>
-                    썸네일
+                    방송 화면
                 </div>
                 <div class="p-3">
                     <h6 class="fw-bold mb-1">김윤환 방송국</h6>
-                    <p class="text-muted fs-6 m-0">스타크래프트 연습 중...</p>
+                    <p class="text-muted fs-6 m-0">스타크래프트 연습 중</p>
                 </div>
             </div>
         </div>
-        <!-- (동일한 카드를 여러 개 넣을 수 있습니다) -->
     </div>
 </div>
 
@@ -92,18 +100,16 @@
     <div class="py-5 my-5">
         <h1 class="display-1 text-muted mb-4">📅</h1>
         <h3 class="fw-bold">경기 일정을 준비 중입니다.</h3>
-        <p class="text-secondary">추후 구글 캘린더나 일정 테이블이 들어갈 자리입니다.</p>
     </div>
 </div>
 
 <!-- 3. 멤버 페이지 -->
 <div id="page-members" class="page-section container">
     <div class="mb-5 text-center">
-        <h2 class="fw-bold">TEAM ROSTER</h2>
+        <h2 class="fw-bold mb-2">TEAM ROSTER</h2>
         <p class="text-secondary">캄몬스타즈를 빛내는 멤버들입니다.</p>
     </div>
 
-    <!-- 파이썬에서 정렬해서 넘겨준 members_list를 활용하여 그룹핑 -->
     {% for role in ['감독', '코치', '선수'] %}
         <h4 class="fw-bold mb-3 border-bottom pb-2">{{ role }}진</h4>
         <div class="row g-4 mb-5">
@@ -118,7 +124,7 @@
                         <div class="tier-badge bg-dark">{{ role }}</div>
                         {% endif %}
                         <h5 class="fw-bold m-0">{{ m['이름'] }}</h5>
-                        <div class="text-muted mt-1" style="font-size:12px;">{{ m['종족'] if m['종족'] else '종족 미정' }}</div>
+                        <div class="text-muted mt-1" style="font-size:13px;">{{ m['종족'] if m['종족'] else '종족 미정' }}</div>
                     </div>
                 </div>
                 {% endif %}
@@ -127,50 +133,90 @@
     {% endfor %}
 </div>
 
-<!-- 4. 전적 페이지 (이전에 만든 대시보드) -->
-<div id="page-stats" class="page-section" style="padding: 0; max-width: 100%;">
-    <div class="row g-0">
-        <!-- 좌측 메뉴 -->
-        <div class="col-md-3 col-lg-2 sidebar">
-            <div class="p-3 border-bottom bg-light">
-                <input type="text" id="searchInput" class="form-control" placeholder="🔍 선수 검색" onkeyup="filterPlayers()">
-            </div>
-            <div id="playerList">
-                {% for player in member_stats['전체'] %}
-                <div class="player-item" onclick="selectPlayer('{{ player.이름 }}')">
-                    <span class="fw-bold player-name-text">{{ player.이름 }}</span>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-        
-        <!-- 우측 전적 대시보드 -->
-        <div class="col-md-9 col-lg-10 p-4 bg-light" id="mainDashboard" style="height: calc(100vh - 70px); overflow-y: auto;">
-            <div id="welcomeScreen" class="text-center py-5 mt-5">
-                <h3 class="text-muted fw-bold">👈 좌측에서 선수를 선택해 전적을 확인하세요!</h3>
-            </div>
+<!-- 4. 전적 페이지 -->
+<div id="page-stats" class="page-section container">
+    <div class="stat-subnav">
+        <button id="btn-team-stat" class="btn btn-primary" onclick="switchStatView('team')">🏢 팀 크루표 (상대 전적)</button>
+        <button id="btn-indiv-stat" class="btn btn-outline-secondary" onclick="switchStatView('individual')">👤 개인 전적 검색</button>
+    </div>
 
-            <div id="statContent" style="display: none;">
-                <h2 class="fw-bold mb-4" id="p-name">이름</h2>
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <div class="stat-box">
-                            <h5 class="fw-bold mb-3">형식별 전적</h5>
-                            <ul class="list-group list-group-flush">
-                                <li class="list-group-item d-flex justify-content-between"><span class="text-muted">대회</span> <strong id="p-fmt-1">-</strong></li>
-                                <li class="list-group-item d-flex justify-content-between"><span class="text-muted">대학</span> <strong id="p-fmt-2">-</strong></li>
-                                <li class="list-group-item d-flex justify-content-between"><span class="text-muted">미니/CK</span> <strong id="p-fmt-3">-</strong></li>
-                            </ul>
-                        </div>
+    <!-- 4-1. 팀 전적 (크루표) -->
+    <div id="view-team-stat">
+        <div class="table-responsive bg-white rounded-3 shadow-sm border">
+            <table class="table team-table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>상대 크루</th>
+                        <th>대회</th>
+                        <th>대학</th>
+                        <th>미니</th>
+                        <th>CK</th>
+                        <th class="text-warning">펀딩(상금)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in crew_stats['전체'] %}
+                    <tr>
+                        <td class="fw-bold">{{ row['상대'] }}</td>
+                        <td>{{ row['대회 전적'] }}</td>
+                        <td>{{ row['대학 전적'] }}</td>
+                        <td>{{ row['미니 전적'] }}</td>
+                        <td>{{ row['CK 전적'] }}</td>
+                        <td class="fw-bold text-primary">{{ row['상금/펀딩'] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 4-2. 개인 전적 (대시보드) -->
+    <div id="view-indiv-stat" style="display: none;">
+        <div class="row g-4">
+            <!-- 좌측 선수 목록 -->
+            <div class="col-md-4 col-lg-3">
+                <div class="sidebar">
+                    <div class="p-3 border-bottom bg-light sticky-top">
+                        <input type="text" id="searchInput" class="form-control" placeholder="🔍 선수 검색" onkeyup="filterPlayers()">
                     </div>
-                    <div class="col-md-6">
-                        <div class="stat-box">
-                            <h5 class="fw-bold mb-3">종족전 전적</h5>
-                            <ul class="list-group list-group-flush">
-                                <li class="list-group-item d-flex justify-content-between text-primary"><span>VS 테란</span> <strong id="p-race-t">-</strong></li>
-                                <li class="list-group-item d-flex justify-content-between" style="color: purple;"><span>VS 저그</span> <strong id="p-race-z">-</strong></li>
-                                <li class="list-group-item d-flex justify-content-between text-warning"><span>VS 토스</span> <strong id="p-race-p">-</strong></li>
-                            </ul>
+                    <div id="playerList">
+                        {% for player in member_stats['전체'] %}
+                        <div class="player-item" onclick="selectPlayer('{{ player.이름 }}')">
+                            <span class="fw-bold player-name-text">{{ player.이름 }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 우측 스탯 대시보드 -->
+            <div class="col-md-8 col-lg-9">
+                <div id="welcomeScreen" class="text-center py-5 mt-5 bg-white border rounded-3">
+                    <h4 class="text-muted fw-bold m-0">👈 좌측에서 선수를 선택해주세요.</h4>
+                </div>
+
+                <div id="statContent" style="display: none;">
+                    <h3 class="fw-bold mb-4" id="p-name">이름</h3>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="stat-box">
+                                <h6 class="fw-bold mb-3 border-bottom pb-2">매치 형식별</h6>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item d-flex justify-content-between"><span class="text-muted">대회</span> <strong id="p-fmt-1">-</strong></li>
+                                    <li class="list-group-item d-flex justify-content-between"><span class="text-muted">대학</span> <strong id="p-fmt-2">-</strong></li>
+                                    <li class="list-group-item d-flex justify-content-between"><span class="text-muted">미니/CK</span> <strong id="p-fmt-3">-</strong></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="stat-box">
+                                <h6 class="fw-bold mb-3 border-bottom pb-2">종족전 승률</h6>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item d-flex justify-content-between"><span class="text-primary fw-bold">VS 테란</span> <strong id="p-race-t">-</strong></li>
+                                    <li class="list-group-item d-flex justify-content-between"><span style="color:#6f42c1;" class="fw-bold">VS 저그</span> <strong id="p-race-z">-</strong></li>
+                                    <li class="list-group-item d-flex justify-content-between"><span class="text-warning fw-bold">VS 토스</span> <strong id="p-race-p">-</strong></li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -179,21 +225,32 @@
     </div>
 </div>
 
-<!-- 스크립트 영역 -->
 <script>
-    // 1. 메뉴 탭 전환 기능
+    // 1. 메인 탭(페이지) 전환 기능
     function switchPage(pageId) {
-        // 모든 페이지 숨기기
         document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
-        // 모든 탭 버튼 활성화 해제
-        document.querySelectorAll('.nav-pills .nav-link').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('#mainMenu .nav-link').forEach(el => el.classList.remove('active'));
         
-        // 선택한 페이지만 보이기
         document.getElementById('page-' + pageId).classList.add('active');
         event.currentTarget.classList.add('active');
     }
 
-    // 2. 전적 페이지 기능
+    // 2. 전적 서브 탭(팀/개인) 전환 기능
+    function switchStatView(viewType) {
+        if(viewType === 'team') {
+            document.getElementById('view-team-stat').style.display = 'block';
+            document.getElementById('view-indiv-stat').style.display = 'none';
+            document.getElementById('btn-team-stat').className = 'btn btn-primary';
+            document.getElementById('btn-indiv-stat').className = 'btn btn-outline-secondary';
+        } else {
+            document.getElementById('view-team-stat').style.display = 'none';
+            document.getElementById('view-indiv-stat').style.display = 'block';
+            document.getElementById('btn-team-stat').className = 'btn btn-outline-primary';
+            document.getElementById('btn-indiv-stat').className = 'btn btn-secondary';
+        }
+    }
+
+    // 3. 개인 전적 데이터 연동
     const playersData = {{ member_stats['전체'] | tojson }};
 
     function selectPlayer(name) {
@@ -206,7 +263,7 @@
         const p = playersData.find(x => x['이름'] === name);
         if (!p) return;
 
-        document.getElementById('p-name').innerText = p['이름'] + ' 님의 전적';
+        document.getElementById('p-name').innerText = p['이름'] + ' 님의 시즌 전체 전적';
         document.getElementById('p-fmt-1').innerText = p['대회 전적'] || '-';
         document.getElementById('p-fmt-2').innerText = p['대학 전적'] || '-';
         document.getElementById('p-fmt-3').innerText = (p['미니 전적'] || '-') + ' / ' + (p['CK 전적'] || '-');
