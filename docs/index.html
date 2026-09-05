@@ -73,7 +73,7 @@
         /* 경기 내역 리스트 (간격 압축 및 팀/선수 완벽 분리) */
         .match-row { display: flex; align-items: center; justify-content: center; gap: 15px; padding: 10px 15px; font-size: var(--fs-body); background: #fff; transition: background 0.1s; cursor: pointer; }
         .match-row:hover { background: var(--color-primary-tint); }
-        .match-row.match-header { background: #f4f5f7 !important; cursor: default; font-weight: 700; color: #666; }
+        .match-row.match-header { background: #fff !important; cursor: default; font-weight: 700; color: #666; border-bottom: 2px solid #d8dce3; }
         .match-row.match-header .m-opp-team, .match-row.match-header .m-opp-player { font-weight: 700; color: #666; }
         .m-date { width: 60px; color: #888; text-align: center; flex-shrink: 0; }
         .m-type { width: 45px; text-align: center; flex-shrink: 0; }
@@ -100,7 +100,12 @@
 
         /* 개인 사이드바 */
         .sidebar-list { border: 1px solid var(--color-border); border-radius: 10px; background: #fff; overflow: hidden; }
-        .sidebar-header { background: #f8f9fa; padding: 12px 20px; font-size: var(--fs-body); font-weight: 800; color: #666; border-bottom: 1px solid var(--color-border); }
+        .sidebar-header { background: #fff; padding: 12px 20px; font-size: var(--fs-body); font-weight: 800; color: #666; border-bottom: 2px solid #d8dce3; }
+        .sidebar-header-toggle { cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none; }
+        .sidebar-header-toggle:hover { background: var(--color-primary-tint); color: var(--color-primary); }
+        .sidebar-header-toggle .sidebar-chevron { font-size: 10px; color: #999; transition: transform 0.2s; }
+        [data-bs-toggle="collapse"].collapsed .sidebar-chevron { transform: rotate(-90deg); }
+        .sidebar-list > .sidebar-header-toggle:not(:first-child) { border-top: 1px solid var(--color-border); }
         .sidebar-scroll { max-height: 250px; overflow-y: auto; }
         .sidebar-scroll::-webkit-scrollbar { width: 6px; }
         .sidebar-scroll::-webkit-scrollbar-thumb { background: #c7d6f5; border-radius: 3px; }
@@ -132,7 +137,7 @@
 
         /* 전적 테이블 공통 (상대 전적 / 개인 요약) */
         .stat-table { font-size: var(--fs-subheading); }
-        .stat-table thead th { background: #f4f5f7; border-bottom: 1px solid var(--color-border); font-size: var(--fs-body); color: #666; font-weight: 700; padding-top: 10px; padding-bottom: 10px; }
+        .stat-table thead th { background: #fff; border-bottom: 2px solid #d8dce3; font-size: var(--fs-body); color: #666; font-weight: 700; padding-top: 10px; padding-bottom: 10px; }
         .team-row-clickable { cursor: pointer; transition: background 0.1s; }
         .team-row-clickable:hover { background: var(--color-primary-tint) !important; }
 
@@ -227,29 +232,6 @@
             <section class="cal-left-area">
                 <div style="display:flex; flex-direction:column; gap:20px;">
 
-                    <!-- 오늘의 일정 -->
-                    <div class="clean-card p-4">
-                        <div class="section-title">오늘의 일정</div>
-                        <div class="cal-today-list" id="todayList"></div>
-                    </div>
-
-                    <!-- 김윤환 일정 (주간) -->
-                    <div class="clean-card p-4">
-                        <div class="section-title">
-                            김윤환 일정
-                            <div class="cal-nav-group">
-                                <button class="cal-nav-btn" onclick="changeWeeklyOffset(-1)">‹</button>
-                                <button class="cal-nav-btn" onclick="changeWeeklyOffset(1)">›</button>
-                            </div>
-                        </div>
-                        <div id="calendarInner">
-                            <div class="cal-weekdays">
-                                <div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div>
-                            </div>
-                            <div class="cal-days-grid" id="weeklyGrid"></div>
-                        </div>
-                    </div>
-
                     <!-- 월간 캘린더 -->
                     <div class="clean-card p-4">
                         <div class="section-title">
@@ -272,6 +254,12 @@
             </section>
 
             <aside class="cal-sidebar">
+                <!-- 오늘의 일정 -->
+                <div class="clean-card p-4">
+                    <div class="section-title">오늘의 일정</div>
+                    <div class="cal-today-list" id="todayList"></div>
+                </div>
+
                 <!-- 선택한 날짜 일정 -->
                 <div class="clean-card p-4">
                     <div class="section-title" id="selectedListTitle">선택한 날짜 일정</div>
@@ -514,21 +502,37 @@
     <div id="view-indiv-stat" style="display: none;">
         <div class="row g-4">
             <div class="col-md-3">
-                <div class="sidebar-list mb-3">
-                    <div class="sidebar-header">종합 통계</div>
-                    <div class="player-item" id="side-btn-summary" onclick="showIndivSummary()">
-                        <span>전체 요약</span>
+                <!-- 모바일 전용 사이드바 토글 -->
+                <button class="btn-clean w-100 d-md-none mb-2 d-flex justify-content-between align-items-center" type="button" data-bs-toggle="collapse" data-bs-target="#indivSidebarCollapse">
+                    <span>선수 목록</span>
+                    <span class="sidebar-chevron">▾</span>
+                </button>
+
+                <div class="collapse d-md-block" id="indivSidebarCollapse">
+                    <div class="sidebar-list">
+                        <div class="sidebar-header sidebar-header-toggle" data-bs-toggle="collapse" data-bs-target="#sec-summary">
+                            종합 통계 <span class="sidebar-chevron">▾</span>
+                        </div>
+                        <div class="collapse show" id="sec-summary">
+                            <div class="player-item" id="side-btn-summary" onclick="showIndivSummary()">
+                                <span>전체 요약</span>
+                            </div>
+                        </div>
+
+                        <div class="sidebar-header sidebar-header-toggle" data-bs-toggle="collapse" data-bs-target="#sec-active">
+                            현역 멤버 <span class="sidebar-chevron">▾</span>
+                        </div>
+                        <div class="collapse show" id="sec-active">
+                            <div class="sidebar-scroll" id="active-player-list"></div>
+                        </div>
+
+                        <div class="sidebar-header sidebar-header-toggle" data-bs-toggle="collapse" data-bs-target="#sec-former">
+                            이전 멤버 <span class="sidebar-chevron">▾</span>
+                        </div>
+                        <div class="collapse" id="sec-former">
+                            <div class="sidebar-scroll" id="former-player-list"></div>
+                        </div>
                     </div>
-                </div>
-                
-                <div class="sidebar-list mb-3">
-                    <div class="sidebar-header">현역 멤버</div>
-                    <div class="sidebar-scroll" id="active-player-list"></div>
-                </div>
-                
-                <div class="sidebar-list">
-                    <div class="sidebar-header">이전 멤버</div>
-                    <div class="sidebar-scroll" id="former-player-list"></div>
                 </div>
             </div>
             
@@ -669,7 +673,7 @@
     <div class="modal-dialog modal-dialog-centered" style="max-width: 400px;">
         <div class="modal-content">
             <div class="modal-header" style="padding: 14px 18px;">
-                <h5 class="modal-title" id="memberProfileTitle"></h5>
+                <h5 class="modal-title" id="memberProfileTitle">프로필</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body" style="padding: 22px 26px;">
@@ -680,6 +684,7 @@
                         <div class="d-flex gap-2">
                             <span class="tag-badge" id="mp-role-badge">직책</span>
                             <span class="tag-badge" id="mp-race-badge">종족</span>
+                            <span class="tag-badge" id="mp-tier-badge">티어</span>
                         </div>
                     </div>
                 </div>
@@ -953,7 +958,8 @@
 
         document.getElementById('mp-name').innerText = name;
         document.getElementById('mp-role-badge').innerText = m['직책'] || '미정';
-        document.getElementById('mp-race-badge').innerText = m['종족'] || '종족 미정';
+        document.getElementById('mp-race-badge').innerText = raceShortLabel(m['종족']);
+        document.getElementById('mp-tier-badge').innerText = (m['티어'] !== undefined && m['티어'] !== '') ? `${m['티어']}티어` : '티어 미정';
 
         const avatarUrl = getProfileImgUrl(m['SOOP ID']);
         const avatarEl = document.getElementById('mp-avatar');
@@ -966,19 +972,16 @@
         const daysLabel = days !== null ? ` (${days}일${active ? '째' : ''})` : '';
         const period = m['입단일'] ? `${m['입단일']} ~ ${active ? '현재' : (m['퇴단일'] || '-')}${daysLabel}` : '-';
         const soopId = m['SOOP ID'];
-        const broadcastLabel = m['방송국'] || (soopId ? `SOOP (${soopId})` : '-');
         const broadcast = soopId
-            ? `<a href="https://www.sooplive.com/station/${soopId}" target="_blank" rel="noopener" style="display:inline-flex; align-items:center; gap:6px; color:var(--color-primary); text-decoration:underline;">
-                   <img src="images/숲로고.webp" alt="SOOP" style="width:16px; height:16px; border-radius:4px; object-fit:contain; text-decoration:none;">
-                   ${broadcastLabel}
+            ? `<a href="https://www.sooplive.com/station/${soopId}" target="_blank" rel="noopener" style="display:inline-flex; align-items:center;">
+                   <img src="images/숲로고.webp" alt="SOOP" style="width:20px; height:20px; border-radius:4px; object-fit:contain;">
                </a>`
-            : broadcastLabel;
+            : '-';
 
         const rows = [
             ['성별', m['성별'] || '-'],
             ['생년월일', m['생년월일'] || '-'],
             ['MBTI', m['MBTI'] || '-'],
-            ['티어', m['티어'] || '-'],
             ['활동기간', period],
             ['방송국', broadcast],
         ];
@@ -1121,8 +1124,6 @@
     let calSelectedDateStr = "";
     let calSelectedType = "calendar";
     let calSchedules = {};
-    let calWeeklySchedules = {};
-    let calWeeklyOffset = 0;
 
     // 관리자 페이지가 GitHub에 커밋해두는 공개 데이터 파일 (읽기 전용으로 fetch)
     const CAL_DATA_URL = 'data/calendar.json';
@@ -1154,12 +1155,7 @@
             const res = await fetch(CAL_DATA_URL, { cache: 'no-store' });
             if (res.ok) {
                 const parsed = await res.json();
-                if (parsed.schedules) {
-                    calSchedules = parsed.schedules;
-                    calWeeklySchedules = parsed.weeklySchedules || {};
-                } else {
-                    calSchedules = parsed;
-                }
+                calSchedules = parsed.schedules || parsed;
             }
         } catch (e) {
             console.error(e);
@@ -1226,56 +1222,12 @@
         }
 
         calRenderTodaySchedules();
-        calRenderWeeklyGrid();
         calRenderSelectedDateSchedules();
-    };
-
-    const calRenderWeeklyGrid = () => {
-        const grid = document.getElementById('weeklyGrid');
-        grid.innerHTML = "";
-
-        const now = new Date();
-        const startOfWeek = new Date(now);
-        startOfWeek.setDate(now.getDate() - now.getDay() + (calWeeklyOffset * 7));
-
-        const actualToday = new Date();
-        const curTodayStr = calGetFormatDate(actualToday.getFullYear(), actualToday.getMonth() + 1, actualToday.getDate());
-
-        for (let i = 0; i < 7; i++) {
-            const currentDay = new Date(startOfWeek);
-            currentDay.setDate(startOfWeek.getDate() + i);
-            const dateStr = calGetFormatDate(currentDay.getFullYear(), currentDay.getMonth() + 1, currentDay.getDate());
-
-            const cell = document.createElement('div');
-            cell.className = 'cal-day-cell';
-
-            if (dateStr === curTodayStr) cell.classList.add('today');
-            if (calPublicHolidays[dateStr]) cell.classList.add('holiday');
-
-            let cellHTML = `<span class="cal-day-number">${currentDay.getDate()}</span>`;
-
-            if (calWeeklySchedules[dateStr] && calWeeklySchedules[dateStr].length > 0) {
-                calWeeklySchedules[dateStr].forEach(item => {
-                    cellHTML += calGetEventHTML(item);
-                });
-            }
-
-            cell.innerHTML = cellHTML;
-            cell.onclick = () => {
-                calSelectDate(dateStr, 'weekly');
-            };
-            grid.appendChild(cell);
-        }
     };
 
     const changeMonth = (direction) => {
         calCurrentDate.setMonth(calCurrentDate.getMonth() + direction);
         calRenderCalendar();
-    };
-
-    const changeWeeklyOffset = (direction) => {
-        calWeeklyOffset += direction;
-        calRenderWeeklyGrid();
     };
 
     const calSelectDate = (dateStr, type = 'calendar') => {
@@ -1324,11 +1276,9 @@
             return;
         }
 
-        const prefix = (calSelectedType === 'weekly') ? '김윤환 ' : '';
-        titleEl.innerText = `선택한 날짜 ${prefix}일정`;
+        titleEl.innerText = `선택한 날짜 일정`;
 
-        const targetStore = (calSelectedType === 'weekly') ? calWeeklySchedules : calSchedules;
-        const daySchedules = targetStore[calSelectedDateStr] || [];
+        const daySchedules = calSchedules[calSelectedDateStr] || [];
 
         if (daySchedules.length === 0) {
             container.innerHTML = `<div class="cal-no-schedule">등록된 일정이 없습니다.</div>`;
