@@ -20,23 +20,22 @@
             --color-lose: #f03e3e;
             --color-draw: #868e96;
 
-            /* 전적 섹션 통일 폰트 스케일: 본문은 거의 13px, 타이틀/헤더급만 14px 이상 */
-            --fs-hero: 28px;      /* 승률 % 강조 숫자 */
-            --fs-heading: 16px;   /* 섹션 제목 / 모달 제목 */
-            --fs-subheading: 14px;/* 표 헤더, 사이드바 헤더 등 타이틀/헤더급 */
-            --fs-body: 13px;      /* 그 외 모든 본문 텍스트 (기본값) */
+            --fs-hero: 28px;
+            --fs-heading: 16px;
+            --fs-subheading: 14px;
+            --fs-body: 13px;
         }
         body { font-family: 'Pretendard', sans-serif; background-color: var(--color-bg); color: var(--color-text-main); }
         a { text-decoration: none; color: inherit; cursor: pointer; }
         
         /* 상단 GNB */
-        /* 색상 팔레트 - 은은한 블루 포인트 */
         .top-navbar { background-color: #fff; height: 64px; border-bottom: 1px solid var(--color-border); }
         .top-navbar .navbar-inner { height: 100%; display: flex; align-items: center; }
         .top-navbar .logo { font-size: 20px; font-weight: 800; margin-right: 40px; display: flex; align-items: center; }
         .top-navbar .logo img { height: 28px; margin-right: 10px; }
-        .nav-menu { display: flex; height: 100%; margin-left: auto; }
-        .nav-menu .nav-item { height: 100%; display: flex; align-items: center; margin-right: 25px; font-size: 15px; font-weight: 600; color: #555; position: relative; }
+        .nav-menu { display: flex; height: 100%; }
+        /* 여백 조정 및 신규 메뉴 추가 */
+        .nav-menu .nav-item { height: 100%; display: flex; align-items: center; margin-right: 20px; font-size: 15px; font-weight: 600; color: #555; position: relative; cursor: pointer; }
         .nav-menu .nav-item:hover { color: #111; }
         .nav-menu .nav-item.active { color: #111; font-weight: 800; }
         .nav-menu .nav-item.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background-color: var(--color-primary); }
@@ -46,18 +45,14 @@
         .sub-tab { padding: 10px 5px; font-size: var(--fs-heading); font-weight: 600; color: var(--color-text-sub); cursor: pointer; margin-bottom: -1px; border-bottom: 3px solid transparent; }
         .sub-tab.active { color: var(--color-primary); font-weight: 800; border-bottom: 3px solid var(--color-primary); }
 
-        /* 공통 컨테이너 및 텍스트 */
-        .page-section { display: none; padding: 30px 0; }
+        /* 공통 컨테이너 및 텍스트 (홈 탭 여백 통일) */
+        .page-section { display: none; padding: 25px 0; }
         .page-section.active { display: block; animation: fadeIn 0.2s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* 모바일에서 Bootstrap 컨테이너 기본 여백(12px)이 너무 좁아서 넉넉하게 조정 */
         @media (max-width: 767.98px) {
             .container { padding-left: 18px; padding-right: 18px; }
             .page-section { padding: 20px 0; }
-        }
-        @media (max-width: 420px) {
-            .container { padding-left: 14px; padding-right: 14px; }
         }
         
         .section-title { font-size: var(--fs-heading); font-weight: 800; color: #111; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; height: 32px; padding-left: 10px; border-left: 4px solid var(--color-primary); }
@@ -74,37 +69,37 @@
         .stat-card-box .rate { font-size: var(--fs-hero); font-weight: 800; line-height: 1.1; margin-bottom: 4px; color: var(--color-primary); }
         .stat-card-box .wl { font-size: var(--fs-body); color: #888; font-weight: 600; margin-bottom: 12px; }
 
-        /* 경기 내역 래퍼 (아코디언용) */
+        /* 경기 내역 래퍼 및 리스트 (간격 일정 고정) */
         .match-item-wrap { border-bottom: 1px solid var(--color-border); }
         .match-item-wrap:last-child { border-bottom: none; }
         .match-list-scroll { overflow-x: auto; }
         .match-list-scroll::-webkit-scrollbar { height: 6px; }
         .match-list-scroll::-webkit-scrollbar-thumb { background: #c7d6f5; border-radius: 3px; }
-        .match-list-scroll .match-row { width: max-content; min-width: 100%; justify-content: flex-start; }
         
-        /* 경기 내역 리스트 (간격 압축 및 팀/선수 완벽 분리) */
-        .match-row { display: flex; align-items: center; justify-content: center; gap: 15px; padding: 10px 15px; font-size: var(--fs-body); background: #fff; transition: background 0.1s; cursor: pointer; }
+        .match-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 15px; font-size: var(--fs-body); background: #fff; transition: background 0.1s; cursor: pointer; min-width: 500px; }
         .match-row:hover { background: var(--color-primary-tint); }
         .match-row.match-header { background: #fff !important; cursor: default; font-weight: 700; color: #666; border-bottom: 2px solid #d8dce3; }
-        .match-row.match-header .m-opp-team, .match-row.match-header .m-opp-player { font-weight: 700; color: #666; }
-        .m-date { width: 60px; color: #888; text-align: center; flex-shrink: 0; }
+        .match-row.match-header > div { font-weight: 700; color: #666; }
+        
+        /* 컬럼 넓이 고정 */
+        .m-date { width: 70px; color: #888; text-align: center; flex-shrink: 0; }
         .m-type { width: 45px; text-align: center; flex-shrink: 0; }
-        .m-opp-team { width: 130px; flex-shrink: 0; font-weight: 700; color: #222; text-align: center; white-space: nowrap; padding: 0 5px; }
-        .m-opp-player { width: 130px; flex-shrink: 0; font-weight: 600; color: #555; text-align: center; white-space: nowrap; padding: 0 5px; }
-        .m-map { width: 85px; color: #666; text-align: center; white-space: nowrap; flex-shrink: 0; }
-        .m-score { width: 40px; font-weight: 800; text-align: center; flex-shrink: 0; }
-        .m-res { width: 45px; display: flex; justify-content: center; flex-shrink: 0; }
+        .m-opp-team { width: 110px; text-align: center; font-weight: 700; color: #222; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-shrink: 0; }
+        .m-opp-player { width: 110px; text-align: center; font-weight: 600; color: #555; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-shrink: 0; }
+        .m-map { width: 90px; text-align: center; color: #666; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-shrink: 0; }
+        .m-score { width: 45px; text-align: center; font-weight: 800; flex-shrink: 0; }
+        .m-res { width: 50px; display: flex; justify-content: center; flex-shrink: 0; }
         .m-arrow { width: 20px; text-align: right; color: #adb5bd; font-size: var(--fs-body); transition: transform 0.2s; flex-shrink: 0; }
 
-        /* 뱃지 */
-        .tag-badge { font-size: var(--fs-body); font-weight: 700; padding: 3px 6px; border-radius: 4px; background: var(--color-primary-tint); color: #2c5cc9; border: 1px solid var(--color-primary-tint-strong); }
+        /* 뱃지 크기 11px 통일 */
+        .tag-badge { font-size: 11px; font-weight: 700; padding: 3px 6px; border-radius: 4px; background: var(--color-primary-tint); color: #2c5cc9; border: 1px solid var(--color-primary-tint-strong); }
         .tag-badge-live { background: #ffe3e3; color: var(--color-lose); border-color: #ffc9c9; }
-        .match-badge { display: inline-block; width: 44px; text-align: center; font-size: var(--fs-body); font-weight: 800; padding: 4px 0; border-radius: 4px; color: #fff; }
+        .match-badge { display: inline-block; width: 44px; text-align: center; font-size: 11px; font-weight: 800; padding: 4px 0; border-radius: 4px; color: #fff; }
         .badge-win { background-color: var(--color-win); }
         .badge-lose { background-color: var(--color-lose); }
         .badge-draw { background-color: var(--color-draw); }
 
-        /* 모달 (팝업창) */
+        /* 모달 */
         .modal-header { position: relative; display: flex; align-items: center; justify-content: center; padding: 18px; border-bottom: 1px solid var(--color-border) !important; background: #fff; }
         .modal-title { font-size: var(--fs-heading); font-weight: 800; text-align: center; width: 100%; margin: 0; color: #111; }
         .modal-header .btn-close { position: absolute; right: 18px; top: 50%; transform: translateY(-50%); margin: 0; }
@@ -123,55 +118,33 @@
         .sidebar-scroll::-webkit-scrollbar { width: 6px; }
         .sidebar-scroll::-webkit-scrollbar-thumb { background: #c7d6f5; border-radius: 3px; }
 
-        /* 개인탭 사이드바 오프캔버스: 모바일에서만 고정폭 드로어, PC에서는 컬럼 폭 그대로 */
         .indiv-sidebar-backdrop { display: none; }
         @media (max-width: 767.98px) {
             .indiv-sidebar-panel {
-                position: fixed;
-                top: 0;
-                left: 0;
-                bottom: 0;
-                width: 280px;
-                max-width: 85vw;
-                background: #fff;
-                z-index: 1050;
-                box-shadow: 0 0 24px rgba(0,0,0,0.15);
-                transform: translateX(-100%);
-                transition: transform 0.25s ease;
-                overflow-y: auto;
-                padding: 16px;
+                position: fixed; top: 0; left: 0; bottom: 0; width: 280px; max-width: 85vw; background: #fff;
+                z-index: 1050; box-shadow: 0 0 24px rgba(0,0,0,0.15); transform: translateX(-100%);
+                transition: transform 0.25s ease; overflow-y: auto; padding: 16px;
             }
             .indiv-sidebar-panel.mobile-open { transform: translateX(0); }
-            .indiv-sidebar-backdrop {
-                display: block;
-                position: fixed;
-                inset: 0;
-                background: rgba(0,0,0,0);
-                pointer-events: none;
-                z-index: 1049;
-                transition: background 0.25s ease;
-            }
-            .indiv-sidebar-backdrop.show {
-                background: rgba(0,0,0,0.35);
-                pointer-events: auto;
-            }
+            .indiv-sidebar-backdrop { display: block; position: fixed; inset: 0; background: rgba(0,0,0,0); pointer-events: none; z-index: 1049; transition: background 0.25s ease; }
+            .indiv-sidebar-backdrop.show { background: rgba(0,0,0,0.35); pointer-events: auto; }
         }
         .player-item { padding: 10px 20px; font-size: var(--fs-body); font-weight: 600; color: #444; cursor: pointer; border-bottom: 1px solid #f9f9f9; display: flex; justify-content: space-between; align-items: center; }
         .player-item .item-sub { font-size: var(--fs-body); color: #888; }
         .player-avatar-sm { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; background: #e9ecef; flex-shrink: 0; }
         .profile-avatar { width: 72px; height: 72px; border-radius: 50%; background: #f1f3f5; font-size: var(--fs-hero); display: flex; align-items: center; justify-content: center; margin-right: 20px; overflow: hidden; flex-shrink: 0; }
         .profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .player-item:hover, .player-item.active { background: var(--color-primary-tint); color: var(--color-primary); font-weight: 800; }
 
         /* 멤버 페이지 카드 */
         .member-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 14px; }
-        .member-card { background: #fff; border: 1px solid var(--color-border); border-radius: 12px; padding: 18px 10px 14px; text-align: center; cursor: pointer; transition: box-shadow 0.15s, transform 0.15s, border-color 0.15s; }
+        .member-card { background: #fff; border: 1px solid var(--color-border); border-radius: 12px; padding: 18px 10px 14px; text-align: center; cursor: pointer; transition: 0.15s; }
         .member-card:hover { box-shadow: 0 6px 16px rgba(41,121,255,0.10); transform: translateY(-2px); border-color: #b9cdf5; }
         .member-card.former { opacity: 0.55; }
         .member-card.former:hover { opacity: 0.85; }
-        .member-avatar-img, .member-avatar-fallback { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; background: #f1f3f5; display: flex; align-items: center; justify-content: center; font-size: 24px; margin: 0 auto 10px auto; }
+        .member-avatar-img { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; background: #f1f3f5; margin: 0 auto 10px auto; }
         .member-card-name { font-weight: 800; font-size: var(--fs-body); color: #222; margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .member-card-tags { display: flex; justify-content: center; gap: 4px; flex-wrap: wrap; }
-        .player-item:hover, .player-item.active { background: var(--color-primary-tint); color: var(--color-primary); font-weight: 800; }
         
         /* 도넛 차트 */
         .donut-wrap { display: flex; justify-content: space-around; }
@@ -182,7 +155,7 @@
         .donut-label { font-size: var(--fs-body); font-weight: 700; color: #555; margin-bottom: 2px; }
         .donut-sub { font-size: var(--fs-body); color: #999; }
 
-        /* 전적 테이블 공통 (상대 전적 / 개인 요약) */
+        /* 전적 테이블 공통 */
         .stat-table { font-size: var(--fs-body); }
         .stat-table thead th { background: #fff; border-bottom: 2px solid #d8dce3; font-size: var(--fs-subheading); color: #666; font-weight: 700; padding-top: 10px; padding-bottom: 10px; }
         .team-row-clickable { cursor: pointer; transition: background 0.1s; }
@@ -191,7 +164,7 @@
         /* ==============================
             일정(캘린더) 페이지
         ============================== */
-        .cal-app-root { padding: 24px 0; }
+        .cal-app-root { padding: 0 0 24px 0; }
         .cal-main-layout { display: flex; gap: 24px; align-items: flex-start; }
         .cal-left-area { display: flex; flex-direction: column; gap: 20px; flex: 1 1 0; min-width: 0; }
         .cal-sidebar { width: 360px; display: flex; flex-direction: column; gap: 20px; flex-shrink: 0; }
@@ -205,17 +178,16 @@
         .cal-nav-btn:hover { background: var(--color-primary-tint); color: var(--color-primary); }
         .cal-nav-badge { font-size: var(--fs-subheading); font-weight: 800; color: #111; min-width: 86px; text-align: center; }
 
-        .cal-weekdays { display: grid; grid-template-columns: repeat(7, 100px); text-align: center; font-size: var(--fs-subheading); font-weight: 700; color: var(--color-text-sub); margin-bottom: 8px; }
+        /* 요일 및 달력 칸 너비 최소 110px 고정 (가로 스크롤 유도) */
+        .cal-calendar-inner { width: 100%; overflow-x: auto; padding-bottom: 6px; }
+        .cal-calendar-scroll-content { min-width: 770px; } 
+
+        .cal-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: var(--fs-subheading); font-weight: 700; color: var(--color-text-sub); margin-bottom: 8px; }
         .cal-weekdays div:first-child { color: var(--color-lose); }
         .cal-weekdays div:last-child { color: var(--color-primary); }
 
-        .cal-calendar-inner { width: 100%; overflow-x: auto; padding-bottom: 6px; }
-        .cal-calendar-inner::-webkit-scrollbar { height: 6px; }
-        .cal-calendar-inner::-webkit-scrollbar-thumb { background: #c7d6f5; border-radius: 3px; }
-        .cal-calendar-scroll-content { width: 700px; }
-
-        .cal-days-grid { display: grid; grid-template-columns: repeat(7, 100px); border-top: 1px solid var(--color-border); border-left: 1px solid var(--color-border); }
-        .cal-day-cell { background: #fff; min-height: 96px; display: flex; flex-direction: column; padding: 6px; cursor: pointer; border-right: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border); transition: background 0.15s; box-sizing: border-box; }
+        .cal-days-grid { display: grid; grid-template-columns: repeat(7, 1fr); border-top: 1px solid var(--color-border); border-left: 1px solid var(--color-border); }
+        .cal-day-cell { background: #fff; min-height: 110px; display: flex; flex-direction: column; padding: 6px; cursor: pointer; border-right: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border); transition: background 0.15s; box-sizing: border-box; }
         .cal-day-cell:hover { background: var(--color-primary-tint); }
         .cal-day-cell.other-month { background: #fafbfc; }
         .cal-day-cell.other-month .cal-day-number { color: #c3c9d1; }
@@ -223,7 +195,6 @@
         .cal-day-number { font-size: var(--fs-body); font-weight: 700; color: #222; margin-bottom: 4px; line-height: 1.3; }
         .cal-day-cell:nth-child(7n+1) .cal-day-number { color: var(--color-lose); }
         .cal-day-cell:nth-child(7n) .cal-day-number { color: var(--color-primary); }
-        .cal-day-cell.holiday .cal-day-number { color: var(--color-lose) !important; }
         .cal-day-cell.today .cal-day-number { width: max-content; position: relative; z-index: 1; }
         .cal-day-cell.today .cal-day-number::after { content: ''; position: absolute; bottom: 1px; left: -3px; right: -3px; height: 8px; background-color: var(--color-primary-tint-strong); z-index: -1; border-radius: 3px; }
 
@@ -243,32 +214,11 @@
         .cal-card-time { color: var(--color-text-sub); font-weight: 700; font-size: var(--fs-body); }
         .cal-card-person { font-weight: 800; color: #222; font-size: var(--fs-body); }
         .cal-card-desc { color: #444; font-size: var(--fs-body); flex-grow: 1; font-weight: 500; }
-        .cal-btn-group { display: flex; gap: 8px; margin-left: auto; flex-shrink: 0; }
-        .cal-edit-btn { background: none; border: none; color: var(--color-primary); font-size: var(--fs-body); font-weight: 700; padding: 0 4px; cursor: pointer; }
-        .cal-edit-btn:hover { text-decoration: underline; }
-        .cal-delete-btn { background: none; border: none; color: var(--color-lose); font-size: var(--fs-body); font-weight: 700; padding: 0 4px; cursor: pointer; }
-        .cal-delete-btn:hover { text-decoration: underline; }
-
-        .cal-form-row { display: flex; gap: 8px; margin-bottom: 10px; align-items: flex-start; }
-        .cal-form-row input, .cal-form-row select, .cal-form-row textarea {
-            width: 100%; height: 40px; padding: 0 10px; background: #fff; border: 1px solid var(--color-border);
-            color: #222; border-radius: 8px; font-size: var(--fs-body); font-family: inherit;
-            transition: 0.15s; box-sizing: border-box; display: flex; align-items: center;
-        }
-        .cal-form-row input:focus, .cal-form-row select:focus, .cal-form-row textarea:focus {
-            outline: none; border-color: var(--color-primary); box-shadow: 0 0 0 3px var(--color-primary-tint);
-        }
-        .cal-form-row textarea { resize: none; padding-top: 10px; overflow: hidden; line-height: 1.3; height: 40px; }
-
-        .cal-btn-primary { width: 100%; padding: 12px; background: var(--color-primary); color: #fff; border: none; border-radius: 8px; font-weight: 700; font-size: var(--fs-body); margin-top: 6px; cursor: pointer; transition: 0.15s; }
-        .cal-btn-primary:hover { background: #1f5fd1; }
-        .cal-btn-action { background: #10b981; color: #fff; border: none; padding: 0 14px; height: 40px; border-radius: 8px; font-size: var(--fs-body); font-weight: 700; flex-shrink: 0; cursor: pointer; transition: 0.15s; }
-        .cal-btn-action:hover:not(:disabled) { background: #0ea371; }
-        .cal-btn-action:disabled { background: #c7cdd6; cursor: not-allowed; opacity: 0.8; }
     </style>
 </head>
 <body>
 
+<!-- GNB -->
 <div class="top-navbar">
     <div class="navbar-inner container">
         <div class="logo">스타대학</div>
@@ -277,58 +227,52 @@
             <a class="nav-item" onclick="switchPage('schedule')">일정</a>
             <a class="nav-item" onclick="switchPage('members')">멤버</a>
             <a class="nav-item active" onclick="switchPage('stats')">전적</a>
+            <a class="nav-item" onclick="alert('시너지표 메뉴는 준비중입니다.')">시너지표(준비중)</a>
+            <a class="nav-item" onclick="alert('도구 메뉴는 준비중입니다.')">도구(준비중)</a>
         </div>
     </div>
 </div>
 
 <div id="page-home" class="page-section container">
     <div class="clean-card p-4 mb-4 text-center">
-        <div class="fw-bold" style="font-size: var(--fs-hero); letter-spacing: -1px; color: #111;">스타대학</div>
+        <div class="fw-bold" style="font-size: var(--fs-hero); letter-spacing: -1px; color: #111;">스타대학 홈</div>
     </div>
-
     <div class="section-title">현재 방송중</div>
     <div class="clean-card p-4" id="home-live-broadcast">
         <div class="text-center text-muted py-4" style="font-size:var(--fs-body);">실시간 방송 상태 연동 준비중입니다.</div>
     </div>
 </div>
+
 <div id="page-schedule" class="page-section container">
     <div class="cal-app-root">
         <div class="cal-main-layout">
             <section class="cal-left-area">
-                <div style="display:flex; flex-direction:column; gap:20px;">
-
-                    <!-- 월간 캘린더 -->
-                    <div class="clean-card p-4">
-                        <div class="section-title">
-                            이달의 일정
-                            <div class="cal-nav-group">
-                                <button class="cal-nav-btn" onclick="changeMonth(-1)">‹</button>
-                                <div id="monthTitle" class="cal-nav-badge"></div>
-                                <button class="cal-nav-btn" onclick="changeMonth(1)">›</button>
-                            </div>
-                        </div>
-                        <div class="cal-calendar-inner">
-                            <div class="cal-calendar-scroll-content">
-                                <div class="cal-weekdays">
-                                    <div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div>
-                                </div>
-                                <div class="cal-days-grid" id="daysGrid"></div>
-                            </div>
+                <div class="clean-card p-4">
+                    <div class="section-title">
+                        이달의 일정
+                        <div class="cal-nav-group">
+                            <button class="cal-nav-btn" onclick="changeMonth(-1)">‹</button>
+                            <div id="monthTitle" class="cal-nav-badge"></div>
+                            <button class="cal-nav-btn" onclick="changeMonth(1)">›</button>
                         </div>
                     </div>
-
+                    <!-- 가로 스크롤 유도 -->
+                    <div class="cal-calendar-inner">
+                        <div class="cal-calendar-scroll-content">
+                            <div class="cal-weekdays">
+                                <div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div>
+                            </div>
+                            <div class="cal-days-grid" id="daysGrid"></div>
+                        </div>
+                    </div>
                 </div>
             </section>
-
             <aside class="cal-sidebar">
-                <!-- 오늘의 일정 -->
                 <div class="clean-card p-4">
                     <div class="section-title">오늘의 일정</div>
                     <div class="cal-today-list" id="todayList"></div>
                 </div>
-
-                <!-- 선택한 날짜 일정 -->
-                <div class="clean-card p-4">
+                <div class="clean-card p-4 mt-3">
                     <div class="section-title" id="selectedListTitle">선택한 날짜 일정</div>
                     <div class="cal-selected-list" id="selectedDateList"></div>
                 </div>
@@ -336,21 +280,23 @@
         </div>
     </div>
 </div>
+
 <div id="page-members" class="page-section container">
     <div id="members-groups"></div>
 </div>
 
 <div id="page-stats" class="page-section active container">
     <div class="sub-tabs">
-        <div class="sub-tab active" id="tab-team" onclick="switchStatView('team')">팀</div>
-        <div class="sub-tab" id="tab-individual" onclick="switchStatView('individual')">개인</div>
+        <div class="sub-tab active" id="tab-team" onclick="switchStatView('team')">팀 종합 전적</div>
+        <div class="sub-tab" id="tab-individual" onclick="switchStatView('individual')">개인 전적 상세</div>
     </div>
 
+    <!-- 1. 팀 뷰 -->
     <div id="view-team-stat">
         <div class="row g-3 mb-4">
             <div class="col-6 col-md-3"><div class="clean-card stat-card-box"><div class="label">대회</div><div class="rate" id="t-sum-대회-r">0%</div><div class="wl" id="t-sum-대회-w">0승 0패</div><button class="btn-clean w-100" onclick="openTeamMatchModal('대회')">상세 전적</button></div></div>
-            <div class="col-6 col-md-3"><div class="clean-card stat-card-box"><div class="label">대학대전</div><div class="rate" id="t-sum-대학-r">0%</div><div class="wl" id="t-sum-대학-w">0승 0패</div><button class="btn-clean w-100" onclick="openTeamMatchModal('대학')">상세 전적</button></div></div>
-            <div class="col-6 col-md-3"><div class="clean-card stat-card-box"><div class="label">미니대전</div><div class="rate" id="t-sum-미니-r">0%</div><div class="wl" id="t-sum-미니-w">0승 0패</div><button class="btn-clean w-100" onclick="openTeamMatchModal('미니')">상세 전적</button></div></div>
+            <div class="col-6 col-md-3"><div class="clean-card stat-card-box"><div class="label">대학</div><div class="rate" id="t-sum-대학-r">0%</div><div class="wl" id="t-sum-대학-w">0승 0패</div><button class="btn-clean w-100" onclick="openTeamMatchModal('대학')">상세 전적</button></div></div>
+            <div class="col-6 col-md-3"><div class="clean-card stat-card-box"><div class="label">미니</div><div class="rate" id="t-sum-미니-r">0%</div><div class="wl" id="t-sum-미니-w">0승 0패</div><button class="btn-clean w-100" onclick="openTeamMatchModal('미니')">상세 전적</button></div></div>
             <div class="col-6 col-md-3"><div class="clean-card stat-card-box"><div class="label">CK</div><div class="rate" id="t-sum-CK-r">0%</div><div class="wl" id="t-sum-CK-w">0승 0패</div><button class="btn-clean w-100" onclick="openTeamMatchModal('CK')">상세 전적</button></div></div>
         </div>
 
@@ -361,7 +307,7 @@
                     <div class="table-responsive flex-grow-1" style="overflow-y: auto;">
                         <table class="table table-borderless table-hover mb-0 text-center stat-table">
                             <thead>
-                                <tr><th class="text-start ps-4">상대 크루</th><th>대회</th><th>대학대전</th><th>미니대전</th><th>CK</th><th></th></tr>
+                                <tr><th class="text-start ps-4">상대</th><th>대회</th><th>대학</th><th>미니</th><th>CK</th><th></th></tr>
                             </thead>
                             <tbody>
                                 {% for row in crew_stats['전체'] %}
@@ -380,7 +326,7 @@
 
             <div class="col-lg-5 d-flex flex-column">
                 <div class="section-title">
-                    최근 10경기
+                    최근 경기
                     <button class="btn-clean" onclick="openTeamMatchModal('전체')">전체보기</button>
                 </div>
                 <div class="clean-card flex-grow-0 p-0 overflow-hidden" style="border-radius: 10px;">
@@ -388,7 +334,7 @@
                         <div class="match-row match-header">
                             <div class="m-date">날짜</div>
                             <div class="m-type">형식</div>
-                            <div class="m-opp-team">상대팀</div>
+                            <div class="m-opp-team">상대</div>
                             <div class="m-score">스코어</div>
                             <div class="m-res">결과</div>
                             <div class="m-arrow"></div>
@@ -400,16 +346,15 @@
         </div>
     </div>
 
+    <!-- 2. 개인 뷰 -->
     <div id="view-indiv-stat" style="display: none;">
         <div class="row g-4">
             <div class="col-md-3">
-                <!-- 모바일 전용 사이드바 토글 -->
                 <button class="btn-clean w-100 d-md-none mb-2 d-flex justify-content-between align-items-center" type="button" onclick="toggleIndivSidebar(true)">
-                    <span>선수 목록</span>
-                    <span>▸</span>
+                    <span>선수 목록</span><span>▸</span>
                 </button>
-
                 <div class="indiv-sidebar-backdrop" id="indivSidebarBackdrop" onclick="toggleIndivSidebar(false)"></div>
+                
                 <div class="indiv-sidebar-panel" id="indivSidebarPanel">
                     <div class="d-md-none d-flex justify-content-between align-items-center mb-2" style="padding-bottom: 10px; border-bottom: 1px solid var(--color-border);">
                         <span class="fw-bold" style="font-size: var(--fs-heading);">선수 목록</span>
@@ -443,18 +388,18 @@
             </div>
             
             <div class="col-md-9">
-                
+                <!-- 전체 요약 화면 -->
                 <div id="indiv-summary-content">
-                    <div class="section-title">현역 멤버 전체 요약</div>
+                    <div class="section-title">전체 요약</div>
                     <div class="clean-card p-0 overflow-hidden">
                         <div class="table-responsive">
                             <table class="table table-borderless table-hover mb-0 text-center stat-table">
                                 <thead>
                                     <tr>
-                                        <th class="text-start ps-4">멤버 이름</th>
+                                        <th class="text-start ps-4">멤버</th>
                                         <th>대회</th>
-                                        <th>대학대전</th>
-                                        <th>미니대전</th>
+                                        <th>대학</th>
+                                        <th>미니</th>
                                         <th>CK</th>
                                     </tr>
                                 </thead>
@@ -465,14 +410,15 @@
                     </div>
                 </div>
 
+                <!-- 개인 프로필 화면 -->
                 <div id="statContent" style="display: none;">
                     <div class="clean-card d-flex align-items-center mb-4 p-4">
                         <div class="profile-avatar" id="p-avatar">👤</div>
                         <div>
                             <h3 class="fw-bold m-0 mb-2" id="p-name" style="letter-spacing:-1px;">이름</h3>
                             <div class="d-flex gap-2">
-                                <span class="tag-badge border border-secondary text-secondary" id="p-tier">티어</span>
-                                <span class="tag-badge border border-secondary text-secondary" id="p-race">종족</span>
+                                <span class="tag-badge" id="p-tier">티어</span>
+                                <span class="tag-badge" id="p-race">종족</span>
                             </div>
                         </div>
                     </div>
@@ -501,7 +447,7 @@
                     </div>
 
                     <div class="section-title mt-4" style="height:auto;">
-                        최근 10경기
+                        최근 경기
                         <div class="d-flex gap-2 align-items-center">
                             <div id="indiv-filters" class="d-flex gap-1 me-3">
                                 <button class="btn-clean active" onclick="setIndivFilter('전체')">전체</button>
@@ -518,7 +464,7 @@
                             <div class="match-row match-header">
                                 <div class="m-date">날짜</div>
                                 <div class="m-type">형식</div>
-                                <div class="m-opp-team">상대팀</div>
+                                <div class="m-opp-team">상대</div>
                                 <div class="m-opp-player">상대 선수</div>
                                 <div class="m-map">맵</div>
                                 <div class="m-res">결과</div>
@@ -527,14 +473,14 @@
                         </div>
                     </div>
                 </div>
-                
             </div>
         </div>
     </div>
 </div>
 
+<!-- 팝업 모달 -->
 <div class="modal fade" id="teamMatchesModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-scrollable" style="max-width: 500px;">
+    <div class="modal-dialog modal-dialog-scrollable" style="max-width: 550px;">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="teamModalTitle">전체 경기 결과</h5>
@@ -545,7 +491,7 @@
                     <div class="match-row match-header">
                         <div class="m-date">날짜</div>
                         <div class="m-type">형식</div>
-                        <div class="m-opp-team">상대팀</div>
+                        <div class="m-opp-team">상대</div>
                         <div class="m-score">스코어</div>
                         <div class="m-res">결과</div>
                         <div class="m-arrow"></div>
@@ -558,7 +504,7 @@
 </div>
 
 <div class="modal fade" id="indivMatchesModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-scrollable" style="max-width: 550px;">
+    <div class="modal-dialog modal-dialog-scrollable" style="max-width: 600px;">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="indivModalTitle">개인 전체 경기 결과</h5>
@@ -569,72 +515,12 @@
                     <div class="match-row match-header">
                         <div class="m-date">날짜</div>
                         <div class="m-type">형식</div>
-                        <div class="m-opp-team">상대팀</div>
+                        <div class="m-opp-team">상대</div>
                         <div class="m-opp-player">상대 선수</div>
                         <div class="m-map">맵</div>
                         <div class="m-res">결과</div>
                     </div>
                     <div id="indiv-modal-list"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="memberProfileModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered" style="max-width: 400px;">
-        <div class="modal-content">
-            <div class="modal-header" style="padding: 14px 18px;">
-                <h5 class="modal-title" id="memberProfileTitle">프로필</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body" style="padding: 22px 26px;">
-                <div class="d-flex align-items-center mb-3">
-                    <div class="profile-avatar" id="mp-avatar" style="width:64px;height:64px;margin-right:16px;">👤</div>
-                    <div>
-                        <div class="fw-bold" id="mp-name" style="font-size:var(--fs-heading); margin-bottom:6px;">이름</div>
-                        <div class="d-flex gap-2">
-                            <span class="tag-badge" id="mp-role-badge">직책</span>
-                            <span class="tag-badge" id="mp-race-badge">종족</span>
-                            <span class="tag-badge" id="mp-tier-badge">티어</span>
-                        </div>
-                    </div>
-                </div>
-                <table class="table table-borderless mb-0" style="font-size:var(--fs-body);">
-                    <tbody id="mp-info-body"></tbody>
-                </table>
-
-                <div class="mt-3 pt-3" style="border-top:1px solid var(--color-border);">
-                    <div class="section-title-sm" style="margin-bottom:10px;">
-                        이번 달 방송 활동
-                        <span class="text-secondary" style="font-size:var(--fs-body); font-weight:600;">데이터 준비중</span>
-                    </div>
-                    <div class="row g-2">
-                        <div class="col-6">
-                            <div class="clean-card text-center py-2">
-                                <div class="text-secondary" style="font-size:var(--fs-body); font-weight:700;">별풍선</div>
-                                <div class="fw-bold" id="mp-balloons" style="font-size:var(--fs-body);">-</div>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="clean-card text-center py-2">
-                                <div class="text-secondary" style="font-size:var(--fs-body); font-weight:700;">방송시간</div>
-                                <div class="fw-bold" id="mp-broadcast-hours" style="font-size:var(--fs-body);">-</div>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="clean-card text-center py-2">
-                                <div class="text-secondary" style="font-size:var(--fs-body); font-weight:700;">누적시청자</div>
-                                <div class="fw-bold" id="mp-viewers" style="font-size:var(--fs-body);">-</div>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="clean-card text-center py-2">
-                                <div class="text-secondary" style="font-size:var(--fs-body); font-weight:700;">스폰전적</div>
-                                <div class="fw-bold" id="mp-sponsor-record" style="font-size:var(--fs-body);">-</div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
@@ -655,7 +541,10 @@
         document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
         document.querySelectorAll('#mainMenu .nav-item').forEach(el => el.classList.remove('active'));
         document.getElementById('page-' + pageId).classList.add('active');
-        event.currentTarget.classList.add('active');
+        
+        // 클릭한 GNB 메뉴 활성화
+        const targetNav = Array.from(document.querySelectorAll('#mainMenu .nav-item')).find(el => el.getAttribute('onclick').includes(`'${pageId}'`));
+        if (targetNav) targetNav.classList.add('active');
     }
 
     function switchStatView(viewType) {
@@ -730,7 +619,7 @@
             else if (resText === '무' || resText === '무승부') badgeHtml = '<span class="match-badge badge-draw">DRAW</span>';
 
             const collapseId = `collapse-${containerId}-${idx}`;
-            const teamRounds = dbRounds.filter(r => r['_match_key'] === m['_match_key']);
+            const teamRounds = dbRounds.filter(r => r['_match_key'] === m['_match_key'] || (r['날짜'] === m['날짜'] && r['상대팀'] === m['상대팀']));
             
             let setDetailsHtml = '';
             if (teamRounds.length > 0) {
@@ -742,12 +631,12 @@
                     if(isDraw) resBadge = '<span class="text-secondary fw-bold">무</span>';
 
                     return `
-                    <div class="d-flex align-items-center justify-content-center py-2" style="font-size:var(--fs-body); border-bottom:1px solid #f1f3f5;">
+                    <div class="d-flex align-items-center justify-content-center py-2" style="font-size:var(--fs-body); border-bottom:1px solid #f1f3f5; min-width: 480px;">
                         <div style="width:45px; font-weight:800; color:#888;">${i+1} SET</div>
-                        <div style="width:100px; text-align:center; color:#555;">${r['맵'] || '-'}</div>
-                        <div style="width:90px; text-align:right;" class="fw-bold ${isWin?'text-primary':'text-dark'}">${r['우리 선수']||'-'}</div>
+                        <div style="width:90px; text-align:center; color:#555;">${r['맵'] || '-'}</div>
+                        <div style="width:110px; text-align:right;" class="fw-bold ${isWin?'text-primary':'text-dark'}">${r['우리 선수']||'-'}</div>
                         <div style="width:50px; text-align:center;">${resBadge}</div>
-                        <div style="width:90px; text-align:left;" class="fw-bold ${!isWin && !isDraw ?'text-primary':'text-dark'}">${r['상대 선수']||'-'}</div>
+                        <div style="width:110px; text-align:left;" class="fw-bold ${!isWin && !isDraw ?'text-primary':'text-dark'}">${r['상대 선수']||'-'}</div>
                     </div>`;
                 }).join('');
             } else {
@@ -780,7 +669,7 @@
         renderTeamMatchesList('team-modal-list', {format}, null);
         new bootstrap.Modal(document.getElementById('teamMatchesModal')).show();
     }
-
+    
     function openTeamOpponentModal(opponent) {
         document.getElementById('teamModalTitle').innerText = `vs ${opponent} 상세 전적`;
         renderTeamMatchesList('team-modal-list', {format: '전체', opponent}, null);
@@ -791,7 +680,6 @@
         if (row) openTeamOpponentModal(row.dataset.team);
     });
 
-    // SOOP(숲) 프로필 사진 URL 생성 - 예: brainzerg7 -> .../LOGO/br/brainzerg7/brainzerg7.jpg
     function getProfileImgUrl(soopId) {
         if (!soopId) return null;
         const id = String(soopId).trim().toLowerCase();
@@ -803,135 +691,6 @@
         const url = getProfileImgUrl(soopId);
         if (!url) return `<span class="${cls} d-flex align-items-center justify-content-center">👤</span>`;
         return `<img src="${url}" class="${cls}" onerror="this.outerHTML='<span class=\\'${cls} d-flex align-items-center justify-content-center\\'>👤</span>';">`;
-    }
-
-    // ===== 멤버 페이지 =====
-    const TIER_ORDER = ['갓','킹','잭','조커','스페이드','0','1','2','3','4','5','6','7','8','베이비'];
-    function tierIndex(tier) {
-        const idx = TIER_ORDER.indexOf(String(tier));
-        return idx === -1 ? TIER_ORDER.length : idx;
-    }
-    function raceShortLabel(race) {
-        if (!race) return '-';
-        if (race.includes('테란')) return 'T';
-        if (race.includes('저그')) return 'Z';
-        if (race.includes('프로토스')) return 'P';
-        return race;
-    }
-    function isActiveMember(m) {
-        return !m['퇴단일'] || String(m['퇴단일']).trim() === '';
-    }
-    function todayStr() {
-        return new Date().toISOString().split('T')[0];
-    }
-    function daysBetween(startStr, endStr) {
-        if (!startStr || !endStr) return null;
-        const start = new Date(startStr);
-        const end = new Date(endStr);
-        if (isNaN(start.getTime()) || isNaN(end.getTime())) return null;
-        return Math.floor((end - start) / 86400000) + 1;
-    }
-    function memberCardHtml(m) {
-        const tierText = (m['티어'] !== undefined && m['티어'] !== '') ? `${m['티어']}티어` : '-';
-        return `
-        <div class="member-card${isActiveMember(m) ? '' : ' former'}" onclick="openMemberProfile('${m['이름']}')">
-            ${avatarHtml(m['SOOP ID'], 'member-avatar-img')}
-            <div class="member-card-name">${m['이름']}</div>
-            <div class="member-card-tags">
-                <span class="tag-badge">${tierText}</span>
-                <span class="tag-badge">${raceShortLabel(m['종족'])}</span>
-            </div>
-        </div>`;
-    }
-    function renderMemberGroup(title, members) {
-        if (members.length === 0) return '';
-        const sorted = [...members].sort((a, b) =>
-            tierIndex(a['티어']) - tierIndex(b['티어']) || String(a['이름']).localeCompare(String(b['이름']), 'ko'));
-        return `
-        <div class="section-title">${title} <span class="text-secondary" style="font-size:var(--fs-body); font-weight:600;">${sorted.length}명</span></div>
-        <div class="member-grid mb-4">${sorted.map(memberCardHtml).join('')}</div>`;
-    }
-    function renderMembersPage() {
-        const roleOrderBase = ['감독', '코치', '선수'];
-        const allRoles = [...new Set(dbMembers.map(m => m['직책'] || '기타'))];
-        const extraRoles = allRoles.filter(r => !roleOrderBase.includes(r));
-        const roleOrder = [...roleOrderBase, ...extraRoles];
-
-        const activeMembers = dbMembers.filter(isActiveMember);
-        const formerMembers = dbMembers.filter(m => !isActiveMember(m));
-
-        let html = '';
-        roleOrder.forEach(role => {
-            const group = activeMembers.filter(m => (m['직책'] || '기타') === role);
-            html += renderMemberGroup(role, group);
-        });
-        html += renderMemberGroup('이전 멤버', formerMembers);
-
-        document.getElementById('members-groups').innerHTML = html || '<div class="text-center text-muted py-5">등록된 멤버가 없습니다.</div>';
-    }
-
-    // 홈 화면 - 현재 방송중 목록 (임시: '방송중' 컬럼이 시트에 추가되면 자동으로 채워짐)
-    function renderLiveBroadcasts() {
-        const container = document.getElementById('home-live-broadcast');
-        const liveMembers = dbMembers.filter(m => {
-            if (!isActiveMember(m)) return false;
-            const v = String(m['방송중'] || '').trim().toUpperCase();
-            return v === 'TRUE' || v === '방송중' || v === 'Y' || v === 'O';
-        });
-
-        if (liveMembers.length === 0) {
-            container.innerHTML = `<div class="text-center text-muted py-4" style="font-size:var(--fs-body);">현재 방송 중인 멤버가 없습니다. (실시간 연동 준비중)</div>`;
-            return;
-        }
-
-        container.innerHTML = `<div class="member-grid">${liveMembers.map(m => `
-            <div class="member-card" onclick="openMemberProfile('${m['이름']}')">
-                ${avatarHtml(m['SOOP ID'], 'member-avatar-img')}
-                <div class="member-card-name">${m['이름']}</div>
-                <div class="member-card-tags"><span class="tag-badge tag-badge-live">🔴 LIVE</span></div>
-            </div>`).join('')}</div>`;
-    }
-
-    function openMemberProfile(name) {
-        const m = dbMembers.find(x => x['이름'] === name);
-        if (!m) return;
-
-        document.getElementById('mp-name').innerText = name;
-        document.getElementById('mp-role-badge').innerText = m['직책'] || '미정';
-        document.getElementById('mp-race-badge').innerText = raceShortLabel(m['종족']);
-        document.getElementById('mp-tier-badge').innerText = (m['티어'] !== undefined && m['티어'] !== '') ? `${m['티어']}티어` : '티어 미정';
-
-        const avatarUrl = getProfileImgUrl(m['SOOP ID']);
-        const avatarEl = document.getElementById('mp-avatar');
-        avatarEl.innerHTML = avatarUrl
-            ? `<img src="${avatarUrl}" onerror="this.parentElement.innerHTML='👤';">`
-            : '👤';
-
-        const active = isActiveMember(m);
-        const days = m['입단일'] ? daysBetween(m['입단일'], active ? todayStr() : (m['퇴단일'] || null)) : null;
-        const daysLabel = days !== null ? ` (${days}일${active ? '째' : ''})` : '';
-        const period = m['입단일'] ? `${m['입단일']} ~ ${active ? '현재' : (m['퇴단일'] || '-')}${daysLabel}` : '-';
-        const soopId = m['SOOP ID'];
-        const broadcast = soopId
-            ? `<a href="https://www.sooplive.com/station/${soopId}" target="_blank" rel="noopener" style="display:inline-flex; align-items:center;">
-                   <img src="images/숲로고.webp" alt="SOOP" style="width:20px; height:20px; border-radius:4px; object-fit:contain;">
-               </a>`
-            : '-';
-
-        const rows = [
-            ['성별', m['성별'] || '-'],
-            ['생년월일', m['생년월일'] || '-'],
-            ['MBTI', m['MBTI'] || '-'],
-            ['활동기간', period],
-            ['방송국', broadcast],
-        ];
-        document.getElementById('mp-info-body').innerHTML = rows.map(([label, val]) => `
-            <tr>
-                <td class="text-secondary" style="width:90px; font-weight:700; border-color:#f1f3f5;">${label}</td>
-                <td class="fw-bold text-dark" style="border-color:#f1f3f5;">${val}</td>
-            </tr>`).join('');
-
-        new bootstrap.Modal(document.getElementById('memberProfileModal')).show();
     }
 
     function renderIndividualSidebar() {
@@ -1038,7 +797,7 @@
                     <div class="m-date">${m['날짜'] ? m['날짜'].split(' ')[0].substring(2) : ''}</div>
                     <div class="m-type"><span class="tag-badge">${m['형식']}</span></div>
                     <div class="m-opp-team">${m['상대팀']}</div>
-                    <div class="m-opp-player" style="font-weight:600; color:#555;">${m['상대 선수']} <span style="font-size:var(--fs-body);">(${m['상대 종족']})</span></div>
+                    <div class="m-opp-player">${m['상대 선수']}</div>
                     <div class="m-map">${m['맵'] || '-'}</div>
                     <div class="m-res">${badgeHtml}</div>
                 </div>
@@ -1054,23 +813,11 @@
         new bootstrap.Modal(document.getElementById('indivMatchesModal')).show();
     }
 
-    window.onload = function() {
-        calculateTeamSummaries();
-        renderMembersPage();
-        renderLiveBroadcasts();
-    };
-</script>
-
-<!-- ===== 일정(캘린더) 페이지 로직 (열람 전용 — 데이터 입력/수정은 별도 관리자 페이지에서) ===== -->
-<script>
+    // ===== 일정(캘린더) 페이지 로직 =====
     let calCurrentDate = new Date();
     let calSelectedDateStr = "";
-    let calSelectedType = "calendar";
     let calSchedules = {};
-
-    // 관리자 페이지가 GitHub에 커밋해두는 공개 데이터 파일 (읽기 전용으로 fetch)
     const CAL_DATA_URL = 'data/calendar.json';
-
     const calPublicHolidays = {
         "2024-01-01": true, "2024-02-09": true, "2024-02-10": true, "2024-02-11": true, "2024-02-12": true,
         "2024-03-01": true, "2024-04-10": true, "2024-05-05": true, "2024-05-06": true, "2024-05-15": true,
@@ -1081,18 +828,13 @@
         "2026-01-01": true, "2026-02-16": true, "2026-02-17": true, "2026-02-18": true, "2026-03-01": true, "2026-03-02": true,
         "2026-05-05": true, "2026-05-24": true, "2026-05-25": true, "2026-06-06": true, "2026-08-15": true, "2026-09-24": true, "2026-09-25": true, "2026-09-26": true, "2026-09-28": true, "2026-10-03": true, "2026-10-09": true, "2026-12-25": true
     };
-
     const calEscapeHTML = (str) => {
         if (!str) return '';
-        return str.replace(/[&<>'"]/g, tag => ({
-            '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
-        }[tag]));
+        return str.replace(/[&<>'"]/g, tag => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'}[tag]));
     };
-
     const calGetFormatDate = (year, month, day) => {
         return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     };
-
     const calLoadPublicData = async () => {
         try {
             const res = await fetch(CAL_DATA_URL, { cache: 'no-store' });
@@ -1105,7 +847,6 @@
         }
         calRenderCalendar();
     };
-
     const calGetEventHTML = (item) => {
         const timeHtml = item.time ? `<span class="cal-event-time">${calEscapeHTML(item.time)}</span>` : '';
         const personText = item.person ? `<span class="cal-event-person">${calEscapeHTML(item.person)}</span>` : '';
@@ -1116,141 +857,98 @@
             </div>
         `;
     };
-
     const calRenderCalendar = () => {
         const year = calCurrentDate.getFullYear();
         const month = calCurrentDate.getMonth();
-
         document.getElementById('monthTitle').innerText = `${year}년 ${month + 1}월`;
-
         const firstDayIndex = new Date(year, month, 1).getDay();
         const lastDay = new Date(year, month + 1, 0).getDate();
         const prevLastDay = new Date(year, month, 0).getDate();
-
         const daysGrid = document.getElementById('daysGrid');
         daysGrid.innerHTML = "";
-
         const actualToday = new Date();
         const curTodayStr = calGetFormatDate(actualToday.getFullYear(), actualToday.getMonth() + 1, actualToday.getDate());
 
-        for (let i = firstDayIndex; i > 0; i--) {
-            daysGrid.insertAdjacentHTML('beforeend', `<div class="cal-day-cell other-month"><span class="cal-day-number">${prevLastDay - i + 1}</span></div>`);
-        }
-
+        for (let i = firstDayIndex; i > 0; i--) daysGrid.insertAdjacentHTML('beforeend', `<div class="cal-day-cell other-month"><span class="cal-day-number">${prevLastDay - i + 1}</span></div>`);
         for (let i = 1; i <= lastDay; i++) {
             const dateStr = calGetFormatDate(year, month + 1, i);
             const dayDiv = document.createElement('div');
             dayDiv.className = 'cal-day-cell';
-
             if (dateStr === curTodayStr) dayDiv.classList.add('today');
             if (calPublicHolidays[dateStr]) dayDiv.classList.add('holiday');
-
             let dayHTML = `<span class="cal-day-number">${i}</span>`;
-
             if (calSchedules[dateStr] && calSchedules[dateStr].length > 0) {
-                calSchedules[dateStr].forEach(item => {
-                    dayHTML += calGetEventHTML(item);
-                });
+                calSchedules[dateStr].forEach(item => { dayHTML += calGetEventHTML(item); });
             }
-
             dayDiv.innerHTML = dayHTML;
-            dayDiv.onclick = () => calSelectDate(dateStr, 'calendar');
+            dayDiv.onclick = () => calSelectDate(dateStr);
             daysGrid.appendChild(dayDiv);
         }
-
         const totalCellsCount = firstDayIndex + lastDay;
         const nextDaysCount = totalCellsCount % 7 === 0 ? 0 : 7 - (totalCellsCount % 7);
-        for (let i = 1; i <= nextDaysCount; i++) {
-            daysGrid.insertAdjacentHTML('beforeend', `<div class="cal-day-cell other-month"><span class="cal-day-number">${i}</span></div>`);
-        }
+        for (let i = 1; i <= nextDaysCount; i++) daysGrid.insertAdjacentHTML('beforeend', `<div class="cal-day-cell other-month"><span class="cal-day-number">${i}</span></div>`);
 
         calRenderTodaySchedules();
         calRenderSelectedDateSchedules();
     };
-
     const changeMonth = (direction) => {
         calCurrentDate.setMonth(calCurrentDate.getMonth() + direction);
         calRenderCalendar();
     };
-
-    const calSelectDate = (dateStr, type = 'calendar') => {
+    const calSelectDate = (dateStr) => {
         calSelectedDateStr = dateStr;
-        calSelectedType = type;
         calRenderSelectedDateSchedules();
     };
-
     const calRenderTodaySchedules = () => {
         const container = document.getElementById('todayList');
         const today = new Date();
         const curTodayStr = calGetFormatDate(today.getFullYear(), today.getMonth() + 1, today.getDate());
-
         const todayItems = (calSchedules[curTodayStr] || []).slice();
         todayItems.sort((a, b) => (a.time || "").localeCompare(b.time || ""));
-
-        if (todayItems.length === 0) {
-            container.innerHTML = `<div class="cal-no-schedule">오늘 등록된 일정이 없습니다.</div>`;
-            return;
-        }
-
-        container.innerHTML = todayItems.map(item => {
-            const timeHtml = item.time ? `<span class="cal-card-time">${calEscapeHTML(item.time)}</span>` : '';
-            const personHtml = item.person ? `<span class="cal-card-person">${calEscapeHTML(item.person)}</span>` : '';
-            const detailHtml = item.detail ? `<div style="color: var(--color-text-sub); font-size: var(--fs-body); padding-left: 18px;">↳ ${calEscapeHTML(item.detail)}</div>` : '';
-
-            return `
-                <div class="cal-today-card">
-                    <div class="cal-card-main">
-                        <div class="cal-card-dot" style="background-color: ${item.color || '#eff6ff'};"></div>
-                        ${timeHtml} ${personHtml}
-                        <span class="cal-card-desc">${calEscapeHTML(item.desc)}</span>
-                    </div>
-                    ${detailHtml}
+        if (todayItems.length === 0) { container.innerHTML = `<div class="cal-no-schedule">오늘 등록된 일정이 없습니다.</div>`; return; }
+        container.innerHTML = todayItems.map(item => `
+            <div class="cal-today-card">
+                <div class="cal-card-main">
+                    <div class="cal-card-dot" style="background-color: ${item.color || '#eff6ff'};"></div>
+                    ${item.time ? `<span class="cal-card-time">${calEscapeHTML(item.time)}</span>` : ''} 
+                    ${item.person ? `<span class="cal-card-person">${calEscapeHTML(item.person)}</span>` : ''}
+                    <span class="cal-card-desc">${calEscapeHTML(item.desc)}</span>
                 </div>
-            `;
-        }).join('');
+                ${item.detail ? `<div style="color: var(--color-text-sub); font-size: var(--fs-body); padding-left: 18px;">↳ ${calEscapeHTML(item.detail)}</div>` : ''}
+            </div>
+        `).join('');
     };
-
     const calRenderSelectedDateSchedules = () => {
         const container = document.getElementById('selectedDateList');
-        const titleEl = document.getElementById('selectedListTitle');
-
-        if (!calSelectedDateStr) {
-            container.innerHTML = `<div class="cal-no-schedule">날짜를 클릭하세요.</div>`;
-            return;
-        }
-
-        titleEl.innerText = `선택한 날짜 일정`;
-
+        if (!calSelectedDateStr) { container.innerHTML = `<div class="cal-no-schedule">날짜를 클릭하세요.</div>`; return; }
         const daySchedules = calSchedules[calSelectedDateStr] || [];
-
-        if (daySchedules.length === 0) {
-            container.innerHTML = `<div class="cal-no-schedule">등록된 일정이 없습니다.</div>`;
-            return;
-        }
-
-        container.innerHTML = daySchedules.map(item => {
-            const timeHtml = item.time ? `<span class="cal-card-time">${calEscapeHTML(item.time)}</span>` : '';
-            const personHtml = item.person ? `<span class="cal-card-person">${calEscapeHTML(item.person)}</span>` : '';
-
-            return `
-                <div class="cal-selected-card">
-                    <div class="cal-card-main">
-                        <div class="cal-card-dot" style="background-color: ${item.color || '#eff6ff'};"></div>
-                        ${timeHtml} ${personHtml}
-                        <span class="cal-card-desc">${calEscapeHTML(item.desc)}</span>
-                    </div>
+        if (daySchedules.length === 0) { container.innerHTML = `<div class="cal-no-schedule">등록된 일정이 없습니다.</div>`; return; }
+        container.innerHTML = daySchedules.map(item => `
+            <div class="cal-selected-card">
+                <div class="cal-card-main">
+                    <div class="cal-card-dot" style="background-color: ${item.color || '#eff6ff'};"></div>
+                    ${item.time ? `<span class="cal-card-time">${calEscapeHTML(item.time)}</span>` : ''} 
+                    ${item.person ? `<span class="cal-card-person">${calEscapeHTML(item.person)}</span>` : ''}
+                    <span class="cal-card-desc">${calEscapeHTML(item.desc)}</span>
                 </div>
-            `;
-        }).join('');
+            </div>
+        `).join('');
     };
 
-    (function initCalendar() {
+    window.onload = function() {
+        calculateTeamSummaries();
+        
+        // GNB 초기 로드 상태 맞추기
+        const activeNav = document.querySelector('.page-section.active').id.replace('page-', '');
+        document.querySelectorAll('#mainMenu .nav-item').forEach(el => el.classList.remove('active'));
+        const targetNav = Array.from(document.querySelectorAll('#mainMenu .nav-item')).find(el => el.getAttribute('onclick').includes(`'${activeNav}'`));
+        if (targetNav) targetNav.classList.add('active');
+
+        // 캘린더 초기화
         const today = new Date();
-        const curTodayStr = calGetFormatDate(today.getFullYear(), today.getMonth() + 1, today.getDate());
-        calSelectedDateStr = curTodayStr;
-        calSelectedType = 'calendar';
+        calSelectedDateStr = calGetFormatDate(today.getFullYear(), today.getMonth() + 1, today.getDate());
         calLoadPublicData();
-    })();
+    };
 </script>
 </body>
 </html>
