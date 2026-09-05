@@ -40,7 +40,6 @@
         .page-section.active { display: block; animation: fadeIn 0.2s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         
-        /* 섹션 제목 (높이를 32px로 강제 고정하여 양옆 카드의 시작 높이를 완벽하게 맞춤) */
         .section-title { font-size: 17px; font-weight: 800; color: #111; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; height: 32px; }
         .clean-card { background: var(--color-card); border: 1px solid var(--color-border); border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.015); }
         
@@ -54,15 +53,15 @@
         .stat-card-box .rate { font-size: 30px; font-weight: 800; line-height: 1.1; margin-bottom: 4px; color: var(--color-primary); }
         .stat-card-box .wl { font-size: 13px; color: #888; font-weight: 600; margin-bottom: 12px; }
 
-        /* 경기 내역 리스트 (간격을 확 줄이고 중앙으로 예쁘게 뭉치게 수정) */
-        .match-row { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--color-border); font-size: 13px; }
+        /* 경기 내역 리스트 (간격 균일화 및 압축) */
+        .match-row { display: grid; grid-template-columns: 80px 70px 1fr 90px 60px 60px; align-items: center; justify-items: center; padding: 8px 10px; border-bottom: 1px solid var(--color-border); font-size: 13px; }
         .match-row:last-child { border-bottom: none; }
-        .m-date { width: 65px; color: #888; text-align: center; flex-shrink: 0; }
-        .m-type { width: 50px; text-align: center; flex-shrink: 0; }
-        .m-opp { width: 160px; font-weight: 700; color: #222; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-shrink: 0; }
-        .m-map { width: 90px; color: #666; text-align: center; flex-shrink: 0; }
-        .m-score { width: 45px; font-weight: 800; text-align: center; flex-shrink: 0; }
-        .m-res { width: 45px; text-align: center; flex-shrink: 0; }
+        .m-date { color: #888; text-align: center; }
+        .m-type { text-align: center; }
+        .m-opp { font-weight: 700; color: #222; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
+        .m-map { color: #666; text-align: center; }
+        .m-score { font-weight: 800; text-align: center; }
+        .m-res { text-align: center; }
 
         /* 뱃지 */
         .tag-badge { font-size: 11px; font-weight: 700; padding: 3px 6px; border-radius: 4px; background: #f1f3f5; color: #555; border: 1px solid #e9ecef; }
@@ -70,14 +69,17 @@
         .badge-win { background-color: var(--color-win); }
         .badge-lose { background-color: var(--color-lose); }
 
-        /* 개인 사이드바 (스크롤) */
+        /* 개인 사이드바 */
         .sidebar-list { border: 1px solid var(--color-border); border-radius: 10px; background: #fff; overflow: hidden; }
         .sidebar-header { background: #fcfcfc; padding: 12px 20px; font-size: 13px; font-weight: 800; color: #555; border-bottom: 1px solid var(--color-border); }
-        .sidebar-scroll { max-height: 280px; overflow-y: auto; }
+        .sidebar-scroll { max-height: 250px; overflow-y: auto; }
         .sidebar-scroll::-webkit-scrollbar { width: 6px; }
         .sidebar-scroll::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
         .player-item { padding: 10px 20px; font-size: 14px; font-weight: 600; color: #444; cursor: pointer; border-bottom: 1px solid #f9f9f9; display: flex; justify-content: space-between; align-items: center; }
         .player-item:hover, .player-item.active { background: #f5f8ff; color: var(--color-primary); font-weight: 800; }
+        
+        /* 전체 요약 강조 메뉴 */
+        .summary-menu { background: #f8f9fa; border-bottom: 2px solid var(--color-border); }
 
         /* 도넛 차트 */
         .donut-wrap { display: flex; justify-content: space-around; }
@@ -87,6 +89,9 @@
         .donut-text { position: relative; font-size: 15px; font-weight: 800; color: #111; }
         .donut-label { font-size: 12px; font-weight: 700; color: #555; margin-bottom: 2px; }
         .donut-sub { font-size: 11px; color: #999; }
+        
+        /* 최근 10경기 리스트 영역 래퍼 */
+        .recent-list-wrapper { padding: 12px 20px; }
     </style>
 </head>
 <body>
@@ -117,38 +122,14 @@
     <!-- ========================================== -->
     <div id="view-team-stat">
         <div class="row g-3 mb-4">
-            <div class="col-6 col-md-3">
-                <div class="clean-card stat-card-box">
-                    <div class="label">대회</div>
-                    <div class="rate" id="t-sum-대회-r">0%</div><div class="wl" id="t-sum-대회-w">0승 0패</div>
-                    <button class="btn-clean w-100" onclick="openTeamMatchModal('대회')">상세 전적</button>
-                </div>
-            </div>
-            <div class="col-6 col-md-3">
-                <div class="clean-card stat-card-box">
-                    <div class="label">대학대전</div>
-                    <div class="rate" id="t-sum-대학-r">0%</div><div class="wl" id="t-sum-대학-w">0승 0패</div>
-                    <button class="btn-clean w-100" onclick="openTeamMatchModal('대학')">상세 전적</button>
-                </div>
-            </div>
-            <div class="col-6 col-md-3">
-                <div class="clean-card stat-card-box">
-                    <div class="label">미니대전</div>
-                    <div class="rate" id="t-sum-미니-r">0%</div><div class="wl" id="t-sum-미니-w">0승 0패</div>
-                    <button class="btn-clean w-100" onclick="openTeamMatchModal('미니')">상세 전적</button>
-                </div>
-            </div>
-            <div class="col-6 col-md-3">
-                <div class="clean-card stat-card-box">
-                    <div class="label">CK</div>
-                    <div class="rate" id="t-sum-CK-r">0%</div><div class="wl" id="t-sum-CK-w">0승 0패</div>
-                    <button class="btn-clean w-100" onclick="openTeamMatchModal('CK')">상세 전적</button>
-                </div>
-            </div>
+            <div class="col-6 col-md-3"><div class="clean-card stat-card-box"><div class="label">대회</div><div class="rate" id="t-sum-대회-r">0%</div><div class="wl" id="t-sum-대회-w">0승 0패</div><button class="btn-clean w-100" onclick="openTeamMatchModal('대회')">상세 전적</button></div></div>
+            <div class="col-6 col-md-3"><div class="clean-card stat-card-box"><div class="label">대학대전</div><div class="rate" id="t-sum-대학-r">0%</div><div class="wl" id="t-sum-대학-w">0승 0패</div><button class="btn-clean w-100" onclick="openTeamMatchModal('대학')">상세 전적</button></div></div>
+            <div class="col-6 col-md-3"><div class="clean-card stat-card-box"><div class="label">미니대전</div><div class="rate" id="t-sum-미니-r">0%</div><div class="wl" id="t-sum-미니-w">0승 0패</div><button class="btn-clean w-100" onclick="openTeamMatchModal('미니')">상세 전적</button></div></div>
+            <div class="col-6 col-md-3"><div class="clean-card stat-card-box"><div class="label">CK</div><div class="rate" id="t-sum-CK-r">0%</div><div class="wl" id="t-sum-CK-w">0승 0패</div><button class="btn-clean w-100" onclick="openTeamMatchModal('CK')">상세 전적</button></div></div>
         </div>
 
         <div class="row g-4 align-items-stretch mb-4">
-            <!-- 좌측: 상대 전적 -->
+            <!-- 상대 전적 -->
             <div class="col-lg-7 d-flex flex-column">
                 <div class="section-title">상대 전적</div>
                 <div class="clean-card p-0 overflow-hidden d-flex flex-column flex-grow-1">
@@ -171,16 +152,15 @@
                 </div>
             </div>
 
-            <!-- 우측: 최근 10경기 -->
+            <!-- 최근 10경기 -->
             <div class="col-lg-5 d-flex flex-column">
                 <div class="section-title">
                     최근 10경기
                     <button class="btn-clean" onclick="openTeamMatchModal('전체')">전체보기</button>
                 </div>
-                <div class="clean-card flex-grow-1" style="padding: 16px 20px;">
-                    <div id="team-recent-list">
-                        <!-- JS 렌더링 -->
-                    </div>
+                <!-- height 제한을 없애고 내용물에 맞게 컴팩트하게 출력 -->
+                <div class="clean-card flex-grow-0 p-0 overflow-hidden" style="border-radius: 10px;">
+                    <div class="recent-list-wrapper" id="team-recent-list"></div>
                 </div>
             </div>
         </div>
@@ -194,6 +174,9 @@
             <!-- 좌측 사이드바 -->
             <div class="col-md-3">
                 <div class="sidebar-list mb-3">
+                    <div class="player-item summary-menu" id="side-btn-summary" onclick="showIndivSummary()">
+                        <span class="fw-bold" style="color:var(--color-primary);">📊 전체 요약</span>
+                    </div>
                     <div class="sidebar-header">현역 멤버</div>
                     <div class="sidebar-scroll" id="active-player-list"></div>
                 </div>
@@ -205,58 +188,84 @@
             
             <!-- 우측 대시보드 -->
             <div class="col-md-9">
-                <div class="clean-card d-flex align-items-center mb-4 p-4">
-                    <div style="width:72px;height:72px;border-radius:50%;background:#f1f3f5;font-size:30px;display:flex;align-items:center;justify-content:center;margin-right:20px;">👤</div>
-                    <div>
-                        <h3 class="fw-bold m-0 mb-2" id="p-name" style="letter-spacing:-1px;">이름</h3>
-                        <div class="d-flex gap-2">
-                            <span class="tag-badge border border-secondary text-secondary" id="p-tier">티어</span>
-                            <span class="tag-badge border border-secondary text-secondary" id="p-race">종족</span>
+                
+                <!-- 2-A. 전체 요약 화면 -->
+                <div id="indiv-summary-content">
+                    <div class="section-title">현역 멤버 전체 요약</div>
+                    <div class="clean-card p-0 overflow-hidden">
+                        <div class="table-responsive">
+                            <table class="table table-borderless table-hover mb-0 text-center" style="font-size:14px;">
+                                <thead style="background:#fcfcfc; border-bottom:1px solid var(--color-border); font-size:13px; color:#555;">
+                                    <tr>
+                                        <th class="text-start ps-4">멤버 이름</th>
+                                        <th>대회</th>
+                                        <th>대학대전</th>
+                                        <th>미니대전</th>
+                                        <th>CK</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="indiv-summary-tbody">
+                                    <!-- JS 렌더링 -->
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
 
-                <div class="row g-3 mb-4">
-                    <div class="col-md-6">
-                        <div class="clean-card h-100 p-3">
-                            <div class="section-title mb-3" style="font-size:14px; padding-bottom:8px; border-bottom:1px solid #eee; height:auto;">형식별 승률</div>
-                            <div class="donut-wrap">
-                                <div class="donut-box"><div class="donut" id="d-fmt-1"><span class="donut-text" id="dt-fmt-1">0%</span></div><div class="donut-label">대회</div><div class="donut-sub" id="dw-fmt-1">-</div></div>
-                                <div class="donut-box"><div class="donut" id="d-fmt-2"><span class="donut-text" id="dt-fmt-2">0%</span></div><div class="donut-label">대학</div><div class="donut-sub" id="dw-fmt-2">-</div></div>
-                                <div class="donut-box"><div class="donut" id="d-fmt-3"><span class="donut-text" id="dt-fmt-3">0%</span></div><div class="donut-label">미니/CK</div><div class="donut-sub" id="dw-fmt-3">-</div></div>
+                <!-- 2-B. 개인 상세 프로필 화면 -->
+                <div id="statContent" style="display: none;">
+                    <div class="clean-card d-flex align-items-center mb-4 p-4">
+                        <div style="width:72px;height:72px;border-radius:50%;background:#f1f3f5;font-size:30px;display:flex;align-items:center;justify-content:center;margin-right:20px;">👤</div>
+                        <div>
+                            <h3 class="fw-bold m-0 mb-2" id="p-name" style="letter-spacing:-1px;">이름</h3>
+                            <div class="d-flex gap-2">
+                                <span class="tag-badge border border-secondary text-secondary" id="p-tier">티어</span>
+                                <span class="tag-badge border border-secondary text-secondary" id="p-race">종족</span>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-6">
-                        <div class="clean-card h-100 p-3">
-                            <div class="section-title mb-3" style="font-size:14px; padding-bottom:8px; border-bottom:1px solid #eee; height:auto;">종족전 승률</div>
-                            <div class="donut-wrap">
-                                <div class="donut-box"><div class="donut" id="d-race-t"><span class="donut-text" id="dt-race-t">0%</span></div><div class="donut-label text-primary">vs T</div><div class="donut-sub" id="dw-race-t">-</div></div>
-                                <div class="donut-box"><div class="donut" id="d-race-z"><span class="donut-text" id="dt-race-z">0%</span></div><div class="donut-label" style="color:purple;">vs Z</div><div class="donut-sub" id="dw-race-z">-</div></div>
-                                <div class="donut-box"><div class="donut" id="d-race-p"><span class="donut-text" id="dt-race-p">0%</span></div><div class="donut-label text-warning">vs P</div><div class="donut-sub" id="dw-race-p">-</div></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
-                <div class="section-title mt-4" style="height:auto;">
-                    최근 10경기
-                    <div class="d-flex gap-2 align-items-center">
-                        <div id="indiv-filters" class="d-flex gap-1 me-3">
-                            <button class="btn-clean active" onclick="setIndivFilter('전체')">전체</button>
-                            <button class="btn-clean" onclick="setIndivFilter('대회')">대회</button>
-                            <button class="btn-clean" onclick="setIndivFilter('대학')">대학</button>
-                            <button class="btn-clean" onclick="setIndivFilter('미니')">미니</button>
-                            <button class="btn-clean" onclick="setIndivFilter('CK')">CK</button>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <div class="clean-card h-100 p-3">
+                                <div class="section-title mb-3" style="font-size:14px; padding-bottom:8px; border-bottom:1px solid #eee; height:auto;">형식별 승률</div>
+                                <div class="donut-wrap">
+                                    <div class="donut-box"><div class="donut" id="d-fmt-1"><span class="donut-text" id="dt-fmt-1">0%</span></div><div class="donut-label">대회</div><div class="donut-sub" id="dw-fmt-1">-</div></div>
+                                    <div class="donut-box"><div class="donut" id="d-fmt-2"><span class="donut-text" id="dt-fmt-2">0%</span></div><div class="donut-label">대학</div><div class="donut-sub" id="dw-fmt-2">-</div></div>
+                                    <div class="donut-box"><div class="donut" id="d-fmt-3"><span class="donut-text" id="dt-fmt-3">0%</span></div><div class="donut-label">미니/CK</div><div class="donut-sub" id="dw-fmt-3">-</div></div>
+                                </div>
+                            </div>
                         </div>
-                        <button class="btn-clean border-dark" onclick="openIndivMatchModal()">전체보기</button>
+                        <div class="col-md-6">
+                            <div class="clean-card h-100 p-3">
+                                <div class="section-title mb-3" style="font-size:14px; padding-bottom:8px; border-bottom:1px solid #eee; height:auto;">종족전 승률</div>
+                                <div class="donut-wrap">
+                                    <div class="donut-box"><div class="donut" id="d-race-t"><span class="donut-text" id="dt-race-t">0%</span></div><div class="donut-label text-primary">vs T</div><div class="donut-sub" id="dw-race-t">-</div></div>
+                                    <div class="donut-box"><div class="donut" id="d-race-z"><span class="donut-text" id="dt-race-z">0%</span></div><div class="donut-label" style="color:purple;">vs Z</div><div class="donut-sub" id="dw-race-z">-</div></div>
+                                    <div class="donut-box"><div class="donut" id="d-race-p"><span class="donut-text" id="dt-race-p">0%</span></div><div class="donut-label text-warning">vs P</div><div class="donut-sub" id="dw-race-p">-</div></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section-title mt-4" style="height:auto;">
+                        최근 10경기
+                        <div class="d-flex gap-2 align-items-center">
+                            <div id="indiv-filters" class="d-flex gap-1 me-3">
+                                <button class="btn-clean active" onclick="setIndivFilter('전체')">전체</button>
+                                <button class="btn-clean" onclick="setIndivFilter('대회')">대회</button>
+                                <button class="btn-clean" onclick="setIndivFilter('대학')">대학</button>
+                                <button class="btn-clean" onclick="setIndivFilter('미니')">미니</button>
+                                <button class="btn-clean" onclick="setIndivFilter('CK')">CK</button>
+                            </div>
+                            <button class="btn-clean border-dark" onclick="openIndivMatchModal()">전체보기</button>
+                        </div>
+                    </div>
+                    <div class="clean-card p-0 overflow-hidden" style="border-radius: 10px;">
+                        <div class="recent-list-wrapper" id="indiv-recent-list"></div>
                     </div>
                 </div>
-                <div class="clean-card" style="padding: 16px 24px;">
-                    <div id="indiv-recent-list">
-                        <!-- JS 렌더링 -->
-                    </div>
-                </div>
+                
             </div>
         </div>
     </div>
@@ -271,8 +280,8 @@
                 <h5 class="modal-title fw-bold" id="teamModalTitle">전체 경기 결과</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
-                <div id="team-modal-list"></div>
+            <div class="modal-body p-0">
+                <div class="recent-list-wrapper" id="team-modal-list"></div>
             </div>
         </div>
     </div>
@@ -285,8 +294,8 @@
                 <h5 class="modal-title fw-bold" id="indivModalTitle">개인 전체 경기 결과</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
-                <div id="indiv-modal-list"></div>
+            <div class="modal-body p-0">
+                <div class="recent-list-wrapper" id="indiv-modal-list"></div>
             </div>
         </div>
     </div>
@@ -300,7 +309,7 @@
     const dbRounds = {{ rounds_list | tojson }};
     const playersStats = {{ member_stats['전체'] | tojson }};
 
-    let currentPlayer = '김윤환'; // 기본 로드 멤버
+    let currentPlayer = ''; 
     let currentIndivFilter = '전체';
 
     // 1. GNB 탭 전환
@@ -323,7 +332,7 @@
             document.getElementById('view-team-stat').style.display = 'none';
             document.getElementById('view-indiv-stat').style.display = 'block';
             renderIndividualSidebar();
-            selectPlayer(currentPlayer);
+            showIndivSummary(); 
         }
     }
 
@@ -362,22 +371,20 @@
     function renderTeamMatchesList(containerId, format, limit) {
         const filtered = format === '전체' ? dbMatches : dbMatches.filter(m => m['형식'] === format);
         const sliced = limit ? filtered.slice(0, limit) : filtered;
-        
         if (sliced.length === 0) {
             document.getElementById(containerId).innerHTML = '<div class="text-center text-muted py-3">경기 기록이 없습니다.</div>';
             return;
         }
-
+        // map 파라미터를 추가하여 팀 기록에 없는 맵 영역을 빈값 처리 (그리드 유지용)
         const html = sliced.map(m => `
             <div class="match-row">
                 <div class="m-date">${m['날짜'] ? m['날짜'].split(' ')[0].substring(2) : ''}</div>
                 <div class="m-type"><span class="tag-badge">${m['형식']}</span></div>
                 <div class="m-opp">${m['상대팀']}</div>
+                <div class="m-map"></div>
                 <div class="m-score">${m['세트 결과'] || '-'}</div>
                 <div class="m-res">
-                    ${m['최근 결과'] === '승' || m['최종 결과'] === '승' 
-                        ? '<span class="match-badge badge-win">WIN</span>' 
-                        : '<span class="match-badge badge-lose">LOSE</span>'}
+                    ${m['최근 결과'] === '승' || m['최종 결과'] === '승' ? '<span class="match-badge badge-win">WIN</span>' : '<span class="match-badge badge-lose">LOSE</span>'}
                 </div>
             </div>
         `).join('');
@@ -390,11 +397,11 @@
         new bootstrap.Modal(document.getElementById('teamMatchesModal')).show();
     }
 
-    // 개인 전적
+    // 개인 전적 사이드바 렌더링
     function renderIndividualSidebar() {
         const activeHtml = [], formerHtml = [];
         dbMembers.forEach(m => {
-            const html = `<div class="player-item ${m['이름']===currentPlayer ? 'active':''}" onclick="selectPlayer('${m['이름']}')">
+            const html = `<div class="player-item" id="side-player-${m['이름']}" onclick="selectPlayer('${m['이름']}')">
                             <span>${m['이름']}</span> <span style="font-size:11px;color:#888;">${m['종족']||''}</span>
                           </div>`;
             if(!m['퇴단일'] || m['퇴단일'].trim() === '') activeHtml.push(html);
@@ -404,9 +411,40 @@
         document.getElementById('former-player-list').innerHTML = formerHtml.join('');
     }
 
+    // 전체 요약 보기 화면
+    function showIndivSummary() {
+        currentPlayer = '';
+        document.getElementById('statContent').style.display = 'none';
+        document.getElementById('indiv-summary-content').style.display = 'block';
+        
+        document.querySelectorAll('.player-item').forEach(el => el.classList.remove('active'));
+        document.getElementById('side-btn-summary').classList.add('active');
+
+        const activeMembers = dbMembers.filter(m => !m['퇴단일'] || m['퇴단일'].trim() === '');
+        let html = '';
+        activeMembers.forEach(m => {
+            const pStat = playersStats.find(x => x['이름'] === m['이름']) || {};
+            const name = m['이름'];
+            html += `<tr style="border-bottom:1px solid #f1f3f5; cursor:pointer;" onclick="selectPlayer('${name}')">
+                <td class="text-start ps-4 fw-bold text-dark">${name}</td>
+                <td>${pStat['대회 전적'] || '-'}</td>
+                <td>${pStat['대학 전적'] || '-'}</td>
+                <td>${pStat['미니 전적'] || '-'}</td>
+                <td>${pStat['CK 전적'] || '-'}</td>
+            </tr>`;
+        });
+        document.getElementById('indiv-summary-tbody').innerHTML = html;
+    }
+
+    // 선수 상세 보기
     function selectPlayer(name) {
         currentPlayer = name;
-        renderIndividualSidebar(); 
+        document.getElementById('indiv-summary-content').style.display = 'none';
+        document.getElementById('statContent').style.display = 'block';
+
+        document.querySelectorAll('.player-item').forEach(el => el.classList.remove('active'));
+        const sideItem = document.getElementById(`side-player-${name}`);
+        if(sideItem) sideItem.classList.add('active');
 
         const pStat = playersStats.find(x => x['이름'] === name) || {};
         const pDb = dbMembers.find(x => x['이름'] === name) || {};
@@ -451,7 +489,8 @@
                 <div class="m-date">${m['날짜'] ? m['날짜'].split(' ')[0].substring(2) : ''}</div>
                 <div class="m-type"><span class="tag-badge">${m['형식']}</span></div>
                 <div class="m-opp">${m['상대팀']} <span style="font-weight:normal;color:#7a828e;">/ ${m['상대 선수']}(${m['상대 종족']})</span></div>
-                <div class="m-map">${m['맵']}</div>
+                <div class="m-map">${m['맵'] || '-'}</div>
+                <div class="m-score"></div>
                 <div class="m-res">
                     ${m['결과'] === '승' ? '<span class="match-badge badge-win">WIN</span>' : '<span class="match-badge badge-lose">LOSE</span>'}
                 </div>
@@ -466,7 +505,6 @@
         new bootstrap.Modal(document.getElementById('indivMatchesModal')).show();
     }
 
-    // 앱 실행
     window.onload = function() {
         calculateTeamSummaries();
     };
