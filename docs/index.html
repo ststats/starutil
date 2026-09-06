@@ -121,19 +121,10 @@
                         <button type="button" class="btn-close" onclick="toggleNewsSidebar(false)"></button>
                     </div>
                     <div class="sidebar-list">
-                        <div class="sidebar-header sidebar-header-toggle" data-bs-toggle="collapse" data-bs-target="#sec-news-active">
-                            현역 멤버 <svg class="sidebar-chevron" width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        <div class="player-item" id="news-side-btn-all" onclick="showNewsAll()">
+                            <span>전체</span>
                         </div>
-                        <div class="collapse show" id="sec-news-active">
-                            <div class="sidebar-scroll" id="news-active-player-list"></div>
-                        </div>
-
-                        <div class="sidebar-header sidebar-header-toggle" data-bs-toggle="collapse" data-bs-target="#sec-news-former">
-                            이전 멤버 <svg class="sidebar-chevron" width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                        </div>
-                        <div class="collapse" id="sec-news-former">
-                            <div class="sidebar-scroll" id="news-former-player-list"></div>
-                        </div>
+                        <div class="sidebar-scroll" id="news-active-player-list"></div>
                     </div>
                 </div>
             </div>
@@ -688,21 +679,10 @@
                         <button type="button" class="btn-close" onclick="toggleIndivSidebar(false)"></button>
                     </div>
                     <div class="sidebar-list">
-                        <div class="sidebar-header sidebar-header-toggle" data-bs-toggle="collapse" data-bs-target="#sec-summary">
-                            종합 통계 <svg class="sidebar-chevron" width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        <div class="player-item" id="side-btn-summary" onclick="showIndivSummary()">
+                            <span>전체</span>
                         </div>
-                        <div class="collapse show" id="sec-summary">
-                            <div class="player-item" id="side-btn-summary" onclick="showIndivSummary()">
-                                <span>전체 요약</span>
-                            </div>
-                        </div>
-
-                        <div class="sidebar-header sidebar-header-toggle" data-bs-toggle="collapse" data-bs-target="#sec-active">
-                            멤버 <svg class="sidebar-chevron" width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                        </div>
-                        <div class="collapse show" id="sec-active">
-                            <div class="sidebar-scroll" id="active-player-list"></div>
-                        </div>
+                        <div class="sidebar-scroll" id="active-player-list"></div>
 
                         <div class="sidebar-header sidebar-header-toggle" data-bs-toggle="collapse" data-bs-target="#sec-former">
                             이전 멤버 <svg class="sidebar-chevron" width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
