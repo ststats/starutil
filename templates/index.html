@@ -263,22 +263,22 @@
                     <div class="table-responsive flex-grow-1" style="overflow-y: auto;">
                         <table class="table table-borderless table-hover mb-0 text-center stat-table" style="min-width:615px; table-layout: fixed;">
                             <thead>
-                                <tr><th class="text-center" style="white-space:nowrap; width:19%;">상대</th><th class="text-center" style="white-space:nowrap; width:19%;">대회</th><th class="text-center" style="white-space:nowrap; width:19%;">대학</th><th class="text-center" style="white-space:nowrap; width:19%;">미니</th><th class="text-center" style="white-space:nowrap; width:19%;">CK</th><th style="width:5%;"></th></tr>
+                                <tr><th class="text-center" style="white-space:nowrap; width:18%;">상대</th><th class="text-center" style="white-space:nowrap; width:18%;">대회</th><th class="text-center" style="white-space:nowrap; width:18%;">대학</th><th class="text-center" style="white-space:nowrap; width:18%;">미니</th><th class="text-center" style="white-space:nowrap; width:18%;">CK</th><th style="width:6%;"></th></tr>
                             </thead>
                             <tbody>
                                 {% for row in crew_stats['전체'] %}
                                 <tr class="team-row-clickable" style="border-bottom:1px solid #f1f3f5;" data-team="{{ row['상대'] | e }}">
-                                    <td class="fw-bold text-dark text-center" style="white-space:nowrap; width:19%;">
+                                    <td class="fw-bold text-dark text-center" style="white-space:nowrap; width:18%;">
                                         <span class="d-flex align-items-center justify-content-center gap-2">
                                             <img src="images/{{ (row['상대'] if row['상대'] != '내전' else '캄몬스타즈') | e }}.webp" alt="" class="team-logo-icon" style="width:16px;height:16px; flex-shrink:0;" onerror="this.remove();">
                                             <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ row['상대'] | e }}</span>
                                         </span>
                                     </td>
-                                    <td class="text-center" style="white-space:nowrap; width:19%;">{{ row['대회 전적'] | e }}</td><td class="text-center" style="white-space:nowrap; width:19%;">{{ row['대학 전적'] | e }}</td>
-                                    <td class="text-center" style="white-space:nowrap; width:19%;">{{ row['미니 전적'] | e }}</td><td class="text-center" style="white-space:nowrap; width:19%;">{{ row['CK 전적'] | e }}</td>
-                                    <!-- 상세보기 표시: 얇은 쉐브런 아이콘 -->
-                                    <td class="text-secondary text-center" style="vertical-align:middle; width: 5%;">
-                                        <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"></polyline></svg>
+                                    <td class="text-center" style="white-space:nowrap; width:18%;">{{ row['대회 전적'] | e }}</td><td class="text-center" style="white-space:nowrap; width:18%;">{{ row['대학 전적'] | e }}</td>
+                                    <td class="text-center" style="white-space:nowrap; width:18%;">{{ row['미니 전적'] | e }}</td><td class="text-center" style="white-space:nowrap; width:18%;">{{ row['CK 전적'] | e }}</td>
+                                    <!-- 상세보기 표시: 최근전적 목록과 동일한 화살표 스타일/비율 재사용 -->
+                                    <td style="width: 6%;">
+                                        <div class="m-arrow" style="width:auto;"><svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"></polyline></svg></div>
                                     </td>
                                 </tr>
                                 {% endfor %}
