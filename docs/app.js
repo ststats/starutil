@@ -699,14 +699,31 @@
                             <div class="avatar-select-fallback">전체</div>
                             <span class="avatar-select-name">전체</span>
                        </div>`];
+        const formerHtml = [];
         dbMembers.forEach(m => {
-            if (!isActiveMember(m)) return;
-            html.push(`<div class="avatar-select-item" id="side-player-${m['이름']}" onclick="selectPlayer('${m['이름']}')">
+            const item = `<div class="avatar-select-item" id="side-player-${m['이름']}" onclick="selectPlayer('${m['이름']}')">
                             ${avatarHtml(m['SOOP ID'], 'avatar-select-img')}
                             <span class="avatar-select-name">${escapeHTML(m['이름'])}</span>
-                        </div>`);
+                        </div>`;
+            if (isActiveMember(m)) html.push(item);
+            else formerHtml.push(item);
         });
+
+        html.push(`<div class="avatar-select-item avatar-select-toggle" id="indiv-toggle-former" onclick="toggleFormerMembers()">
+                        <div class="avatar-select-fallback">···</div>
+                        <span class="avatar-select-name">이전 멤버 보기</span>
+                   </div>`);
+        html.push(`<span id="indiv-former-wrap" style="display:none;">${formerHtml.join('')}</span>`);
+
         document.getElementById('indiv-avatar-list').innerHTML = html.join('');
+    }
+
+    function toggleFormerMembers() {
+        const wrap = document.getElementById('indiv-former-wrap');
+        const btn = document.getElementById('indiv-toggle-former');
+        const showing = wrap.style.display !== 'none';
+        wrap.style.display = showing ? 'none' : 'contents';
+        btn.querySelector('.avatar-select-name').innerText = showing ? '이전 멤버 보기' : '이전 멤버 접기';
     }
 
     function showIndivSummary() {
