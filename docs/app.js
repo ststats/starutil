@@ -710,8 +710,10 @@
         });
 
         html.push(`<div class="avatar-select-item avatar-select-toggle" id="indiv-toggle-former" onclick="toggleFormerMembers()">
-                        <div class="avatar-select-fallback">···</div>
-                        <span class="avatar-select-name">이전 멤버 보기</span>
+                        <div class="avatar-select-fallback">
+                            <svg id="indiv-toggle-chevron" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="transition:transform 0.2s;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </div>
+                        <span class="avatar-select-name">이전 멤버</span>
                    </div>`);
         html.push(`<span id="indiv-former-wrap" style="display:none;">${formerHtml.join('')}</span>`);
 
@@ -720,10 +722,10 @@
 
     function toggleFormerMembers() {
         const wrap = document.getElementById('indiv-former-wrap');
-        const btn = document.getElementById('indiv-toggle-former');
+        const chevron = document.getElementById('indiv-toggle-chevron');
         const showing = wrap.style.display !== 'none';
         wrap.style.display = showing ? 'none' : 'contents';
-        btn.querySelector('.avatar-select-name').innerText = showing ? '이전 멤버 보기' : '이전 멤버 접기';
+        chevron.style.transform = showing ? '' : 'rotate(180deg)';
     }
 
     function showIndivSummary() {
