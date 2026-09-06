@@ -728,11 +728,11 @@
             const pStat = playersStats.find(x => x['이름'] === m['이름']) || {};
             const name = m['이름'];
             html += `<tr style="border-bottom:1px solid #f1f3f5; cursor:pointer;" onclick="selectPlayer('${name}')">
-                <td class="fw-bold text-dark" style="white-space:nowrap; width:130px;"><span class="d-flex align-items-center justify-content-start gap-2 ps-2">${avatarHtml(m['SOOP ID'], 'player-avatar-sm')}<span style="overflow:hidden; text-overflow:ellipsis;">${escapeHTML(name)}</span></span></td>
-                <td style="white-space:nowrap; width:130px;">${pStat['대회 전적'] || '-'}</td>
-                <td style="white-space:nowrap; width:130px;">${pStat['대학 전적'] || '-'}</td>
-                <td style="white-space:nowrap; width:130px;">${pStat['미니 전적'] || '-'}</td>
-                <td style="white-space:nowrap; width:130px;">${pStat['CK 전적'] || '-'}</td>
+                <td class="fw-bold text-dark" style="white-space:nowrap; width:20%;"><span class="d-flex align-items-center justify-content-start gap-2 ps-2">${avatarHtml(m['SOOP ID'], 'player-avatar-sm')}<span style="overflow:hidden; text-overflow:ellipsis;">${escapeHTML(name)}</span></span></td>
+                <td style="white-space:nowrap; width:20%;">${pStat['대회 전적'] || '-'}</td>
+                <td style="white-space:nowrap; width:20%;">${pStat['대학 전적'] || '-'}</td>
+                <td style="white-space:nowrap; width:20%;">${pStat['미니 전적'] || '-'}</td>
+                <td style="white-space:nowrap; width:20%;">${pStat['CK 전적'] || '-'}</td>
             </tr>`;
         });
         document.getElementById('indiv-summary-tbody').innerHTML = html;
@@ -914,14 +914,14 @@
 
         return `
         <tr>
-            <td class="text-center text-secondary fw-bold" style="width:110px; white-space:nowrap;">${idx + 1}</td>
-            <td class="text-center" style="width:110px;">
+            <td class="text-center text-secondary fw-bold" style="width:25%; white-space:nowrap;">${idx + 1}</td>
+            <td class="text-center" style="width:25%;">
                 <span class="d-flex align-items-center justify-content-center gap-2" style="min-width:0;">
                     ${avatarHtml(ours['SOOP ID'], 'player-avatar-sm')}
                     <span class="fw-bold" style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHTML(name)}</span>
                 </span>
             </td>
-            <td class="text-center fw-bold" style="width:220px; color:var(--color-primary); white-space:nowrap;">${escapeHTML(displayVal)}</td>
+            <td class="text-center fw-bold" style="width:50%; color:var(--color-primary); white-space:nowrap;">${escapeHTML(displayVal)}</td>
         </tr>`;
     }
 
