@@ -53,6 +53,7 @@
         if (viewType === 'news' && !newsSidebarRendered) {
             renderNewsSidebar();
             newsSidebarRendered = true;
+            showNewsAll();
         }
     }
 
@@ -724,11 +725,11 @@
             const pStat = playersStats.find(x => x['이름'] === m['이름']) || {};
             const name = m['이름'];
             html += `<tr style="border-bottom:1px solid #f1f3f5; cursor:pointer;" onclick="selectPlayer('${name}')">
-                <td class="fw-bold text-dark"><span class="d-flex align-items-center justify-content-center gap-2">${avatarHtml(m['SOOP ID'], 'player-avatar-sm')}${escapeHTML(name)}</span></td>
-                <td>${pStat['대회 전적'] || '-'}</td>
-                <td>${pStat['대학 전적'] || '-'}</td>
-                <td>${pStat['미니 전적'] || '-'}</td>
-                <td>${pStat['CK 전적'] || '-'}</td>
+                <td class="fw-bold text-dark" style="white-space:nowrap;"><span class="d-flex align-items-center justify-content-start gap-2 ps-2">${avatarHtml(m['SOOP ID'], 'player-avatar-sm')}${escapeHTML(name)}</span></td>
+                <td style="white-space:nowrap;">${pStat['대회 전적'] || '-'}</td>
+                <td style="white-space:nowrap;">${pStat['대학 전적'] || '-'}</td>
+                <td style="white-space:nowrap;">${pStat['미니 전적'] || '-'}</td>
+                <td style="white-space:nowrap;">${pStat['CK 전적'] || '-'}</td>
             </tr>`;
         });
         document.getElementById('indiv-summary-tbody').innerHTML = html;
