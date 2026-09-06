@@ -654,14 +654,14 @@
 
         return `
         <tr>
-            <td class="text-center text-secondary fw-bold" style="width:60px; white-space:nowrap;">${idx + 1}</td>
-            <td class="text-center">
-                <span class="d-flex align-items-center justify-content-center gap-2">
+            <td class="text-center text-secondary fw-bold" style="width:25%; white-space:nowrap;">${idx + 1}</td>
+            <td class="text-center" style="width:25%;">
+                <span class="d-flex align-items-center justify-content-center gap-2" style="min-width:0;">
                     ${avatarHtml(ours['SOOP ID'], 'player-avatar-sm')}
-                    <span class="fw-bold">${escapeHTML(name)}</span>
+                    <span class="fw-bold" style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHTML(name)}</span>
                 </span>
             </td>
-            <td class="text-center fw-bold" style="width:140px; color:var(--color-primary); white-space:nowrap;">${escapeHTML(displayVal)}</td>
+            <td class="text-center fw-bold" style="width:50%; color:var(--color-primary); white-space:nowrap;">${escapeHTML(displayVal)}</td>
         </tr>`;
     }
 
