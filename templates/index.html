@@ -38,7 +38,10 @@
         <div class="text-center text-muted py-4" style="font-size:var(--fs-body);">실시간 방송 상태 연동 준비중입니다.</div>
     </div>
 
-    <div class="section-title mt-4">공지</div>
+    <div class="section-title mt-4">
+        공지
+        <button class="btn-view-all" onclick="goToNewsFeed()">소식보기<svg width="7" height="7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="margin-left:2px; vertical-align:middle;"><polyline points="9 6 15 12 9 18"></polyline></svg></button>
+    </div>
     <div class="clean-card p-0 overflow-hidden" id="home-notice-list">
         <div class="text-center text-muted py-4" style="font-size:var(--fs-body);">불러오는 중...</div>
     </div>
@@ -124,6 +127,7 @@
                         <div class="player-item" id="news-side-btn-all" onclick="showNewsAll()">
                             <span>전체</span>
                         </div>
+                        <div class="sidebar-header">멤버</div>
                         <div class="sidebar-scroll" id="news-active-player-list"></div>
                     </div>
                 </div>
@@ -322,6 +326,8 @@
                         <div class="player-item" id="side-btn-summary" onclick="showIndivSummary()">
                             <span>전체</span>
                         </div>
+
+                        <div class="sidebar-header">멤버</div>
                         <div class="sidebar-scroll" id="active-player-list"></div>
 
                         <div class="sidebar-header sidebar-header-toggle" data-bs-toggle="collapse" data-bs-target="#sec-former">
