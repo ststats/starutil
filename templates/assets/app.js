@@ -70,28 +70,27 @@
     let newsTotalPages = 1;
     let newsLoading = false;
 
-    function toggleNewsSidebar(open) {
-        document.getElementById('newsSidebarPanel').classList.toggle('mobile-open', open);
-        document.getElementById('newsSidebarBackdrop').classList.toggle('show', open);
-    }
-
     function renderNewsSidebar() {
-        const activeHtml = [];
+        const html = [`<div class="avatar-select-item avatar-select-all active" id="news-side-btn-all" onclick="showNewsAll()">
+                            <div class="avatar-select-fallback">전체</div>
+                            <span class="avatar-select-name">전체</span>
+                       </div>`];
         dbMembers.forEach(m => {
             if (!isActiveMember(m)) return;
             const soopId = m['SOOP ID'];
             if (!soopId || !/^[a-zA-Z0-9_-]+$/.test(String(soopId).trim())) return;
-            activeHtml.push(`<div class="player-item" id="news-side-player-${m['이름']}" onclick="selectNewsPlayer('${m['이름']}')">
-                            <span>${escapeHTML(m['이름'])}</span>
-                          </div>`);
+            html.push(`<div class="avatar-select-item" id="news-side-player-${m['이름']}" onclick="selectNewsPlayer('${m['이름']}')">
+                            ${avatarHtml(soopId, 'avatar-select-img')}
+                            <span class="avatar-select-name">${escapeHTML(m['이름'])}</span>
+                        </div>`);
         });
-        document.getElementById('news-active-player-list').innerHTML = activeHtml.join('') || `<div class="text-center text-muted py-2" style="font-size:var(--fs-body);">없음</div>`;
+        document.getElementById('news-avatar-list').innerHTML = html.join('');
     }
 
     async function showNewsAll() {
-        toggleNewsSidebar(false);
-        document.querySelectorAll('#newsSidebarPanel .player-item, #newsSidebarPanel .sidebar-header').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('#news-avatar-list .avatar-select-item').forEach(el => el.classList.remove('active'));
         document.getElementById('news-side-btn-all').classList.add('active');
+        document.getElementById('news-content-title').innerText = '전체 소식';
         currentNewsPlayer = null;
 
         const content = document.getElementById('news-feed-content');
@@ -124,10 +123,10 @@
     }
 
     function selectNewsPlayer(name) {
-        toggleNewsSidebar(false);
-        document.querySelectorAll('#newsSidebarPanel .player-item, #newsSidebarPanel .sidebar-header').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('#news-avatar-list .avatar-select-item').forEach(el => el.classList.remove('active'));
         const sideItem = document.getElementById(`news-side-player-${name}`);
         if (sideItem) sideItem.classList.add('active');
+        document.getElementById('news-content-title').innerText = `${name}의 소식`;
 
         const m = dbMembers.find(x => x['이름'] === name);
         if (!m) return;
@@ -247,11 +246,6 @@
     function loadMoreNews() {
         newsCurrentPage += 1;
         loadNewsFeed(false);
-    }
-
-    function toggleIndivSidebar(open) {
-        document.getElementById('indivSidebarPanel').classList.toggle('mobile-open', open);
-        document.getElementById('indivSidebarBackdrop').classList.toggle('show', open);
     }
 
     function parseStat(statStr) {
@@ -701,25 +695,27 @@
     }
 
     function renderIndividualSidebar() {
-        const activeHtml = [], formerHtml = [];
+        const html = [`<div class="avatar-select-item avatar-select-all active" id="side-btn-summary" onclick="showIndivSummary()">
+                            <div class="avatar-select-fallback">전체</div>
+                            <span class="avatar-select-name">전체</span>
+                       </div>`];
         dbMembers.forEach(m => {
-            const html = `<div class="player-item" id="side-player-${m['이름']}" onclick="selectPlayer('${m['이름']}')">
-                            <span>${escapeHTML(m['이름'])}</span> <span class="item-sub">${escapeHTML(m['종족'])||''}</span>
-                          </div>`;
-            if(!m['퇴단일'] || m['퇴단일'].trim() === '') activeHtml.push(html);
-            else formerHtml.push(html);
+            if (!isActiveMember(m)) return;
+            html.push(`<div class="avatar-select-item" id="side-player-${m['이름']}" onclick="selectPlayer('${m['이름']}')">
+                            ${avatarHtml(m['SOOP ID'], 'avatar-select-img')}
+                            <span class="avatar-select-name">${escapeHTML(m['이름'])}</span>
+                        </div>`);
         });
-        document.getElementById('active-player-list').innerHTML = activeHtml.join('');
-        document.getElementById('former-player-list').innerHTML = formerHtml.join('');
+        document.getElementById('indiv-avatar-list').innerHTML = html.join('');
     }
 
     function showIndivSummary() {
         currentPlayer = '';
-        toggleIndivSidebar(false);
         document.getElementById('statContent').style.display = 'none';
         document.getElementById('indiv-summary-content').style.display = 'block';
-        
-        document.querySelectorAll('.indiv-sidebar-panel .player-item, .indiv-sidebar-panel .sidebar-header').forEach(el => el.classList.remove('active'));
+        document.getElementById('indiv-content-title').innerText = '전체 전적';
+
+        document.querySelectorAll('#indiv-avatar-list .avatar-select-item').forEach(el => el.classList.remove('active'));
         document.getElementById('side-btn-summary').classList.add('active');
 
         const activeMembers = dbMembers.filter(m => !m['퇴단일'] || m['퇴단일'].trim() === '');
@@ -740,12 +736,11 @@
 
     function selectPlayer(name) {
         currentPlayer = name;
-        toggleIndivSidebar(false);
         document.getElementById('indiv-summary-content').style.display = 'none';
         document.getElementById('statContent').style.display = 'block';
+        document.getElementById('indiv-content-title').innerText = `${name}의 전적`;
 
-        document.querySelectorAll('.indiv-sidebar-panel .player-item, .indiv-sidebar-panel .sidebar-header').forEach(el => el.classList.remove('active'));
-        document.getElementById('side-btn-summary').classList.remove('active');
+        document.querySelectorAll('#indiv-avatar-list .avatar-select-item').forEach(el => el.classList.remove('active'));
         const sideItem = document.getElementById(`side-player-${name}`);
         if(sideItem) sideItem.classList.add('active');
 
