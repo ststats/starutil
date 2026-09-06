@@ -75,18 +75,58 @@
     }
 
     function renderNewsSidebar() {
-        const activeHtml = [], formerHtml = [];
+        const activeHtml = [];
         dbMembers.forEach(m => {
+            if (!isActiveMember(m)) return;
             const soopId = m['SOOP ID'];
             if (!soopId || !/^[a-zA-Z0-9_-]+$/.test(String(soopId).trim())) return;
-            const html = `<div class="player-item" id="news-side-player-${m['이름']}" onclick="selectNewsPlayer('${m['이름']}')">
+            activeHtml.push(`<div class="player-item" id="news-side-player-${m['이름']}" onclick="selectNewsPlayer('${m['이름']}')">
                             <span>${escapeHTML(m['이름'])}</span>
-                          </div>`;
-            if (!m['퇴단일'] || m['퇴단일'].trim() === '') activeHtml.push(html);
-            else formerHtml.push(html);
+                          </div>`);
         });
         document.getElementById('news-active-player-list').innerHTML = activeHtml.join('') || `<div class="text-center text-muted py-2" style="font-size:var(--fs-body);">없음</div>`;
-        document.getElementById('news-former-player-list').innerHTML = formerHtml.join('') || `<div class="text-center text-muted py-2" style="font-size:var(--fs-body);">없음</div>`;
+    }
+
+    // SOOP 게시판에서 특정 멤버의 최신 글 1개만 가져온다 ("전체" 병합 피드용)
+    async function fetchLatestPost(soopId) {
+        try {
+            const url = `https://api-channel.sooplive.com/v1.1/channel/${encodeURIComponent(soopId)}/board?perPage=1&page=1`;
+            const res = await fetch(url);
+            if (!res.ok) return null;
+            const data = await res.json();
+            return (data.contents && data.contents[0]) || null;
+        } catch (e) {
+            return null;
+        }
+    }
+
+    async function showNewsAll() {
+        toggleNewsSidebar(false);
+        document.querySelectorAll('#newsSidebarPanel .player-item').forEach(el => el.classList.remove('active'));
+        document.getElementById('news-side-btn-all').classList.add('active');
+        currentNewsPlayer = null;
+
+        const content = document.getElementById('news-feed-content');
+        content.innerHTML = `<div class="text-center text-muted py-4" style="font-size:var(--fs-body);">불러오는 중...</div>`;
+
+        const activeMembers = dbMembers.filter(m => {
+            if (!isActiveMember(m)) return false;
+            const soopId = m['SOOP ID'];
+            return soopId && /^[a-zA-Z0-9_-]+$/.test(String(soopId).trim());
+        });
+
+        const settled = await Promise.allSettled(
+            activeMembers.map(m => fetchLatestPost(m['SOOP ID']).then(post => ({ member: m, post })))
+        );
+
+        const withPost = settled
+            .filter(r => r.status === 'fulfilled' && r.value.post)
+            .map(r => r.value)
+            .sort((a, b) => new Date(b.post.regDate) - new Date(a.post.regDate));
+
+        content.innerHTML = withPost.length
+            ? withPost.map(({ member: m, post }) => renderNewsPostHtml(post, m)).join('')
+            : `<div class="text-center text-muted py-4" style="font-size:var(--fs-body);">작성된 글이 없습니다.</div>`;
     }
 
     function selectNewsPlayer(name) {
@@ -119,14 +159,14 @@
         return String(dateStr).split(' ')[0];
     }
 
-    function renderNewsPostHtml(post) {
+    function renderNewsPostHtml(post, member) {
         const title = post.titleName || '';
         const snippet = (post.content && post.content.textContent) || '';
         const category = (post.display && post.display.bbsName) || '';
         const timeText = formatRelativeTime(post.regDate);
         const photos = post.photos || [];
-        const soopId = currentNewsPlayer ? currentNewsPlayer['SOOP ID'] : post.userId;
-        const name = currentNewsPlayer ? currentNewsPlayer['이름'] : (post.userNick || '');
+        const soopId = member ? member['SOOP ID'] : post.userId;
+        const name = member ? member['이름'] : (post.userNick || '');
 
         const photosHtml = photos.length
             ? `<div class="news-post-photos">${photos.map(p => `<img src="${escapeHTML(p.url)}" alt="" loading="lazy" onerror="this.remove();">`).join('')}</div>`
@@ -161,7 +201,7 @@
             const posts = data.contents || [];
             newsTotalPages = (data.meta && data.meta.totalPages) || 1;
 
-            const postsHtml = posts.map(renderNewsPostHtml).join('');
+            const postsHtml = posts.map(p => renderNewsPostHtml(p, currentNewsPlayer)).join('');
 
             if (reset) {
                 content.innerHTML = posts.length ? postsHtml : `<div class="text-center text-muted py-4" style="font-size:var(--fs-body);">작성된 글이 없습니다.</div>`;
