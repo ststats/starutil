@@ -25,7 +25,7 @@ sorted_members = sort_members(db_data.get('members', []))
 # 같은 날 같은 상대와 여러 경기를 치른 경우를 구분하기 위해 매치/라운드에
 # 고유 순번(_match_key)을 부여하고, 라운드에 형식을 채운다 (프론트에서 개인 전적에
 # 형식 표시 + 팀 매치 상세보기에서 세트가 섞이지 않게 하는 데 사용됨. match_link.py 참고)
-linked_matches, linked_rounds = link_rounds_to_matches(db_data.get('matches', []), db_data.get('rounds', []))
+linked_matches, linked_rounds = link_rounds_to_matches(db_data.get('matches', []), db_data.get('rounds', []), db_data.get('members', []))
 
 # 최신 경기가 위로 오도록 역순 정렬 (팀 경기, 개인 라운드 경기)
 matches_list = sorted(linked_matches, key=lambda x: str(x.get('날짜', '')), reverse=True)

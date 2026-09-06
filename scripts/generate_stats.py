@@ -13,7 +13,7 @@ except FileNotFoundError:
 
 # 같은 날 같은 상대와 여러 경기를 치른 경우를 구분하기 위해 매치/라운드에
 # 고유 순번을 부여하고, 라운드에 형식을 채운다 (자세한 내용은 match_link.py 참고)
-linked_matches, linked_rounds = link_rounds_to_matches(db.get('matches', []), db.get('rounds', []))
+linked_matches, linked_rounds = link_rounds_to_matches(db.get('matches', []), db.get('rounds', []), db.get('members', []))
 
 # 리스트 딕셔너리를 Pandas DataFrame으로 변환
 df_matches = pd.DataFrame(linked_matches)

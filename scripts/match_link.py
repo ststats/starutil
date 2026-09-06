@@ -20,6 +20,16 @@
 * '형식'은 이제 '매치 전적' 시트에 자체 컬럼으로 들어오므로, 라운드에 값이 있으면
   그대로 신뢰해서 쓴다. 매치와 매칭해 형식을 채우는 건 그 값이 비어 있는
   (컬럼 추가 이전의) 과거 데이터를 위한 fallback으로만 남겨둔다.
+
+* '내전'(상대팀이 우리 크루 자체인 스크림) 라운드는 시트에 세트당 한 줄만
+  기록된다(예: A가 이겼다는 관점으로 '우리 선수'=A, '상대 선수'=B). 이 한 줄만
+  가지고 개인 통계를 집계하면 진 쪽(B)은 자기 이름으로는 이 세트가 전혀
+  집계되지 않는다(개인 승패, 종족전, 맵 전적, 최근 전적 모두 누락).
+  그래서 내전 라운드마다 '우리 선수'/'상대 선수'를 뒤집고 결과를 반전시킨
+  '미러' 라운드를 하나 더 만들어 함께 반환한다. 미러 라운드는 '_mirrored': True로
+  표시해두는데, 팀 매치 상세보기(세트별 목록)는 원본 한 줄만 보여줘야 하므로
+  프론트엔드에서 이 플래그를 보고 걸러낸다(app.js의 renderTeamMatchesList 참고).
+  미러 라운드의 '상대 종족'은 원래 '우리 선수'의 종족을 멤버 목록에서 찾아 채운다.
 """
 
 
@@ -30,10 +40,60 @@ def _extract_round_num(round_str):
         return None
 
 
-def link_rounds_to_matches(matches, rounds):
+def _race_to_code(race_full):
+    """멤버 시트의 '종족'(테란/저그/프로토스 전체 단어)을 라운드 시트가 쓰는
+    'T'/'Z'/'P' 코드로 변환한다 (app.js의 raceShortLabel과 동일한 규칙)."""
+    race_full = str(race_full or '')
+    if '테란' in race_full:
+        return 'T'
+    if '저그' in race_full:
+        return 'Z'
+    if '프로토스' in race_full:
+        return 'P'
+    return ''
+
+
+def _flip_result(res):
+    res = str(res or '').strip()
+    if res == '승':
+        return '패'
+    if res == '패':
+        return '승'
+    return res  # 무/무승부/빈값 등은 그대로
+
+
+def _build_mirrored_rounds(rounds, members):
+    """_match_key까지 부여된 rounds 중 내전 라운드를 뒤집은 사본 리스트를 만든다."""
+    race_by_name = {}
+    for m in (members or []):
+        name = str(m.get('이름') or '').strip()
+        if name:
+            race_by_name[name] = m.get('종족')
+
+    mirrors = []
+    for r in rounds:
+        opponent_team = str(r.get('상대팀') or '').strip()
+        our_player = str(r.get('우리 선수') or '').strip()
+        opp_player = str(r.get('상대 선수') or '').strip()
+        if opponent_team != '내전' or not our_player or not opp_player:
+            continue
+
+        mirror = dict(r)
+        mirror['우리 선수'] = opp_player
+        mirror['상대 선수'] = our_player
+        mirror['결과'] = _flip_result(r.get('결과'))
+        mirror['상대 종족'] = _race_to_code(race_by_name.get(our_player, ''))
+        mirror['_mirrored'] = True
+        mirrors.append(mirror)
+    return mirrors
+
+
+def link_rounds_to_matches(matches, rounds, members=None):
     """matches, rounds(dict 리스트)를 받아 각 항목에 '_match_key'를 붙이고,
     라운드에 '형식'이 비어 있으면 대응하는 매치의 '형식'으로 채워서
-    (matches_copy, rounds_copy)로 반환한다. 라운드에 '형식'이 이미 있으면 그대로 둔다."""
+    (matches_copy, rounds_copy)로 반환한다. 라운드에 '형식'이 이미 있으면 그대로 둔다.
+    members(멤버 목록, 선택)를 넘기면 내전 라운드에 대해 반대편 관점의 미러 라운드를
+    함께 만들어 rounds_copy에 포함시킨다 (미러 라운드는 '_mirrored': True)."""
     matches = [dict(m) for m in matches]
     rounds = [dict(r) for r in rounds]
 
@@ -93,6 +153,10 @@ def link_rounds_to_matches(matches, rounds):
         if not existing_fmt:
             matched = match_by_key.get(m_key)
             r['형식'] = matched.get('형식', '') if matched else ''
+
+    # 3. 내전 라운드는 반대편 관점의 미러 라운드를 만들어 추가한다.
+    #    (_match_key가 이미 원본과 동일하게 붙어 있으므로 미러도 같은 매치로 묶인다)
+    rounds = rounds + _build_mirrored_rounds(rounds, members)
 
     return matches, rounds
 
