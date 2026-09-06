@@ -147,7 +147,7 @@
 
     function renderNewsSidebar() {
         const html = [`<div class="avatar-select-item avatar-select-all active" id="news-side-btn-all" onclick="showNewsAll()">
-                            <div class="avatar-select-fallback">전체</div>
+                            <img src="images/캄몬스타즈.webp" alt="전체" class="avatar-select-img" onerror="this.outerHTML='&lt;div class=&quot;avatar-select-fallback&quot;&gt;전체&lt;/div&gt;';">
                             <span class="avatar-select-name">전체</span>
                        </div>`];
         dbMembers.forEach(m => {
@@ -804,7 +804,7 @@
 
     function renderIndividualSidebar() {
         const html = [`<div class="avatar-select-item avatar-select-all active" id="side-btn-summary" onclick="showIndivSummary()">
-                            <div class="avatar-select-fallback">전체</div>
+                            <img src="images/캄몬스타즈.webp" alt="전체" class="avatar-select-img" onerror="this.outerHTML='&lt;div class=&quot;avatar-select-fallback&quot;&gt;전체&lt;/div&gt;';">
                             <span class="avatar-select-name">전체</span>
                        </div>`];
         const formerHtml = [];
