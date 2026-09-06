@@ -33,14 +33,14 @@
         <div class="home-wordmark-sub">STAR UNIVERSITY</div>
     </div>
     <hr class="page-header-divider" style="margin-top: 0;">
-    <div class="section-title">현재 방송중</div>
+    <div class="section-title">방송중</div>
     <div class="clean-card p-4" id="home-live-broadcast">
         <div class="text-center text-muted py-4" style="font-size:var(--fs-body);">실시간 방송 상태 연동 준비중입니다.</div>
     </div>
 
-    <div class="section-title mt-4">최신 공지</div>
+    <div class="section-title mt-4">공지</div>
     <div class="clean-card p-0 overflow-hidden" id="home-notice-list">
-        <div class="text-center text-muted py-4" style="font-size:var(--fs-body);">불러오는 중...</div>
+        <div class="text-center text-muted py-4" style="font-size:var(--fs-body);">공지 기능 준비중입니다.</div>
     </div>
 </div>
 
@@ -53,26 +53,30 @@
         <div class="cal-main-layout">
             <!-- 모바일 분리용 사이드바 -->
             <aside class="cal-sidebar">
-                <div class="clean-card p-4 cal-today-card-wrapper">
+                <div class="cal-today-card-wrapper">
                     <div class="section-title">오늘의 일정</div>
-                    <div class="cal-today-list" id="todayList"></div>
+                    <div class="clean-card p-4">
+                        <div class="cal-today-list" id="todayList"></div>
+                    </div>
                 </div>
-                <div class="clean-card p-4 cal-selected-card-wrapper">
+                <div class="cal-selected-card-wrapper">
                     <div class="section-title" id="selectedListTitle">선택한 날짜 일정</div>
-                    <div class="cal-selected-list" id="selectedDateList"></div>
+                    <div class="clean-card p-4">
+                        <div class="cal-selected-list" id="selectedDateList"></div>
+                    </div>
                 </div>
             </aside>
             
             <section class="cal-calendar-area">
-                <div class="clean-card p-4">
-                    <div class="section-title">
-                        이달의 일정
-                        <div class="cal-nav-group">
-                            <button class="cal-nav-btn" onclick="changeMonth(-1)"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
-                            <div id="monthTitle" class="cal-nav-badge"></div>
-                            <button class="cal-nav-btn" onclick="changeMonth(1)"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
-                        </div>
+                <div class="section-title">
+                    이달의 일정
+                    <div class="cal-nav-group">
+                        <button class="cal-nav-btn" onclick="changeMonth(-1)"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
+                        <div id="monthTitle" class="cal-nav-badge"></div>
+                        <button class="cal-nav-btn" onclick="changeMonth(1)"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
                     </div>
+                </div>
+                <div class="clean-card p-4">
                     <!-- 가로 스크롤 허용 캘린더 구역 -->
                     <div class="cal-calendar-inner">
                         <div class="cal-calendar-scroll-content">
@@ -214,7 +218,7 @@
                     <div class="table-responsive flex-grow-1" style="overflow-y: auto;">
                         <table class="table table-borderless table-hover mb-0 text-center stat-table" style="min-width: 480px;">
                             <thead>
-                                <tr><th class="text-start ps-4" style="white-space:nowrap;">상대</th><th style="white-space:nowrap;">대회</th><th style="white-space:nowrap;">대학</th><th style="white-space:nowrap;">미니</th><th style="white-space:nowrap;">CK</th><th></th></tr>
+                                <tr><th style="white-space:nowrap;">상대</th><th style="white-space:nowrap;">대회</th><th style="white-space:nowrap;">대학</th><th style="white-space:nowrap;">미니</th><th style="white-space:nowrap;">CK</th><th></th></tr>
                             </thead>
                             <tbody>
                                 {% for row in crew_stats['전체'] %}
@@ -287,7 +291,7 @@
                         </div>
 
                         <div class="sidebar-header sidebar-header-toggle" data-bs-toggle="collapse" data-bs-target="#sec-active">
-                            현역 멤버 <svg class="sidebar-chevron" width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                            멤버 <svg class="sidebar-chevron" width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
                         </div>
                         <div class="collapse show" id="sec-active">
                             <div class="sidebar-scroll" id="active-player-list"></div>
@@ -310,7 +314,7 @@
                             <table class="table table-borderless table-hover mb-0 text-center stat-table">
                                 <thead>
                                     <tr>
-                                        <th class="text-start ps-4">멤버</th>
+                                        <th>멤버</th>
                                         <th>대회</th>
                                         <th>대학</th>
                                         <th>미니</th>
