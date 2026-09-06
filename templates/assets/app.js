@@ -90,7 +90,7 @@
 
     async function showNewsAll() {
         toggleNewsSidebar(false);
-        document.querySelectorAll('#newsSidebarPanel .player-item').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('#newsSidebarPanel .player-item, #newsSidebarPanel .sidebar-header').forEach(el => el.classList.remove('active'));
         document.getElementById('news-side-btn-all').classList.add('active');
         currentNewsPlayer = null;
 
@@ -125,7 +125,7 @@
 
     function selectNewsPlayer(name) {
         toggleNewsSidebar(false);
-        document.querySelectorAll('#newsSidebarPanel .player-item').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('#newsSidebarPanel .player-item, #newsSidebarPanel .sidebar-header').forEach(el => el.classList.remove('active'));
         const sideItem = document.getElementById(`news-side-player-${name}`);
         if (sideItem) sideItem.classList.add('active');
 
@@ -719,7 +719,7 @@
         document.getElementById('statContent').style.display = 'none';
         document.getElementById('indiv-summary-content').style.display = 'block';
         
-        document.querySelectorAll('.player-item').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.indiv-sidebar-panel .player-item, .indiv-sidebar-panel .sidebar-header').forEach(el => el.classList.remove('active'));
         document.getElementById('side-btn-summary').classList.add('active');
 
         const activeMembers = dbMembers.filter(m => !m['퇴단일'] || m['퇴단일'].trim() === '');
@@ -728,7 +728,7 @@
             const pStat = playersStats.find(x => x['이름'] === m['이름']) || {};
             const name = m['이름'];
             html += `<tr style="border-bottom:1px solid #f1f3f5; cursor:pointer;" onclick="selectPlayer('${name}')">
-                <td class="fw-bold text-dark" style="white-space:nowrap; width:20%;"><span class="d-flex align-items-center justify-content-start gap-2 ps-2">${avatarHtml(m['SOOP ID'], 'player-avatar-sm')}<span style="overflow:hidden; text-overflow:ellipsis;">${escapeHTML(name)}</span></span></td>
+                <td class="fw-bold text-dark text-center" style="white-space:nowrap; width:20%;"><span class="d-flex align-items-center justify-content-center gap-2">${avatarHtml(m['SOOP ID'], 'player-avatar-sm')}<span style="overflow:hidden; text-overflow:ellipsis;">${escapeHTML(name)}</span></span></td>
                 <td style="white-space:nowrap; width:20%;">${pStat['대회 전적'] || '-'}</td>
                 <td style="white-space:nowrap; width:20%;">${pStat['대학 전적'] || '-'}</td>
                 <td style="white-space:nowrap; width:20%;">${pStat['미니 전적'] || '-'}</td>
@@ -744,7 +744,7 @@
         document.getElementById('indiv-summary-content').style.display = 'none';
         document.getElementById('statContent').style.display = 'block';
 
-        document.querySelectorAll('.player-item').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.indiv-sidebar-panel .player-item, .indiv-sidebar-panel .sidebar-header').forEach(el => el.classList.remove('active'));
         document.getElementById('side-btn-summary').classList.remove('active');
         const sideItem = document.getElementById(`side-player-${name}`);
         if(sideItem) sideItem.classList.add('active');
