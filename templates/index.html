@@ -162,7 +162,7 @@
             <div class="section-title">남자 멤버</div>
             <div class="clean-card p-0 overflow-hidden">
                 <div class="table-responsive">
-                    <table class="table table-borderless table-hover mb-0 text-center stat-table" style="min-width:440px; table-layout:fixed;">
+                    <table class="table table-borderless table-hover mb-0 text-center stat-table" style="min-width:320px; table-layout:fixed;">
                         <thead>
                             <tr>
                                 <th class="text-center" style="width:25%; white-space:nowrap;">순위</th>
@@ -181,7 +181,7 @@
             <div class="section-title">여자 멤버</div>
             <div class="clean-card p-0 overflow-hidden">
                 <div class="table-responsive">
-                    <table class="table table-borderless table-hover mb-0 text-center stat-table" style="min-width:440px; table-layout:fixed;">
+                    <table class="table table-borderless table-hover mb-0 text-center stat-table" style="min-width:320px; table-layout:fixed;">
                         <thead>
                             <tr>
                                 <th class="text-center" style="width:25%; white-space:nowrap;">순위</th>
@@ -263,13 +263,13 @@
                     <div class="table-responsive flex-grow-1" style="overflow-y: auto;">
                         <table class="table table-borderless table-hover mb-0 text-center stat-table" style="min-width:615px; table-layout: fixed;">
                             <thead>
-                                <tr><th class="text-start ps-4" style="white-space:nowrap; width:19%;">상대</th><th class="text-center" style="white-space:nowrap; width:19%;">대회</th><th class="text-center" style="white-space:nowrap; width:19%;">대학</th><th class="text-center" style="white-space:nowrap; width:19%;">미니</th><th class="text-center" style="white-space:nowrap; width:19%;">CK</th><th style="width:5%;"></th></tr>
+                                <tr><th class="text-center" style="white-space:nowrap; width:19%;">상대</th><th class="text-center" style="white-space:nowrap; width:19%;">대회</th><th class="text-center" style="white-space:nowrap; width:19%;">대학</th><th class="text-center" style="white-space:nowrap; width:19%;">미니</th><th class="text-center" style="white-space:nowrap; width:19%;">CK</th><th style="width:5%;"></th></tr>
                             </thead>
                             <tbody>
                                 {% for row in crew_stats['전체'] %}
                                 <tr class="team-row-clickable" style="border-bottom:1px solid #f1f3f5;" data-team="{{ row['상대'] | e }}">
-                                    <td class="fw-bold text-dark" style="white-space:nowrap; width:19%;">
-                                        <span class="d-flex align-items-center gap-2">
+                                    <td class="fw-bold text-dark text-center" style="white-space:nowrap; width:19%;">
+                                        <span class="d-flex align-items-center justify-content-center gap-2">
                                             <img src="images/{{ (row['상대'] if row['상대'] != '내전' else '캄몬스타즈') | e }}.webp" alt="" class="team-logo-icon" style="width:16px;height:16px; flex-shrink:0;" onerror="this.remove();">
                                             <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ row['상대'] | e }}</span>
                                         </span>
@@ -294,7 +294,7 @@
                     <button class="btn-view-all" onclick="openTeamMatchModal('전체')">전체보기<svg width="7" height="7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="margin-left:2px; vertical-align:middle;"><polyline points="9 6 15 12 9 18"></polyline></svg></button>
                 </div>
                 <div class="clean-card flex-grow-0 p-0 overflow-hidden" style="border-radius: 10px;">
-                    <div class="match-list-scroll">
+                    <div class="match-list-scroll match-list-team">
                         <div class="match-row match-header">
                             <div class="m-date">날짜</div>
                             <div class="m-type">형식</div>
@@ -352,7 +352,7 @@
                             <table class="table table-borderless table-hover mb-0 text-center stat-table" style="min-width:650px; table-layout: fixed;">
                                 <thead>
                                     <tr>
-                                        <th class="text-start ps-4" style="white-space:nowrap; width:20%;">멤버</th>
+                                        <th class="text-center" style="white-space:nowrap; width:20%;">멤버</th>
                                         <th style="white-space:nowrap; width:20%;">대회</th>
                                         <th style="white-space:nowrap; width:20%;">대학</th>
                                         <th style="white-space:nowrap; width:20%;">미니</th>
@@ -416,7 +416,7 @@
                     </div>
 
                     <div class="clean-card p-0 overflow-hidden" style="border-radius: 10px;">
-                        <div class="match-list-scroll">
+                        <div class="match-list-scroll match-list-indiv">
                             <div class="match-row match-header">
                                 <div class="m-date">날짜</div>
                                 <div class="m-type">형식</div>
