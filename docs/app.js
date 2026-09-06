@@ -21,14 +21,27 @@
         return `<img src="images/${encodeURIComponent(fileName)}.webp" alt="" class="team-logo-icon" style="width:${size}px;height:${size}px;" onerror="this.remove();">`;
     }
 
-    function switchPage(pageId) {
+    const VALID_PAGE_IDS = ['home', 'schedule', 'members', 'stats', 'synergy', 'tools'];
+
+    function switchPage(pageId, skipHashUpdate) {
         document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
         document.querySelectorAll('#mainMenu .nav-item').forEach(el => el.classList.remove('active'));
         document.getElementById('page-' + pageId).classList.add('active');
 
         const targetNav = document.querySelector(`#mainMenu .nav-item[data-page="${pageId}"]`);
         if (targetNav) targetNav.classList.add('active');
+
+        // 새로고침해도 페이지가 유지되고, 링크 공유·뒤로가기도 되도록 URL 해시를 맞춰준다.
+        if (!skipHashUpdate && location.hash !== '#' + pageId) {
+            history.pushState({ page: pageId }, '', '#' + pageId);
+        }
     }
+
+    // 뒤로가기/앞으로가기 시 해시에 맞는 페이지로 전환
+    window.addEventListener('popstate', () => {
+        const pageId = (location.hash || '#home').slice(1);
+        if (VALID_PAGE_IDS.includes(pageId)) switchPage(pageId, true);
+    });
 
     function switchStatView(viewType) {
         document.getElementById('tab-team').classList.toggle('active', viewType === 'team');
@@ -977,10 +990,16 @@
         renderLatestNotices();
         loadSynergyData();
 
-        const activePageId = document.querySelector('.page-section.active').id.replace('page-', '');
-        document.querySelectorAll('#mainMenu .nav-item').forEach(el => el.classList.remove('active'));
-        const targetNav = document.querySelector(`#mainMenu .nav-item[data-page="${activePageId}"]`);
-        if (targetNav) targetNav.classList.add('active');
+        // 새로고침 시 URL 해시에 맞는 페이지를 그대로 열어준다 (없으면 기본 홈 유지)
+        const hashPageId = (location.hash || '').slice(1);
+        if (VALID_PAGE_IDS.includes(hashPageId)) {
+            switchPage(hashPageId, true);
+        } else {
+            const activePageId = document.querySelector('.page-section.active').id.replace('page-', '');
+            document.querySelectorAll('#mainMenu .nav-item').forEach(el => el.classList.remove('active'));
+            const targetNav = document.querySelector(`#mainMenu .nav-item[data-page="${activePageId}"]`);
+            if (targetNav) targetNav.classList.add('active');
+        }
 
         const today = new Date();
         calSelectedDateStr = calGetFormatDate(today.getFullYear(), today.getMonth() + 1, today.getDate());
