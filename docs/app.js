@@ -50,6 +50,140 @@
         document.getElementById('tab-member-news').classList.toggle('active', viewType === 'news');
         document.getElementById('view-member-status').style.display = viewType === 'status' ? 'block' : 'none';
         document.getElementById('view-member-news').style.display = viewType === 'news' ? 'block' : 'none';
+        if (viewType === 'news' && !newsSidebarRendered) {
+            renderNewsSidebar();
+            newsSidebarRendered = true;
+        }
+    }
+
+    // 홈 화면 "소식 전체보기" -> 멤버 페이지의 소식 탭으로 이동
+    function goToNewsFeed() {
+        switchPage('members');
+        switchMemberView('news');
+    }
+
+    // ===== 멤버 소식(SOOP 게시판 전체 글) =====
+    let newsSidebarRendered = false;
+    let currentNewsPlayer = null;
+    let newsCurrentPage = 1;
+    let newsTotalPages = 1;
+    let newsLoading = false;
+
+    function toggleNewsSidebar(open) {
+        document.getElementById('newsSidebarPanel').classList.toggle('mobile-open', open);
+        document.getElementById('newsSidebarBackdrop').classList.toggle('show', open);
+    }
+
+    function renderNewsSidebar() {
+        const activeHtml = [], formerHtml = [];
+        dbMembers.forEach(m => {
+            const soopId = m['SOOP ID'];
+            if (!soopId || !/^[a-zA-Z0-9_-]+$/.test(String(soopId).trim())) return;
+            const html = `<div class="player-item" id="news-side-player-${m['이름']}" onclick="selectNewsPlayer('${m['이름']}')">
+                            <span>${escapeHTML(m['이름'])}</span>
+                          </div>`;
+            if (!m['퇴단일'] || m['퇴단일'].trim() === '') activeHtml.push(html);
+            else formerHtml.push(html);
+        });
+        document.getElementById('news-active-player-list').innerHTML = activeHtml.join('') || `<div class="text-center text-muted py-2" style="font-size:var(--fs-body);">없음</div>`;
+        document.getElementById('news-former-player-list').innerHTML = formerHtml.join('') || `<div class="text-center text-muted py-2" style="font-size:var(--fs-body);">없음</div>`;
+    }
+
+    function selectNewsPlayer(name) {
+        toggleNewsSidebar(false);
+        document.querySelectorAll('#newsSidebarPanel .player-item').forEach(el => el.classList.remove('active'));
+        const sideItem = document.getElementById(`news-side-player-${name}`);
+        if (sideItem) sideItem.classList.add('active');
+
+        const m = dbMembers.find(x => x['이름'] === name);
+        if (!m) return;
+        currentNewsPlayer = m;
+        newsCurrentPage = 1;
+        newsTotalPages = 1;
+
+        document.getElementById('news-feed-content').innerHTML = `<div class="text-center text-muted py-4" style="font-size:var(--fs-body);">불러오는 중...</div>`;
+        loadNewsFeed(true);
+    }
+
+    // SOOP 게시판 API의 regDate("YYYY-MM-DD HH:MM:SS")를 "N분 전" 식으로 변환
+    function formatRelativeTime(dateStr) {
+        const date = new Date(String(dateStr || '').replace(' ', 'T'));
+        if (isNaN(date.getTime())) return '';
+        const diffMin = Math.floor((Date.now() - date.getTime()) / 60000);
+        if (diffMin < 1) return '방금 전';
+        if (diffMin < 60) return `${diffMin}분 전`;
+        const diffHour = Math.floor(diffMin / 60);
+        if (diffHour < 24) return `${diffHour}시간 전`;
+        const diffDay = Math.floor(diffHour / 24);
+        if (diffDay < 30) return `${diffDay}일 전`;
+        return String(dateStr).split(' ')[0];
+    }
+
+    function renderNewsPostHtml(post) {
+        const title = post.titleName || '';
+        const snippet = (post.content && post.content.textContent) || '';
+        const category = (post.display && post.display.bbsName) || '';
+        const timeText = formatRelativeTime(post.regDate);
+        const photos = post.photos || [];
+        const soopId = currentNewsPlayer ? currentNewsPlayer['SOOP ID'] : post.userId;
+        const name = currentNewsPlayer ? currentNewsPlayer['이름'] : (post.userNick || '');
+
+        const photosHtml = photos.length
+            ? `<div class="news-post-photos">${photos.map(p => `<img src="${escapeHTML(p.url)}" alt="" loading="lazy" onerror="this.remove();">`).join('')}</div>`
+            : '';
+
+        return `
+        <div class="news-post-card">
+            <div class="news-post-header">
+                ${avatarHtml(soopId, 'news-post-avatar')}
+                <div>
+                    <div class="news-post-name">${escapeHTML(name)}</div>
+                    <div class="news-post-meta">${escapeHTML(category)}${category && timeText ? ' · ' : ''}${escapeHTML(timeText)}</div>
+                </div>
+            </div>
+            ${title ? `<div class="news-post-title">${escapeHTML(title)}</div>` : ''}
+            ${snippet ? `<div class="news-post-body">${escapeHTML(snippet)}</div>` : ''}
+            ${photosHtml}
+        </div>`;
+    }
+
+    async function loadNewsFeed(reset) {
+        if (newsLoading || !currentNewsPlayer) return;
+        newsLoading = true;
+        const soopId = currentNewsPlayer['SOOP ID'];
+        const content = document.getElementById('news-feed-content');
+
+        try {
+            const url = `https://api-channel.sooplive.com/v1.1/channel/${encodeURIComponent(soopId)}/board?perPage=10&page=${newsCurrentPage}`;
+            const res = await fetch(url);
+            if (!res.ok) throw new Error('요청 실패');
+            const data = await res.json();
+            const posts = data.contents || [];
+            newsTotalPages = (data.meta && data.meta.totalPages) || 1;
+
+            const postsHtml = posts.map(renderNewsPostHtml).join('');
+
+            if (reset) {
+                content.innerHTML = posts.length ? postsHtml : `<div class="text-center text-muted py-4" style="font-size:var(--fs-body);">작성된 글이 없습니다.</div>`;
+            } else {
+                const loadMoreWrap = document.getElementById('news-load-more-wrap');
+                if (loadMoreWrap) loadMoreWrap.remove();
+                content.insertAdjacentHTML('beforeend', postsHtml);
+            }
+
+            if (newsCurrentPage < newsTotalPages) {
+                content.insertAdjacentHTML('beforeend', `<div class="text-center mt-2 mb-3" id="news-load-more-wrap"><button class="btn-clean" onclick="loadMoreNews()">더보기</button></div>`);
+            }
+        } catch (e) {
+            content.innerHTML = `<div class="text-center text-muted py-4" style="font-size:var(--fs-body);">글을 불러오지 못했습니다.</div>`;
+        } finally {
+            newsLoading = false;
+        }
+    }
+
+    function loadMoreNews() {
+        newsCurrentPage += 1;
+        loadNewsFeed(false);
     }
 
     function toggleIndivSidebar(open) {
@@ -401,7 +535,7 @@
             return;
         }
 
-        container.innerHTML = withNotice.slice(0, 8).map(({ member: m, notice }) => {
+        container.innerHTML = withNotice.slice(0, 5).map(({ member: m, notice }) => {
             const soopId = m['SOOP ID'];
             const title = notice.titleName || '(제목 없음)';
             const snippet = (notice.content && (notice.content.textContent || notice.content.summary)) || '';
@@ -419,7 +553,10 @@
                     <div class="notice-row-snippet">${escapeHTML(snippet)}</div>
                 </div>
             </a>`;
-        }).join('');
+        }).join('') + `
+            <div class="notice-view-all-wrap">
+                <a class="notice-view-all" onclick="goToNewsFeed(); return false;" href="#">소식 전체보기 ›</a>
+            </div>`;
     }
 
     function openMemberProfile(name) {
