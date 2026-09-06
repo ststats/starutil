@@ -76,7 +76,7 @@
                         <button class="cal-nav-btn" onclick="changeMonth(1)"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
                     </div>
                 </div>
-                <div class="clean-card p-4">
+                <div class="clean-card p-0 overflow-hidden">
                     <!-- 가로 스크롤 허용 캘린더 구역 -->
                     <div class="cal-calendar-inner">
                         <div class="cal-calendar-scroll-content">
@@ -96,8 +96,19 @@
     <div class="page-header">
         <h1 class="page-header-title">멤버</h1>
     </div>
-    <hr class="page-header-divider">
-    <div id="members-groups"></div>
+    <hr class="page-header-divider tight">
+    <div class="sub-tabs">
+        <div class="sub-tab active" id="tab-member-status" onclick="switchMemberView('status')">현황</div>
+        <div class="sub-tab" id="tab-member-news" onclick="switchMemberView('news')">소식</div>
+    </div>
+
+    <div id="view-member-status">
+        <div id="members-groups"></div>
+    </div>
+
+    <div id="view-member-news" style="display:none;">
+        <div class="clean-card p-4 text-center text-muted" style="font-size:var(--fs-body);">멤버 소식 기능은 준비중입니다.</div>
+    </div>
 </div>
 
 <!-- 시너지표: ststats(외부) 데이터에서 우리 로스터만 뽑아 방송 활동 랭킹 표시 -->
@@ -223,8 +234,8 @@
                             <tbody>
                                 
                                 <tr class="team-row-clickable" style="border-bottom:1px solid #f1f3f5;" data-team="BGM">
-                                    <td class="text-start ps-4 fw-bold text-dark" style="white-space:nowrap;">
-                                        <span class="d-flex align-items-center gap-2">
+                                    <td class="fw-bold text-dark" style="white-space:nowrap;">
+                                        <span class="d-flex align-items-center justify-content-center gap-2">
                                             <img src="images/BGM.webp" alt="" class="team-logo-icon" style="width:16px;height:16px;" onerror="this.remove();">
                                             BGM
                                         </span>
@@ -232,14 +243,14 @@
                                     <td style="white-space:nowrap;">-</td><td style="white-space:nowrap;">-</td>
                                     <td style="white-space:nowrap;">1승 0패</td><td style="white-space:nowrap;">-</td>
                                     <!-- 상세보기 표시: 얇은 쉐브런 아이콘 -->
-                                    <td class="text-secondary" style="vertical-align:middle; width: 30px;">
+                                    <td class="text-secondary text-center" style="vertical-align:middle; width: 30px;">
                                         <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"></polyline></svg>
                                     </td>
                                 </tr>
                                 
                                 <tr class="team-row-clickable" style="border-bottom:1px solid #f1f3f5;" data-team="DM">
-                                    <td class="text-start ps-4 fw-bold text-dark" style="white-space:nowrap;">
-                                        <span class="d-flex align-items-center gap-2">
+                                    <td class="fw-bold text-dark" style="white-space:nowrap;">
+                                        <span class="d-flex align-items-center justify-content-center gap-2">
                                             <img src="images/DM.webp" alt="" class="team-logo-icon" style="width:16px;height:16px;" onerror="this.remove();">
                                             DM
                                         </span>
@@ -247,14 +258,14 @@
                                     <td style="white-space:nowrap;">-</td><td style="white-space:nowrap;">-</td>
                                     <td style="white-space:nowrap;">2승 0패</td><td style="white-space:nowrap;">-</td>
                                     <!-- 상세보기 표시: 얇은 쉐브런 아이콘 -->
-                                    <td class="text-secondary" style="vertical-align:middle; width: 30px;">
+                                    <td class="text-secondary text-center" style="vertical-align:middle; width: 30px;">
                                         <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"></polyline></svg>
                                     </td>
                                 </tr>
                                 
                                 <tr class="team-row-clickable" style="border-bottom:1px solid #f1f3f5;" data-team="HM">
-                                    <td class="text-start ps-4 fw-bold text-dark" style="white-space:nowrap;">
-                                        <span class="d-flex align-items-center gap-2">
+                                    <td class="fw-bold text-dark" style="white-space:nowrap;">
+                                        <span class="d-flex align-items-center justify-content-center gap-2">
                                             <img src="images/HM.webp" alt="" class="team-logo-icon" style="width:16px;height:16px;" onerror="this.remove();">
                                             HM
                                         </span>
@@ -262,14 +273,14 @@
                                     <td style="white-space:nowrap;">1승 0패</td><td style="white-space:nowrap;">-</td>
                                     <td style="white-space:nowrap;">1승 0패</td><td style="white-space:nowrap;">-</td>
                                     <!-- 상세보기 표시: 얇은 쉐브런 아이콘 -->
-                                    <td class="text-secondary" style="vertical-align:middle; width: 30px;">
+                                    <td class="text-secondary text-center" style="vertical-align:middle; width: 30px;">
                                         <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"></polyline></svg>
                                     </td>
                                 </tr>
                                 
                                 <tr class="team-row-clickable" style="border-bottom:1px solid #f1f3f5;" data-team="JSA">
-                                    <td class="text-start ps-4 fw-bold text-dark" style="white-space:nowrap;">
-                                        <span class="d-flex align-items-center gap-2">
+                                    <td class="fw-bold text-dark" style="white-space:nowrap;">
+                                        <span class="d-flex align-items-center justify-content-center gap-2">
                                             <img src="images/JSA.webp" alt="" class="team-logo-icon" style="width:16px;height:16px;" onerror="this.remove();">
                                             JSA
                                         </span>
@@ -277,14 +288,14 @@
                                     <td style="white-space:nowrap;">1승 2패</td><td style="white-space:nowrap;">1승 1패</td>
                                     <td style="white-space:nowrap;">5승 2패</td><td style="white-space:nowrap;">1승 0패</td>
                                     <!-- 상세보기 표시: 얇은 쉐브런 아이콘 -->
-                                    <td class="text-secondary" style="vertical-align:middle; width: 30px;">
+                                    <td class="text-secondary text-center" style="vertical-align:middle; width: 30px;">
                                         <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"></polyline></svg>
                                     </td>
                                 </tr>
                                 
                                 <tr class="team-row-clickable" style="border-bottom:1px solid #f1f3f5;" data-team="YB">
-                                    <td class="text-start ps-4 fw-bold text-dark" style="white-space:nowrap;">
-                                        <span class="d-flex align-items-center gap-2">
+                                    <td class="fw-bold text-dark" style="white-space:nowrap;">
+                                        <span class="d-flex align-items-center justify-content-center gap-2">
                                             <img src="images/YB.webp" alt="" class="team-logo-icon" style="width:16px;height:16px;" onerror="this.remove();">
                                             YB
                                         </span>
@@ -292,14 +303,14 @@
                                     <td style="white-space:nowrap;">1승 1패</td><td style="white-space:nowrap;">-</td>
                                     <td style="white-space:nowrap;">1승 2패</td><td style="white-space:nowrap;">-</td>
                                     <!-- 상세보기 표시: 얇은 쉐브런 아이콘 -->
-                                    <td class="text-secondary" style="vertical-align:middle; width: 30px;">
+                                    <td class="text-secondary text-center" style="vertical-align:middle; width: 30px;">
                                         <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"></polyline></svg>
                                     </td>
                                 </tr>
                                 
                                 <tr class="team-row-clickable" style="border-bottom:1px solid #f1f3f5;" data-team="거성대">
-                                    <td class="text-start ps-4 fw-bold text-dark" style="white-space:nowrap;">
-                                        <span class="d-flex align-items-center gap-2">
+                                    <td class="fw-bold text-dark" style="white-space:nowrap;">
+                                        <span class="d-flex align-items-center justify-content-center gap-2">
                                             <img src="images/거성대.webp" alt="" class="team-logo-icon" style="width:16px;height:16px;" onerror="this.remove();">
                                             거성대
                                         </span>
@@ -307,14 +318,14 @@
                                     <td style="white-space:nowrap;">1승 0패</td><td style="white-space:nowrap;">-</td>
                                     <td style="white-space:nowrap;">-</td><td style="white-space:nowrap;">-</td>
                                     <!-- 상세보기 표시: 얇은 쉐브런 아이콘 -->
-                                    <td class="text-secondary" style="vertical-align:middle; width: 30px;">
+                                    <td class="text-secondary text-center" style="vertical-align:middle; width: 30px;">
                                         <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"></polyline></svg>
                                     </td>
                                 </tr>
                                 
                                 <tr class="team-row-clickable" style="border-bottom:1px solid #f1f3f5;" data-team="내전">
-                                    <td class="text-start ps-4 fw-bold text-dark" style="white-space:nowrap;">
-                                        <span class="d-flex align-items-center gap-2">
+                                    <td class="fw-bold text-dark" style="white-space:nowrap;">
+                                        <span class="d-flex align-items-center justify-content-center gap-2">
                                             <img src="images/캄몬스타즈.webp" alt="" class="team-logo-icon" style="width:16px;height:16px;" onerror="this.remove();">
                                             내전
                                         </span>
@@ -322,14 +333,14 @@
                                     <td style="white-space:nowrap;">-</td><td style="white-space:nowrap;">-</td>
                                     <td style="white-space:nowrap;">-</td><td style="white-space:nowrap;">-</td>
                                     <!-- 상세보기 표시: 얇은 쉐브런 아이콘 -->
-                                    <td class="text-secondary" style="vertical-align:middle; width: 30px;">
+                                    <td class="text-secondary text-center" style="vertical-align:middle; width: 30px;">
                                         <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"></polyline></svg>
                                     </td>
                                 </tr>
                                 
                                 <tr class="team-row-clickable" style="border-bottom:1px solid #f1f3f5;" data-team="노적단">
-                                    <td class="text-start ps-4 fw-bold text-dark" style="white-space:nowrap;">
-                                        <span class="d-flex align-items-center gap-2">
+                                    <td class="fw-bold text-dark" style="white-space:nowrap;">
+                                        <span class="d-flex align-items-center justify-content-center gap-2">
                                             <img src="images/노적단.webp" alt="" class="team-logo-icon" style="width:16px;height:16px;" onerror="this.remove();">
                                             노적단
                                         </span>
@@ -337,14 +348,14 @@
                                     <td style="white-space:nowrap;">-</td><td style="white-space:nowrap;">-</td>
                                     <td style="white-space:nowrap;">-</td><td style="white-space:nowrap;">1승 0패</td>
                                     <!-- 상세보기 표시: 얇은 쉐브런 아이콘 -->
-                                    <td class="text-secondary" style="vertical-align:middle; width: 30px;">
+                                    <td class="text-secondary text-center" style="vertical-align:middle; width: 30px;">
                                         <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"></polyline></svg>
                                     </td>
                                 </tr>
                                 
                                 <tr class="team-row-clickable" style="border-bottom:1px solid #f1f3f5;" data-team="뉴캣슬">
-                                    <td class="text-start ps-4 fw-bold text-dark" style="white-space:nowrap;">
-                                        <span class="d-flex align-items-center gap-2">
+                                    <td class="fw-bold text-dark" style="white-space:nowrap;">
+                                        <span class="d-flex align-items-center justify-content-center gap-2">
                                             <img src="images/뉴캣슬.webp" alt="" class="team-logo-icon" style="width:16px;height:16px;" onerror="this.remove();">
                                             뉴캣슬
                                         </span>
@@ -352,14 +363,14 @@
                                     <td style="white-space:nowrap;">-</td><td style="white-space:nowrap;">0승 1패</td>
                                     <td style="white-space:nowrap;">4승 4패</td><td style="white-space:nowrap;">0승 1패</td>
                                     <!-- 상세보기 표시: 얇은 쉐브런 아이콘 -->
-                                    <td class="text-secondary" style="vertical-align:middle; width: 30px;">
+                                    <td class="text-secondary text-center" style="vertical-align:middle; width: 30px;">
                                         <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"></polyline></svg>
                                     </td>
                                 </tr>
                                 
                                 <tr class="team-row-clickable" style="border-bottom:1px solid #f1f3f5;" data-team="늪지대">
-                                    <td class="text-start ps-4 fw-bold text-dark" style="white-space:nowrap;">
-                                        <span class="d-flex align-items-center gap-2">
+                                    <td class="fw-bold text-dark" style="white-space:nowrap;">
+                                        <span class="d-flex align-items-center justify-content-center gap-2">
                                             <img src="images/늪지대.webp" alt="" class="team-logo-icon" style="width:16px;height:16px;" onerror="this.remove();">
                                             늪지대
                                         </span>
@@ -367,14 +378,14 @@
                                     <td style="white-space:nowrap;">0승 1패</td><td style="white-space:nowrap;">1승 0패</td>
                                     <td style="white-space:nowrap;">1승 4패</td><td style="white-space:nowrap;">1승 0패</td>
                                     <!-- 상세보기 표시: 얇은 쉐브런 아이콘 -->
-                                    <td class="text-secondary" style="vertical-align:middle; width: 30px;">
+                                    <td class="text-secondary text-center" style="vertical-align:middle; width: 30px;">
                                         <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"></polyline></svg>
                                     </td>
                                 </tr>
                                 
                                 <tr class="team-row-clickable" style="border-bottom:1px solid #f1f3f5;" data-team="드림즈">
-                                    <td class="text-start ps-4 fw-bold text-dark" style="white-space:nowrap;">
-                                        <span class="d-flex align-items-center gap-2">
+                                    <td class="fw-bold text-dark" style="white-space:nowrap;">
+                                        <span class="d-flex align-items-center justify-content-center gap-2">
                                             <img src="images/드림즈.webp" alt="" class="team-logo-icon" style="width:16px;height:16px;" onerror="this.remove();">
                                             드림즈
                                         </span>
@@ -382,14 +393,14 @@
                                     <td style="white-space:nowrap;">-</td><td style="white-space:nowrap;">-</td>
                                     <td style="white-space:nowrap;">0승 1패</td><td style="white-space:nowrap;">-</td>
                                     <!-- 상세보기 표시: 얇은 쉐브런 아이콘 -->
-                                    <td class="text-secondary" style="vertical-align:middle; width: 30px;">
+                                    <td class="text-secondary text-center" style="vertical-align:middle; width: 30px;">
                                         <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"></polyline></svg>
                                     </td>
                                 </tr>
                                 
                                 <tr class="team-row-clickable" style="border-bottom:1px solid #f1f3f5;" data-team="섭이대">
-                                    <td class="text-start ps-4 fw-bold text-dark" style="white-space:nowrap;">
-                                        <span class="d-flex align-items-center gap-2">
+                                    <td class="fw-bold text-dark" style="white-space:nowrap;">
+                                        <span class="d-flex align-items-center justify-content-center gap-2">
                                             <img src="images/섭이대.webp" alt="" class="team-logo-icon" style="width:16px;height:16px;" onerror="this.remove();">
                                             섭이대
                                         </span>
@@ -397,14 +408,14 @@
                                     <td style="white-space:nowrap;">-</td><td style="white-space:nowrap;">-</td>
                                     <td style="white-space:nowrap;">1승 0패</td><td style="white-space:nowrap;">-</td>
                                     <!-- 상세보기 표시: 얇은 쉐브런 아이콘 -->
-                                    <td class="text-secondary" style="vertical-align:middle; width: 30px;">
+                                    <td class="text-secondary text-center" style="vertical-align:middle; width: 30px;">
                                         <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"></polyline></svg>
                                     </td>
                                 </tr>
                                 
                                 <tr class="team-row-clickable" style="border-bottom:1px solid #f1f3f5;" data-team="소림사">
-                                    <td class="text-start ps-4 fw-bold text-dark" style="white-space:nowrap;">
-                                        <span class="d-flex align-items-center gap-2">
+                                    <td class="fw-bold text-dark" style="white-space:nowrap;">
+                                        <span class="d-flex align-items-center justify-content-center gap-2">
                                             <img src="images/소림사.webp" alt="" class="team-logo-icon" style="width:16px;height:16px;" onerror="this.remove();">
                                             소림사
                                         </span>
@@ -412,14 +423,14 @@
                                     <td style="white-space:nowrap;">1승 0패</td><td style="white-space:nowrap;">0승 1패</td>
                                     <td style="white-space:nowrap;">1승 0패</td><td style="white-space:nowrap;">-</td>
                                     <!-- 상세보기 표시: 얇은 쉐브런 아이콘 -->
-                                    <td class="text-secondary" style="vertical-align:middle; width: 30px;">
+                                    <td class="text-secondary text-center" style="vertical-align:middle; width: 30px;">
                                         <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"></polyline></svg>
                                     </td>
                                 </tr>
                                 
                                 <tr class="team-row-clickable" style="border-bottom:1px solid #f1f3f5;" data-team="수술대">
-                                    <td class="text-start ps-4 fw-bold text-dark" style="white-space:nowrap;">
-                                        <span class="d-flex align-items-center gap-2">
+                                    <td class="fw-bold text-dark" style="white-space:nowrap;">
+                                        <span class="d-flex align-items-center justify-content-center gap-2">
                                             <img src="images/수술대.webp" alt="" class="team-logo-icon" style="width:16px;height:16px;" onerror="this.remove();">
                                             수술대
                                         </span>
@@ -427,14 +438,14 @@
                                     <td style="white-space:nowrap;">1승 0패</td><td style="white-space:nowrap;">-</td>
                                     <td style="white-space:nowrap;">3승 3패</td><td style="white-space:nowrap;">-</td>
                                     <!-- 상세보기 표시: 얇은 쉐브런 아이콘 -->
-                                    <td class="text-secondary" style="vertical-align:middle; width: 30px;">
+                                    <td class="text-secondary text-center" style="vertical-align:middle; width: 30px;">
                                         <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"></polyline></svg>
                                     </td>
                                 </tr>
                                 
                                 <tr class="team-row-clickable" style="border-bottom:1px solid #f1f3f5;" data-team="신세계">
-                                    <td class="text-start ps-4 fw-bold text-dark" style="white-space:nowrap;">
-                                        <span class="d-flex align-items-center gap-2">
+                                    <td class="fw-bold text-dark" style="white-space:nowrap;">
+                                        <span class="d-flex align-items-center justify-content-center gap-2">
                                             <img src="images/신세계.webp" alt="" class="team-logo-icon" style="width:16px;height:16px;" onerror="this.remove();">
                                             신세계
                                         </span>
@@ -442,14 +453,14 @@
                                     <td style="white-space:nowrap;">-</td><td style="white-space:nowrap;">-</td>
                                     <td style="white-space:nowrap;">1승 0패</td><td style="white-space:nowrap;">-</td>
                                     <!-- 상세보기 표시: 얇은 쉐브런 아이콘 -->
-                                    <td class="text-secondary" style="vertical-align:middle; width: 30px;">
+                                    <td class="text-secondary text-center" style="vertical-align:middle; width: 30px;">
                                         <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"></polyline></svg>
                                     </td>
                                 </tr>
                                 
                                 <tr class="team-row-clickable" style="border-bottom:1px solid #f1f3f5;" data-team="씨나인">
-                                    <td class="text-start ps-4 fw-bold text-dark" style="white-space:nowrap;">
-                                        <span class="d-flex align-items-center gap-2">
+                                    <td class="fw-bold text-dark" style="white-space:nowrap;">
+                                        <span class="d-flex align-items-center justify-content-center gap-2">
                                             <img src="images/씨나인.webp" alt="" class="team-logo-icon" style="width:16px;height:16px;" onerror="this.remove();">
                                             씨나인
                                         </span>
@@ -457,14 +468,14 @@
                                     <td style="white-space:nowrap;">0승 2패</td><td style="white-space:nowrap;">0승 3패</td>
                                     <td style="white-space:nowrap;">4승 5패</td><td style="white-space:nowrap;">3승 0패</td>
                                     <!-- 상세보기 표시: 얇은 쉐브런 아이콘 -->
-                                    <td class="text-secondary" style="vertical-align:middle; width: 30px;">
+                                    <td class="text-secondary text-center" style="vertical-align:middle; width: 30px;">
                                         <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"></polyline></svg>
                                     </td>
                                 </tr>
                                 
                                 <tr class="team-row-clickable" style="border-bottom:1px solid #f1f3f5;" data-team="엠비대">
-                                    <td class="text-start ps-4 fw-bold text-dark" style="white-space:nowrap;">
-                                        <span class="d-flex align-items-center gap-2">
+                                    <td class="fw-bold text-dark" style="white-space:nowrap;">
+                                        <span class="d-flex align-items-center justify-content-center gap-2">
                                             <img src="images/엠비대.webp" alt="" class="team-logo-icon" style="width:16px;height:16px;" onerror="this.remove();">
                                             엠비대
                                         </span>
@@ -472,14 +483,14 @@
                                     <td style="white-space:nowrap;">2승 1패</td><td style="white-space:nowrap;">0승 1패</td>
                                     <td style="white-space:nowrap;">2승 2패</td><td style="white-space:nowrap;">0승 1패</td>
                                     <!-- 상세보기 표시: 얇은 쉐브런 아이콘 -->
-                                    <td class="text-secondary" style="vertical-align:middle; width: 30px;">
+                                    <td class="text-secondary text-center" style="vertical-align:middle; width: 30px;">
                                         <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"></polyline></svg>
                                     </td>
                                 </tr>
                                 
                                 <tr class="team-row-clickable" style="border-bottom:1px solid #f1f3f5;" data-team="연합팀">
-                                    <td class="text-start ps-4 fw-bold text-dark" style="white-space:nowrap;">
-                                        <span class="d-flex align-items-center gap-2">
+                                    <td class="fw-bold text-dark" style="white-space:nowrap;">
+                                        <span class="d-flex align-items-center justify-content-center gap-2">
                                             <img src="images/연합팀.webp" alt="" class="team-logo-icon" style="width:16px;height:16px;" onerror="this.remove();">
                                             연합팀
                                         </span>
@@ -487,14 +498,14 @@
                                     <td style="white-space:nowrap;">-</td><td style="white-space:nowrap;">-</td>
                                     <td style="white-space:nowrap;">-</td><td style="white-space:nowrap;">19승 18패</td>
                                     <!-- 상세보기 표시: 얇은 쉐브런 아이콘 -->
-                                    <td class="text-secondary" style="vertical-align:middle; width: 30px;">
+                                    <td class="text-secondary text-center" style="vertical-align:middle; width: 30px;">
                                         <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"></polyline></svg>
                                     </td>
                                 </tr>
                                 
                                 <tr class="team-row-clickable" style="border-bottom:1px solid #f1f3f5;" data-team="와플대">
-                                    <td class="text-start ps-4 fw-bold text-dark" style="white-space:nowrap;">
-                                        <span class="d-flex align-items-center gap-2">
+                                    <td class="fw-bold text-dark" style="white-space:nowrap;">
+                                        <span class="d-flex align-items-center justify-content-center gap-2">
                                             <img src="images/와플대.webp" alt="" class="team-logo-icon" style="width:16px;height:16px;" onerror="this.remove();">
                                             와플대
                                         </span>
@@ -502,14 +513,14 @@
                                     <td style="white-space:nowrap;">1승 1패</td><td style="white-space:nowrap;">-</td>
                                     <td style="white-space:nowrap;">4승 0패</td><td style="white-space:nowrap;">-</td>
                                     <!-- 상세보기 표시: 얇은 쉐브런 아이콘 -->
-                                    <td class="text-secondary" style="vertical-align:middle; width: 30px;">
+                                    <td class="text-secondary text-center" style="vertical-align:middle; width: 30px;">
                                         <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"></polyline></svg>
                                     </td>
                                 </tr>
                                 
                                 <tr class="team-row-clickable" style="border-bottom:1px solid #f1f3f5;" data-team="우끼끼즈">
-                                    <td class="text-start ps-4 fw-bold text-dark" style="white-space:nowrap;">
-                                        <span class="d-flex align-items-center gap-2">
+                                    <td class="fw-bold text-dark" style="white-space:nowrap;">
+                                        <span class="d-flex align-items-center justify-content-center gap-2">
                                             <img src="images/우끼끼즈.webp" alt="" class="team-logo-icon" style="width:16px;height:16px;" onerror="this.remove();">
                                             우끼끼즈
                                         </span>
@@ -517,14 +528,14 @@
                                     <td style="white-space:nowrap;">-</td><td style="white-space:nowrap;">0승 1패</td>
                                     <td style="white-space:nowrap;">-</td><td style="white-space:nowrap;">-</td>
                                     <!-- 상세보기 표시: 얇은 쉐브런 아이콘 -->
-                                    <td class="text-secondary" style="vertical-align:middle; width: 30px;">
+                                    <td class="text-secondary text-center" style="vertical-align:middle; width: 30px;">
                                         <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"></polyline></svg>
                                     </td>
                                 </tr>
                                 
                                 <tr class="team-row-clickable" style="border-bottom:1px solid #f1f3f5;" data-team="이노대">
-                                    <td class="text-start ps-4 fw-bold text-dark" style="white-space:nowrap;">
-                                        <span class="d-flex align-items-center gap-2">
+                                    <td class="fw-bold text-dark" style="white-space:nowrap;">
+                                        <span class="d-flex align-items-center justify-content-center gap-2">
                                             <img src="images/이노대.webp" alt="" class="team-logo-icon" style="width:16px;height:16px;" onerror="this.remove();">
                                             이노대
                                         </span>
@@ -532,14 +543,14 @@
                                     <td style="white-space:nowrap;">2승 0패</td><td style="white-space:nowrap;">-</td>
                                     <td style="white-space:nowrap;">4승 0패</td><td style="white-space:nowrap;">2승 2패</td>
                                     <!-- 상세보기 표시: 얇은 쉐브런 아이콘 -->
-                                    <td class="text-secondary" style="vertical-align:middle; width: 30px;">
+                                    <td class="text-secondary text-center" style="vertical-align:middle; width: 30px;">
                                         <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"></polyline></svg>
                                     </td>
                                 </tr>
                                 
                                 <tr class="team-row-clickable" style="border-bottom:1px solid #f1f3f5;" data-team="장독대">
-                                    <td class="text-start ps-4 fw-bold text-dark" style="white-space:nowrap;">
-                                        <span class="d-flex align-items-center gap-2">
+                                    <td class="fw-bold text-dark" style="white-space:nowrap;">
+                                        <span class="d-flex align-items-center justify-content-center gap-2">
                                             <img src="images/장독대.webp" alt="" class="team-logo-icon" style="width:16px;height:16px;" onerror="this.remove();">
                                             장독대
                                         </span>
@@ -547,14 +558,14 @@
                                     <td style="white-space:nowrap;">1승 0패</td><td style="white-space:nowrap;">0승 1패</td>
                                     <td style="white-space:nowrap;">0승 1패</td><td style="white-space:nowrap;">-</td>
                                     <!-- 상세보기 표시: 얇은 쉐브런 아이콘 -->
-                                    <td class="text-secondary" style="vertical-align:middle; width: 30px;">
+                                    <td class="text-secondary text-center" style="vertical-align:middle; width: 30px;">
                                         <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"></polyline></svg>
                                     </td>
                                 </tr>
                                 
                                 <tr class="team-row-clickable" style="border-bottom:1px solid #f1f3f5;" data-team="정선대">
-                                    <td class="text-start ps-4 fw-bold text-dark" style="white-space:nowrap;">
-                                        <span class="d-flex align-items-center gap-2">
+                                    <td class="fw-bold text-dark" style="white-space:nowrap;">
+                                        <span class="d-flex align-items-center justify-content-center gap-2">
                                             <img src="images/정선대.webp" alt="" class="team-logo-icon" style="width:16px;height:16px;" onerror="this.remove();">
                                             정선대
                                         </span>
@@ -562,14 +573,14 @@
                                     <td style="white-space:nowrap;">2승 1패</td><td style="white-space:nowrap;">0승 1패</td>
                                     <td style="white-space:nowrap;">5승 1패</td><td style="white-space:nowrap;">-</td>
                                     <!-- 상세보기 표시: 얇은 쉐브런 아이콘 -->
-                                    <td class="text-secondary" style="vertical-align:middle; width: 30px;">
+                                    <td class="text-secondary text-center" style="vertical-align:middle; width: 30px;">
                                         <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"></polyline></svg>
                                     </td>
                                 </tr>
                                 
                                 <tr class="team-row-clickable" style="border-bottom:1px solid #f1f3f5;" data-team="케이대">
-                                    <td class="text-start ps-4 fw-bold text-dark" style="white-space:nowrap;">
-                                        <span class="d-flex align-items-center gap-2">
+                                    <td class="fw-bold text-dark" style="white-space:nowrap;">
+                                        <span class="d-flex align-items-center justify-content-center gap-2">
                                             <img src="images/케이대.webp" alt="" class="team-logo-icon" style="width:16px;height:16px;" onerror="this.remove();">
                                             케이대
                                         </span>
@@ -577,14 +588,14 @@
                                     <td style="white-space:nowrap;">3승 1패</td><td style="white-space:nowrap;">-</td>
                                     <td style="white-space:nowrap;">3승 3패</td><td style="white-space:nowrap;">0승 1패</td>
                                     <!-- 상세보기 표시: 얇은 쉐브런 아이콘 -->
-                                    <td class="text-secondary" style="vertical-align:middle; width: 30px;">
+                                    <td class="text-secondary text-center" style="vertical-align:middle; width: 30px;">
                                         <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"></polyline></svg>
                                     </td>
                                 </tr>
                                 
                                 <tr class="team-row-clickable" style="border-bottom:1px solid #f1f3f5;" data-team="흑카데미">
-                                    <td class="text-start ps-4 fw-bold text-dark" style="white-space:nowrap;">
-                                        <span class="d-flex align-items-center gap-2">
+                                    <td class="fw-bold text-dark" style="white-space:nowrap;">
+                                        <span class="d-flex align-items-center justify-content-center gap-2">
                                             <img src="images/흑카데미.webp" alt="" class="team-logo-icon" style="width:16px;height:16px;" onerror="this.remove();">
                                             흑카데미
                                         </span>
@@ -592,7 +603,7 @@
                                     <td style="white-space:nowrap;">1승 0패</td><td style="white-space:nowrap;">-</td>
                                     <td style="white-space:nowrap;">0승 6패</td><td style="white-space:nowrap;">-</td>
                                     <!-- 상세보기 표시: 얇은 쉐브런 아이콘 -->
-                                    <td class="text-secondary" style="vertical-align:middle; width: 30px;">
+                                    <td class="text-secondary text-center" style="vertical-align:middle; width: 30px;">
                                         <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"></polyline></svg>
                                     </td>
                                 </tr>

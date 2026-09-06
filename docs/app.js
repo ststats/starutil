@@ -31,8 +31,8 @@
     }
 
     function switchStatView(viewType) {
-        document.querySelectorAll('.sub-tab').forEach(el => el.classList.remove('active'));
-        document.getElementById('tab-' + viewType).classList.add('active');
+        document.getElementById('tab-team').classList.toggle('active', viewType === 'team');
+        document.getElementById('tab-individual').classList.toggle('active', viewType === 'individual');
 
         if(viewType === 'team') {
             document.getElementById('view-team-stat').style.display = 'block';
@@ -43,6 +43,13 @@
             renderIndividualSidebar();
             showIndivSummary(); 
         }
+    }
+
+    function switchMemberView(viewType) {
+        document.getElementById('tab-member-status').classList.toggle('active', viewType === 'status');
+        document.getElementById('tab-member-news').classList.toggle('active', viewType === 'news');
+        document.getElementById('view-member-status').style.display = viewType === 'status' ? 'block' : 'none';
+        document.getElementById('view-member-news').style.display = viewType === 'news' ? 'block' : 'none';
     }
 
     function toggleIndivSidebar(open) {
@@ -224,21 +231,44 @@
             </div>
         </div>`;
     }
-    function renderMemberGroup(title, members) {
+    function renderMemberGroup(title, members, opts) {
+        opts = opts || {};
         if (members.length === 0) return '';
         const sorted = [...members].sort((a, b) =>
             tierIndex(a['티어']) - tierIndex(b['티어']) || String(a['이름']).localeCompare(String(b['이름']), 'ko'));
+
+        const countHtml = `<span class="text-secondary" style="font-size:var(--fs-body); font-weight:600;">${sorted.length}명</span>`;
+
+        if (opts.collapseId) {
+            const startClosed = !!opts.startClosed;
+            return `
+            <div class="section-title${startClosed ? ' collapsed' : ''}" style="cursor:pointer;" role="button" data-bs-toggle="collapse" data-bs-target="#${opts.collapseId}">
+                <span>${escapeHTML(title)} ${countHtml}</span>
+                <svg class="section-title-chevron" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </div>
+            <div class="collapse${startClosed ? '' : ' show'}" id="${opts.collapseId}">
+                <div class="member-grid mb-4">${sorted.map(memberCardHtml).join('')}</div>
+            </div>`;
+        }
+
         return `
-        <div class="section-title">${escapeHTML(title)} <span class="text-secondary" style="font-size:var(--fs-body); font-weight:600;">${sorted.length}명</span></div>
+        <div class="section-title">${escapeHTML(title)} ${countHtml}</div>
         <div class="member-grid mb-4">${sorted.map(memberCardHtml).join('')}</div>`;
     }
     function renderMembersPage() {
+        const roleOrderBase = ['감독', '코치', '선수'];
         const activeMembers = dbMembers.filter(isActiveMember);
         const formerMembers = dbMembers.filter(m => !isActiveMember(m));
+        const allRoles = [...new Set(activeMembers.map(m => m['직책'] || '기타'))];
+        const extraRoles = allRoles.filter(r => !roleOrderBase.includes(r));
+        const roleOrder = [...roleOrderBase, ...extraRoles];
 
         let html = '';
-        html += renderMemberGroup('현황', activeMembers);
-        html += renderMemberGroup('전 멤버', formerMembers);
+        roleOrder.forEach(role => {
+            const group = activeMembers.filter(m => (m['직책'] || '기타') === role);
+            html += renderMemberGroup(role, group);
+        });
+        html += renderMemberGroup('이전 멤버', formerMembers, { collapseId: 'former-members-collapse', startClosed: true });
 
         document.getElementById('members-groups').innerHTML = html || '<div class="text-center text-muted py-5">등록된 멤버가 없습니다.</div>';
     }
@@ -438,7 +468,7 @@
             const pStat = playersStats.find(x => x['이름'] === m['이름']) || {};
             const name = m['이름'];
             html += `<tr style="border-bottom:1px solid #f1f3f5; cursor:pointer;" onclick="selectPlayer('${name}')">
-                <td class="text-start ps-4 fw-bold text-dark"><span class="d-flex align-items-center gap-2">${avatarHtml(m['SOOP ID'], 'player-avatar-sm')}${escapeHTML(name)}</span></td>
+                <td class="fw-bold text-dark"><span class="d-flex align-items-center justify-content-center gap-2">${avatarHtml(m['SOOP ID'], 'player-avatar-sm')}${escapeHTML(name)}</span></td>
                 <td>${pStat['대회 전적'] || '-'}</td>
                 <td>${pStat['대학 전적'] || '-'}</td>
                 <td>${pStat['미니 전적'] || '-'}</td>
