@@ -54,7 +54,8 @@
         .page-header { margin-bottom: 4px; }
         .page-header-title { font-size: 30px; font-weight: 800; color: #141821; letter-spacing: -0.5px; margin: 0 0 8px 0; }
         .page-header-desc { font-size: var(--fs-body); color: var(--color-text-sub); margin: 0; }
-        .page-header-divider { border: none; border-bottom: 2px solid #1a1f27; margin: 14px 0 10px 0; }
+        .page-header-divider { border: none; border-bottom: 2px solid #1a1f27; margin: 14px 0 25px 0; }
+        .page-header-divider.tight { margin-bottom: 4px; }
         .sub-tab { padding: 10px 5px; font-size: var(--fs-heading); font-weight: 600; color: var(--color-text-sub); cursor: pointer; margin-bottom: -1px; border-bottom: 3px solid transparent; }
         .sub-tab.active { color: var(--color-primary); font-weight: 800; border-bottom: 3px solid var(--color-primary); }
 
@@ -66,7 +67,7 @@
         /* 좌우 여백: 부트스트랩 기본(12px)은 PC에서도 너무 좁아서 기본값을 늘리고,
            화면 크기별로 계단식으로 넉넉하게 준다. 네비게이션도 .container를
            그대로 쓰니 자동으로 같이 맞춰진다. */
-        .container { padding-left: 32px !important; padding-right: 32px !important; }
+        .container { padding-left: 32px !important; padding-right: 32px !important; max-width: 1320px !important; }
         @media (min-width: 1200px) {
             .container { padding-left: 40px !important; padding-right: 40px !important; }
         }
