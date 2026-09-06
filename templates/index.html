@@ -76,7 +76,7 @@
                         <button class="cal-nav-btn" onclick="changeMonth(1)"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
                     </div>
                 </div>
-                <div class="clean-card p-4">
+                <div class="clean-card p-0 overflow-hidden">
                     <!-- 가로 스크롤 허용 캘린더 구역 -->
                     <div class="cal-calendar-inner">
                         <div class="cal-calendar-scroll-content">
@@ -96,8 +96,19 @@
     <div class="page-header">
         <h1 class="page-header-title">멤버</h1>
     </div>
-    <hr class="page-header-divider">
-    <div id="members-groups"></div>
+    <hr class="page-header-divider tight">
+    <div class="sub-tabs">
+        <div class="sub-tab active" id="tab-member-status" onclick="switchMemberView('status')">현황</div>
+        <div class="sub-tab" id="tab-member-news" onclick="switchMemberView('news')">소식</div>
+    </div>
+
+    <div id="view-member-status">
+        <div id="members-groups"></div>
+    </div>
+
+    <div id="view-member-news" style="display:none;">
+        <div class="clean-card p-4 text-center text-muted" style="font-size:var(--fs-body);">멤버 소식 기능은 준비중입니다.</div>
+    </div>
 </div>
 
 <!-- 시너지표: ststats(외부) 데이터에서 우리 로스터만 뽑아 방송 활동 랭킹 표시 -->
@@ -223,8 +234,8 @@
                             <tbody>
                                 {% for row in crew_stats['전체'] %}
                                 <tr class="team-row-clickable" style="border-bottom:1px solid #f1f3f5;" data-team="{{ row['상대'] | e }}">
-                                    <td class="text-start ps-4 fw-bold text-dark" style="white-space:nowrap;">
-                                        <span class="d-flex align-items-center gap-2">
+                                    <td class="fw-bold text-dark" style="white-space:nowrap;">
+                                        <span class="d-flex align-items-center justify-content-center gap-2">
                                             <img src="images/{{ (row['상대'] if row['상대'] != '내전' else '캄몬스타즈') | e }}.webp" alt="" class="team-logo-icon" style="width:16px;height:16px;" onerror="this.remove();">
                                             {{ row['상대'] | e }}
                                         </span>
@@ -232,7 +243,7 @@
                                     <td style="white-space:nowrap;">{{ row['대회 전적'] | e }}</td><td style="white-space:nowrap;">{{ row['대학 전적'] | e }}</td>
                                     <td style="white-space:nowrap;">{{ row['미니 전적'] | e }}</td><td style="white-space:nowrap;">{{ row['CK 전적'] | e }}</td>
                                     <!-- 상세보기 표시: 얇은 쉐브런 아이콘 -->
-                                    <td class="text-secondary" style="vertical-align:middle; width: 30px;">
+                                    <td class="text-secondary text-center" style="vertical-align:middle; width: 30px;">
                                         <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"></polyline></svg>
                                     </td>
                                 </tr>
