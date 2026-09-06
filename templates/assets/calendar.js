@@ -120,9 +120,8 @@
                     <div class="cal-card-dot" style="background-color: ${item.color || '#eff6ff'};"></div>
                     ${item.time ? `<span class="cal-card-time">${calEscapeHTML(item.time)}</span>` : ''} 
                     ${item.person ? `<span class="cal-card-person">${calEscapeHTML(item.person)}</span>` : ''}
-                    <span class="cal-card-desc">${calEscapeHTML(item.desc)}</span>
+                    <span class="cal-card-desc">${calEscapeHTML(item.desc)}${item.detail ? ' ' + calEscapeHTML(item.detail) : ''}</span>
                 </div>
-                ${item.detail ? `<div style="color: var(--color-text-sub); font-size: var(--fs-body); padding-left: 18px;">↳ ${calEscapeHTML(item.detail)}</div>` : ''}
             </div>
         `).join('');
     };
@@ -144,7 +143,7 @@
                     <div class="cal-card-dot" style="background-color: ${item.color || '#eff6ff'};"></div>
                     ${item.time ? `<span class="cal-card-time">${calEscapeHTML(item.time)}</span>` : ''} 
                     ${item.person ? `<span class="cal-card-person">${calEscapeHTML(item.person)}</span>` : ''}
-                    <span class="cal-card-desc">${calEscapeHTML(item.desc)}</span>
+                    <span class="cal-card-desc">${calEscapeHTML(item.desc)}${item.detail ? ' ' + calEscapeHTML(item.detail) : ''}</span>
                 </div>
             </div>
         `).join('');
