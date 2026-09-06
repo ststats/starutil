@@ -356,7 +356,9 @@
         const soopId = m['SOOP ID'];
         const isValidSoopId = soopId && /^[a-zA-Z0-9_-]+$/.test(String(soopId).trim());
         const broadcast = isValidSoopId
-            ? `<a href="https://www.sooplive.com/station/${encodeURIComponent(String(soopId).trim())}" target="_blank" rel="noopener" style="display:inline-flex; align-items:center;">방송국</a>`
+            ? `<a href="https://www.sooplive.com/station/${encodeURIComponent(String(soopId).trim())}" target="_blank" rel="noopener" style="display:inline-flex; align-items:center;">
+                   <img src="images/숲로고.webp" alt="SOOP" style="width:20px; height:20px; border-radius:4px; object-fit:contain;">
+               </a>`
             : '-';
 
         const rows = [
