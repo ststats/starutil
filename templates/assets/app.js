@@ -23,6 +23,31 @@
 
     const VALID_PAGE_IDS = ['home', 'schedule', 'members', 'stats', 'synergy', 'tools'];
 
+    // ===== 해시 라우터: #페이지?파라미터=값 형태로 하위 상태까지 URL에 반영 =====
+    function parseHash() {
+        const raw = (location.hash || '').replace(/^#/, '');
+        const qIdx = raw.indexOf('?');
+        const page = qIdx === -1 ? raw : raw.slice(0, qIdx);
+        const params = new URLSearchParams(qIdx === -1 ? '' : raw.slice(qIdx + 1));
+        return { page: page || 'home', params };
+    }
+
+    function buildHash(page, params) {
+        const qs = new URLSearchParams();
+        Object.entries(params || {}).forEach(([k, v]) => { if (v) qs.set(k, v); });
+        const qsStr = qs.toString();
+        // 홈 + 파라미터 없음은 주소 깔끔하게 해시 자체를 비운다
+        if (page === 'home' && !qsStr) return '';
+        return '#' + page + (qsStr ? '?' + qsStr : '');
+    }
+
+    function updateHash(page, params) {
+        const newHash = buildHash(page, params);
+        if (location.hash !== newHash) {
+            history.pushState({ page, params }, '', newHash || location.pathname + location.search);
+        }
+    }
+
     function switchPage(pageId, skipHashUpdate) {
         document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
         document.querySelectorAll('#mainMenu .nav-item').forEach(el => el.classList.remove('active'));
@@ -31,17 +56,42 @@
         const targetNav = document.querySelector(`#mainMenu .nav-item[data-page="${pageId}"]`);
         if (targetNav) targetNav.classList.add('active');
 
-        // 새로고침해도 페이지가 유지되고, 링크 공유·뒤로가기도 되도록 URL 해시를 맞춰준다.
-        if (!skipHashUpdate && location.hash !== '#' + pageId) {
-            history.pushState({ page: pageId }, '', '#' + pageId);
+        if (!skipHashUpdate) updateHash(pageId, {});
+    }
+
+    // 뒤로가기/앞으로가기 및 새로고침 시 해시에 맞춰 페이지 + 하위 상태를 복원
+    function restoreFromHash() {
+        const { page, params } = parseHash();
+        const pageId = VALID_PAGE_IDS.includes(page) ? page : 'home';
+        switchPage(pageId, true);
+
+        if (pageId === 'stats') {
+            const view = params.get('view') === 'individual' ? 'individual' : 'team';
+            switchStatView(view);
+            const player = params.get('player');
+            if (view === 'individual' && player) selectPlayer(player);
+        } else if (pageId === 'members') {
+            const view = params.get('view') === 'news' ? 'news' : 'status';
+            switchMemberView(view);
+            const member = params.get('member');
+            if (view === 'news' && member) selectNewsPlayer(member);
+        } else if (pageId === 'synergy') {
+            const metric = params.get('metric');
+            if (metric) setSynergyMetric(metric);
         }
     }
 
-    // 뒤로가기/앞으로가기 시 해시에 맞는 페이지로 전환
-    window.addEventListener('popstate', () => {
-        const pageId = (location.hash || '#home').slice(1);
-        if (VALID_PAGE_IDS.includes(pageId)) switchPage(pageId, true);
-    });
+    window.addEventListener('popstate', restoreFromHash);
+
+    function updateStatsHash() {
+        const view = document.getElementById('tab-individual').classList.contains('active') ? 'individual' : 'team';
+        const params = {};
+        if (view === 'individual') {
+            params.view = 'individual';
+            if (currentPlayer) params.player = currentPlayer;
+        }
+        updateHash('stats', params);
+    }
 
     function switchStatView(viewType) {
         document.getElementById('tab-team').classList.toggle('active', viewType === 'team');
@@ -56,6 +106,17 @@
             renderIndividualSidebar();
             showIndivSummary(); 
         }
+        updateStatsHash();
+    }
+
+    function updateMembersHash() {
+        const view = document.getElementById('tab-member-news').classList.contains('active') ? 'news' : 'status';
+        const params = {};
+        if (view === 'news') {
+            params.view = 'news';
+            if (currentNewsPlayer) params.member = currentNewsPlayer['이름'];
+        }
+        updateHash('members', params);
     }
 
     function switchMemberView(viewType) {
@@ -68,6 +129,7 @@
             newsSidebarRendered = true;
             showNewsAll();
         }
+        updateMembersHash();
     }
 
     // 홈 화면 "소식 전체보기" -> 멤버 페이지의 소식 탭으로 이동
@@ -105,6 +167,7 @@
         document.getElementById('news-side-btn-all').classList.add('active');
         document.getElementById('news-content-title').innerText = '전체 소식';
         currentNewsPlayer = null;
+        updateMembersHash();
 
         const content = document.getElementById('news-feed-content');
         content.innerHTML = `<div class="text-center text-muted py-4" style="font-size:var(--fs-body);">불러오는 중...</div>`;
@@ -146,6 +209,7 @@
         currentNewsPlayer = m;
         newsCurrentPage = 1;
         newsTotalPages = 1;
+        updateMembersHash();
 
         document.getElementById('news-feed-content').innerHTML = `<div class="text-center text-muted py-4" style="font-size:var(--fs-body);">불러오는 중...</div>`;
         loadNewsFeed(true);
@@ -764,6 +828,7 @@
             </tr>`;
         });
         document.getElementById('indiv-summary-tbody').innerHTML = html;
+        updateStatsHash();
     }
 
     function selectPlayer(name) {
@@ -774,7 +839,14 @@
 
         document.querySelectorAll('#indiv-avatar-list .avatar-select-item').forEach(el => el.classList.remove('active'));
         const sideItem = document.getElementById(`side-player-${name}`);
-        if(sideItem) sideItem.classList.add('active');
+        if (sideItem) {
+            sideItem.classList.add('active');
+            // 이전 멤버가 접혀있는 상태에서 그 사람이 선택되면 자동으로 펼쳐준다
+            const formerWrap = document.getElementById('indiv-former-wrap');
+            if (formerWrap && formerWrap.contains(sideItem) && formerWrap.style.display === 'none') {
+                toggleFormerMembers();
+            }
+        }
 
         const pStat = playersStats.find(x => x['이름'] === name) || {};
         const pDb = dbMembers.find(x => x['이름'] === name) || {};
@@ -800,6 +872,7 @@
         updateDonut('d-race-p', 'dt-race-p', 'dw-race-p', parseStat(pStat['프로토스전 전적']), '#f57f17');
 
         renderIndivMatchesList('indiv-recent-list', currentIndivFilter, 10);
+        updateStatsHash();
     }
 
     function setIndivFilter(format) {
@@ -927,6 +1000,7 @@
             el.innerText = SYNERGY_METRIC_LABELS[metric] || '';
         });
         renderSynergyTable();
+        updateHash('synergy', metric !== 'balloons' ? { metric } : {});
     }
 
     function synergyRowHtml(m, idx) {
@@ -990,16 +1064,8 @@
         renderLatestNotices();
         loadSynergyData();
 
-        // 새로고침 시 URL 해시에 맞는 페이지를 그대로 열어준다 (없으면 기본 홈 유지)
-        const hashPageId = (location.hash || '').slice(1);
-        if (VALID_PAGE_IDS.includes(hashPageId)) {
-            switchPage(hashPageId, true);
-        } else {
-            const activePageId = document.querySelector('.page-section.active').id.replace('page-', '');
-            document.querySelectorAll('#mainMenu .nav-item').forEach(el => el.classList.remove('active'));
-            const targetNav = document.querySelector(`#mainMenu .nav-item[data-page="${activePageId}"]`);
-            if (targetNav) targetNav.classList.add('active');
-        }
+        // 새로고침해도 URL 해시에 맞춰 페이지 + 하위 상태(선택된 멤버, 지표 등)까지 그대로 복원
+        restoreFromHash();
 
         const today = new Date();
         calSelectedDateStr = calGetFormatDate(today.getFullYear(), today.getMonth() + 1, today.getDate());
