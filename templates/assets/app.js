@@ -208,6 +208,9 @@
             ${title ? `<div class="news-post-title">${escapeHTML(title)}</div>` : ''}
             ${snippet ? `<div class="news-post-body">${escapeHTML(snippet)}</div>` : ''}
             ${photosHtml}
+            <a class="news-post-link" href="https://www.sooplive.co.kr/station/${encodeURIComponent(soopId)}/post/${post.titleNo}" target="_blank" rel="noopener">
+                원글 보기 <svg width="7" height="7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"></polyline></svg>
+            </a>
         </div>`;
     }
 
@@ -725,11 +728,11 @@
             const pStat = playersStats.find(x => x['이름'] === m['이름']) || {};
             const name = m['이름'];
             html += `<tr style="border-bottom:1px solid #f1f3f5; cursor:pointer;" onclick="selectPlayer('${name}')">
-                <td class="fw-bold text-dark" style="white-space:nowrap;"><span class="d-flex align-items-center justify-content-start gap-2 ps-2">${avatarHtml(m['SOOP ID'], 'player-avatar-sm')}${escapeHTML(name)}</span></td>
-                <td style="white-space:nowrap;">${pStat['대회 전적'] || '-'}</td>
-                <td style="white-space:nowrap;">${pStat['대학 전적'] || '-'}</td>
-                <td style="white-space:nowrap;">${pStat['미니 전적'] || '-'}</td>
-                <td style="white-space:nowrap;">${pStat['CK 전적'] || '-'}</td>
+                <td class="fw-bold text-dark" style="white-space:nowrap; width:130px;"><span class="d-flex align-items-center justify-content-start gap-2 ps-2">${avatarHtml(m['SOOP ID'], 'player-avatar-sm')}<span style="overflow:hidden; text-overflow:ellipsis;">${escapeHTML(name)}</span></span></td>
+                <td style="white-space:nowrap; width:130px;">${pStat['대회 전적'] || '-'}</td>
+                <td style="white-space:nowrap; width:130px;">${pStat['대학 전적'] || '-'}</td>
+                <td style="white-space:nowrap; width:130px;">${pStat['미니 전적'] || '-'}</td>
+                <td style="white-space:nowrap; width:130px;">${pStat['CK 전적'] || '-'}</td>
             </tr>`;
         });
         document.getElementById('indiv-summary-tbody').innerHTML = html;
@@ -911,14 +914,14 @@
 
         return `
         <tr>
-            <td class="text-center text-secondary fw-bold" style="width:25%; white-space:nowrap;">${idx + 1}</td>
-            <td class="text-center" style="width:25%;">
+            <td class="text-center text-secondary fw-bold" style="width:110px; white-space:nowrap;">${idx + 1}</td>
+            <td class="text-center" style="width:110px;">
                 <span class="d-flex align-items-center justify-content-center gap-2" style="min-width:0;">
                     ${avatarHtml(ours['SOOP ID'], 'player-avatar-sm')}
                     <span class="fw-bold" style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHTML(name)}</span>
                 </span>
             </td>
-            <td class="text-center fw-bold" style="width:50%; color:var(--color-primary); white-space:nowrap;">${escapeHTML(displayVal)}</td>
+            <td class="text-center fw-bold" style="width:220px; color:var(--color-primary); white-space:nowrap;">${escapeHTML(displayVal)}</td>
         </tr>`;
     }
 
