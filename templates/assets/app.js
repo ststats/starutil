@@ -165,7 +165,7 @@
     async function showNewsAll() {
         document.querySelectorAll('#news-avatar-list .avatar-select-item').forEach(el => el.classList.remove('active'));
         document.getElementById('news-side-btn-all').classList.add('active');
-        document.getElementById('news-content-title').innerText = '전체 소식';
+        document.getElementById('news-content-title').innerText = '전체 공지';
         currentNewsPlayer = null;
         updateMembersHash();
 
@@ -202,7 +202,7 @@
         document.querySelectorAll('#news-avatar-list .avatar-select-item').forEach(el => el.classList.remove('active'));
         const sideItem = document.getElementById(`news-side-player-${name}`);
         if (sideItem) sideItem.classList.add('active');
-        document.getElementById('news-content-title').innerText = `${name}의 소식`;
+        document.getElementById('news-content-title').innerText = `${name}의 공지`;
 
         const m = dbMembers.find(x => x['이름'] === name);
         if (!m) return;
@@ -398,10 +398,10 @@
                     return `
                     <div class="d-flex align-items-center py-2" style="font-size:var(--fs-body); border-bottom:1px solid #f1f3f5; min-width: 480px;">
                         <div style="width:20%; text-align:center; font-weight:800; color:#888; white-space:nowrap;">${escapeHTML(r['세트']) || ''} ${escapeHTML(r['라운드']) || (i+1) + '라'}</div>
-                        <div style="width:20%; text-align:center; color:#555;">${escapeHTML(r['맵']) || '-'}</div>
                         <div style="width:20%; text-align:center;" class="fw-bold ${isWin?'text-primary':'text-dark'}">${escapeHTML(r['우리 선수'])||'-'}</div>
                         <div style="width:20%; text-align:center;">${resBadge}</div>
                         <div style="width:20%; text-align:center;" class="fw-bold ${!isWin && !isDraw ?'text-primary':'text-dark'}">${escapeHTML(r['상대 선수'])||'-'}</div>
+                        <div style="width:20%; text-align:center; color:#555;">${escapeHTML(r['맵']) || '-'}</div>
                     </div>`;
                 }).join('');
             } else {
