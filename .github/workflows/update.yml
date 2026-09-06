@@ -1,4 +1,4 @@
-name: Update Starcraft Stats
+name: Update Stats
 
 on:
   workflow_dispatch:
