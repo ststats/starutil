@@ -654,9 +654,9 @@
 
         return `
         <tr>
-            <td class="text-start ps-4 text-secondary fw-bold" style="width:60px; white-space:nowrap;">${idx + 1}</td>
-            <td class="text-start ps-3">
-                <span class="d-flex align-items-center gap-2">
+            <td class="text-center text-secondary fw-bold" style="width:60px; white-space:nowrap;">${idx + 1}</td>
+            <td class="text-center">
+                <span class="d-flex align-items-center justify-content-center gap-2">
                     ${avatarHtml(ours['SOOP ID'], 'player-avatar-sm')}
                     <span class="fw-bold">${escapeHTML(name)}</span>
                 </span>
