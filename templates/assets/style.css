@@ -125,7 +125,7 @@
         .m-res { width: 50px; display: flex; justify-content: center; flex-shrink: 0; }
         
         /* 아코디언 화살표 통일 */
-        .m-arrow { width: 20px; text-align: right; color: #adb5bd; display: flex; justify-content: flex-end; transition: transform 0.2s; flex-shrink: 0; }
+        .m-arrow { width: 20px; text-align: center; color: #adb5bd; display: flex; justify-content: center; transition: transform 0.2s; flex-shrink: 0; }
         .m-arrow svg { display: block; }
         .match-row[aria-expanded="true"] .m-arrow { transform: rotate(180deg); }
 
@@ -258,10 +258,10 @@
             .cal-selected-card-wrapper { order: 3; width: 100%; }
         }
 
-        .cal-nav-group { display: flex; align-items: center; gap: 8px; }
-        .cal-nav-btn { background: #fff; border: 1px solid #dcdfe4; color: var(--color-text-sub); width: 26px; height: 26px; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.1s; }
-        .cal-nav-btn:hover { background: var(--color-primary-tint); color: var(--color-primary); border-color: #b9cdf5; }
-        .cal-nav-badge { font-size: var(--fs-subheading); font-weight: 800; color: #111; min-width: 86px; text-align: center; background: var(--color-bg); border-radius: 6px; padding: 5px 10px; }
+        .cal-nav-group { display: flex; align-items: center; gap: 4px; }
+        .cal-nav-btn { background: transparent; border: none; color: var(--color-text-sub); width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.15s; }
+        .cal-nav-btn:hover { background: var(--color-primary-tint); color: var(--color-primary); }
+        .cal-nav-badge { font-size: var(--fs-subheading); font-weight: 800; color: #111; min-width: 78px; text-align: center; }
 
         /* 달력 내부 스크롤 및 칸 크기 유지 (1fr + minmax로 유동적으로 늘어남 보장) */
         .cal-calendar-inner { width: 100%; overflow-x: auto; padding-bottom: 6px; -webkit-overflow-scrolling: touch; }
@@ -295,10 +295,11 @@
         .cal-event-person { font-weight: 700; font-size: var(--fs-body); margin-left: auto; text-align: right; }
         .cal-event-desc { font-size: var(--fs-body); text-align: right; white-space: pre-wrap; word-break: break-all; margin-left: auto; line-height: 1.25; }
 
-        .cal-today-list, .cal-selected-list { display: flex; flex-direction: column; gap: 10px; max-height: 360px; overflow-y: auto; padding-right: 4px; }
+        .cal-today-list, .cal-selected-list { display: flex; flex-direction: column; gap: 0; max-height: 360px; overflow-y: auto; padding-right: 4px; }
         .cal-today-list::-webkit-scrollbar, .cal-selected-list::-webkit-scrollbar { width: 6px; }
         .cal-today-list::-webkit-scrollbar-thumb, .cal-selected-list::-webkit-scrollbar-thumb { background: #c7d6f5; border-radius: 3px; }
-        .cal-today-card, .cal-selected-card { background: #fff; border: 1px solid var(--color-border); border-radius: 10px; padding: 10px 14px; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.015); }
+        .cal-today-card, .cal-selected-card { padding: 10px 0; display: flex; flex-direction: column; gap: 6px; border-bottom: 1px solid #f1f3f5; }
+        .cal-today-card:last-child, .cal-selected-card:last-child { border-bottom: none; }
         .cal-no-schedule { font-size: var(--fs-body); color: var(--color-text-sub); text-align: center; padding: 16px 0; width: 100%; }
         .cal-card-main { display: flex; align-items: center; gap: 8px; font-size: var(--fs-body); }
         .cal-card-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
