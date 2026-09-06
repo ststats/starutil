@@ -32,13 +32,27 @@
         <div class="home-wordmark-title"><span class="logo-black">스타</span><span class="logo-accent">대학</span></div>
         <div class="home-wordmark-sub">STAR UNIVERSITY</div>
     </div>
+    <div class="page-header">
+        <p class="page-header-desc">스타대학의 방송 현황과 최신 소식을 확인하세요.</p>
+    </div>
+    <hr class="page-header-divider">
     <div class="section-title">현재 방송중</div>
     <div class="clean-card p-4" id="home-live-broadcast">
         <div class="text-center text-muted py-4" style="font-size:var(--fs-body);">실시간 방송 상태 연동 준비중입니다.</div>
     </div>
+
+    <div class="section-title mt-4">최신 공지</div>
+    <div class="clean-card p-0 overflow-hidden" id="home-notice-list">
+        <div class="text-center text-muted py-4" style="font-size:var(--fs-body);">불러오는 중...</div>
+    </div>
 </div>
 
 <div id="page-schedule" class="page-section container">
+    <div class="page-header">
+        <h1 class="page-header-title">일정</h1>
+        <p class="page-header-desc">이번 달 일정과 오늘의 일정을 확인하세요.</p>
+    </div>
+    <hr class="page-header-divider">
     <div class="cal-app-root">
         <div class="cal-main-layout">
             <!-- 모바일 분리용 사이드바 -->
@@ -79,11 +93,21 @@
 </div>
 
 <div id="page-members" class="page-section container">
+    <div class="page-header">
+        <h1 class="page-header-title">멤버</h1>
+        <p class="page-header-desc">직책과 티어 순으로 정리된 스타대학 멤버 목록입니다.</p>
+    </div>
+    <hr class="page-header-divider">
     <div id="members-groups"></div>
 </div>
 
 <!-- 시너지표: ststats(외부) 데이터에서 우리 로스터만 뽑아 방송 활동 랭킹 표시 -->
 <div id="page-synergy" class="page-section container">
+    <div class="page-header">
+        <h1 class="page-header-title">시너지표</h1>
+        <p class="page-header-desc">SOOP 방송 활동 데이터 기반 랭킹입니다. (이번 달 기준)</p>
+    </div>
+    <hr class="page-header-divider">
     <div class="sub-tabs" id="synergy-metric-filter">
         <div class="sub-tab active" data-metric="balloons" onclick="setSynergyMetric('balloons')">별풍선</div>
         <div class="sub-tab" data-metric="broadcast_seconds" onclick="setSynergyMetric('broadcast_seconds')">방송시간</div>
@@ -135,7 +159,11 @@
 
 <!-- 도구 페이지: 외부 링크 카드 모음 -->
 <div id="page-tools" class="page-section container">
-    <div class="section-title">도구</div>
+    <div class="page-header">
+        <h1 class="page-header-title">도구</h1>
+        <p class="page-header-desc">멤버들이 쓰기 좋은 외부 도구 모음입니다.</p>
+    </div>
+    <hr class="page-header-divider">
     <div class="tool-grid">
         <a class="tool-card" href="https://calm-hoxy.vercel.app/" target="_blank" rel="noopener">
             <span class="tool-card-ext">↗</span>
@@ -167,6 +195,11 @@
 
 <!-- 전적 페이지 -->
 <div id="page-stats" class="page-section container">
+    <div class="page-header">
+        <h1 class="page-header-title">전적</h1>
+        <p class="page-header-desc">팀 전적과 개인 전적을 확인하세요.</p>
+    </div>
+    <hr class="page-header-divider">
     <div class="sub-tabs">
         <div class="sub-tab active" id="tab-team" onclick="switchStatView('team')">팀</div>
         <div class="sub-tab" id="tab-individual" onclick="switchStatView('individual')">개인</div>
