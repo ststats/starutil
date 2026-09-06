@@ -108,6 +108,8 @@
         .match-list-scroll { overflow-x: auto; }
         .match-list-scroll::-webkit-scrollbar { height: 6px; }
         .match-list-scroll::-webkit-scrollbar-thumb { background: #c7d6f5; border-radius: 3px; }
+        .table-responsive::-webkit-scrollbar { height: 6px; }
+        .table-responsive::-webkit-scrollbar-thumb { background: #c7d6f5; border-radius: 3px; }
         
         .match-row { display: flex; align-items: center; padding: 10px 15px; font-size: var(--fs-body); background: #fff; transition: background 0.1s; cursor: pointer; min-width: 480px; }
         .match-row:hover { background: var(--color-primary-tint); }
@@ -198,6 +200,7 @@
         .badge-draw { background-color: var(--color-draw); }
 
         /* 모달 */
+        .modal-content { overflow: hidden; }
         .modal-header { position: relative; display: flex; align-items: center; justify-content: center; padding: 18px; border-bottom: 1px solid var(--color-border) !important; background: #fff; }
         .modal-title { font-size: var(--fs-heading); font-weight: 800; text-align: center; width: 100%; margin: 0; color: #111; }
         .modal-header .btn-close { position: absolute; right: 18px; top: 50%; transform: translateY(-50%); margin: 0; }
