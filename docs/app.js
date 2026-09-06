@@ -103,7 +103,10 @@
 
             const collapseId = `collapse-${containerId}-${idx}`;
             // _match_key가 있으면 그걸로 정확히 매칭(같은 날 여러 경기 구분), 없을 때만 날짜+상대팀으로 대체
+            // 내전 라운드는 개인 통계용으로 반대편 관점의 '미러' 라운드가 추가돼 있으므로
+            // (match_link.py 참고) 세트별 상세보기에는 원본 한 줄만 보이도록 걸러낸다.
             const teamRounds = dbRounds.filter(r => {
+                if (r['_mirrored']) return false;
                 if (m['_match_key'] && r['_match_key']) return r['_match_key'] === m['_match_key'];
                 return r['날짜'] === m['날짜'] && r['상대팀'] === m['상대팀'];
             });
@@ -230,20 +233,12 @@
         <div class="member-grid mb-4">${sorted.map(memberCardHtml).join('')}</div>`;
     }
     function renderMembersPage() {
-        const roleOrderBase = ['감독', '코치', '선수'];
-        const allRoles = [...new Set(dbMembers.map(m => m['직책'] || '기타'))];
-        const extraRoles = allRoles.filter(r => !roleOrderBase.includes(r));
-        const roleOrder = [...roleOrderBase, ...extraRoles];
-
         const activeMembers = dbMembers.filter(isActiveMember);
         const formerMembers = dbMembers.filter(m => !isActiveMember(m));
 
         let html = '';
-        roleOrder.forEach(role => {
-            const group = activeMembers.filter(m => (m['직책'] || '기타') === role);
-            html += renderMemberGroup(role, group);
-        });
-        html += renderMemberGroup('이전 멤버', formerMembers);
+        html += renderMemberGroup('현황', activeMembers);
+        html += renderMemberGroup('전 멤버', formerMembers);
 
         document.getElementById('members-groups').innerHTML = html || '<div class="text-center text-muted py-5">등록된 멤버가 없습니다.</div>';
     }
