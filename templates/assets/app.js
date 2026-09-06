@@ -325,7 +325,7 @@
                     if(isDraw) resBadge = '<span class="text-secondary fw-bold">무</span>';
 
                     return `
-                    <div class="d-flex align-items-center py-2" style="font-size:var(--fs-body); border-bottom:1px solid #f1f3f5; min-width: 500px;">
+                    <div class="d-flex align-items-center py-2" style="font-size:var(--fs-body); border-bottom:1px solid #f1f3f5; min-width: 480px;">
                         <div style="width:20%; text-align:center; font-weight:800; color:#888; white-space:nowrap;">${escapeHTML(r['세트']) || ''} ${escapeHTML(r['라운드']) || (i+1) + '라'}</div>
                         <div style="width:20%; text-align:center; color:#555;">${escapeHTML(r['맵']) || '-'}</div>
                         <div style="width:20%; text-align:center;" class="fw-bold ${isWin?'text-primary':'text-dark'}">${escapeHTML(r['우리 선수'])||'-'}</div>
@@ -350,7 +350,7 @@
                     </div>
                 </div>
                 <div class="collapse" id="${collapseId}">
-                    <div class="px-4 py-2" style="background-color:#fcfcfd; border-top:1px dashed #eaedf2;">
+                    <div class="py-2" style="padding-left:15px; padding-right:15px; background-color:#fcfcfd; border-top:1px dashed #eaedf2;">
                         ${setDetailsHtml}
                     </div>
                 </div>
