@@ -87,19 +87,6 @@
         document.getElementById('news-active-player-list').innerHTML = activeHtml.join('') || `<div class="text-center text-muted py-2" style="font-size:var(--fs-body);">없음</div>`;
     }
 
-    // SOOP 게시판에서 특정 멤버의 최신 글 1개만 가져온다 ("전체" 병합 피드용)
-    async function fetchLatestPost(soopId) {
-        try {
-            const url = `https://api-channel.sooplive.com/v1.1/channel/${encodeURIComponent(soopId)}/board?perPage=1&page=1`;
-            const res = await fetch(url);
-            if (!res.ok) return null;
-            const data = await res.json();
-            return (data.contents && data.contents[0]) || null;
-        } catch (e) {
-            return null;
-        }
-    }
-
     async function showNewsAll() {
         toggleNewsSidebar(false);
         document.querySelectorAll('#newsSidebarPanel .player-item').forEach(el => el.classList.remove('active'));
@@ -115,14 +102,20 @@
             return soopId && /^[a-zA-Z0-9_-]+$/.test(String(soopId).trim());
         });
 
+        // 멤버별로 최근 몇 개씩 후보를 모아서(공지+일반글 합친 것) 전체를 한 번에
+        // 날짜순으로 다시 정렬 - 활동이 뜸한 멤버 글도 상위 10개 안에 들어올 수 있게.
         const settled = await Promise.allSettled(
-            activeMembers.map(m => fetchLatestPost(m['SOOP ID']).then(post => ({ member: m, post })))
+            activeMembers.map(async m => {
+                const { posts } = await fetchMemberFeed(m['SOOP ID'], 1);
+                return posts.slice(0, 5).map(post => ({ member: m, post }));
+            })
         );
 
         const withPost = settled
-            .filter(r => r.status === 'fulfilled' && r.value.post)
-            .map(r => r.value)
-            .sort((a, b) => new Date(b.post.regDate) - new Date(a.post.regDate));
+            .filter(r => r.status === 'fulfilled')
+            .flatMap(r => r.value)
+            .sort((a, b) => new Date(b.post.regDate) - new Date(a.post.regDate))
+            .slice(0, 10);
 
         content.innerHTML = withPost.length
             ? withPost.map(({ member: m, post }) => renderNewsPostHtml(post, m)).join('')
@@ -157,6 +150,36 @@
         const diffDay = Math.floor(diffHour / 24);
         if (diffDay < 30) return `${diffDay}일 전`;
         return String(dateStr).split(' ')[0];
+    }
+
+    // 게시판 응답의 contents(일반글)와 noticeData(공지)를 합쳐서, 본인이 쓴 글만
+    // 남기고 최신순으로 정렬한다. (같은 글이 양쪽에 겹치는 경우는 titleNo로 중복 제거)
+    function mergeOwnPosts(data, soopId) {
+        const isOwn = p => String(p.userId || '').toLowerCase() === String(soopId).toLowerCase();
+        const merged = [...(data.contents || []).filter(isOwn), ...(data.noticeData || []).filter(isOwn)];
+        const seen = new Set();
+        const unique = merged.filter(p => {
+            if (seen.has(p.titleNo)) return false;
+            seen.add(p.titleNo);
+            return true;
+        });
+        unique.sort((a, b) => new Date(b.regDate) - new Date(a.regDate));
+        return unique;
+    }
+
+    async function fetchMemberFeed(soopId, page) {
+        try {
+            const url = `https://api-channel.sooplive.com/v1.1/channel/${encodeURIComponent(soopId)}/board?perPage=10&page=${page}`;
+            const res = await fetch(url);
+            if (!res.ok) return { posts: [], totalPages: 1 };
+            const data = await res.json();
+            return {
+                posts: mergeOwnPosts(data, soopId),
+                totalPages: (data.meta && data.meta.totalPages) || 1,
+            };
+        } catch (e) {
+            return { posts: [], totalPages: 1 };
+        }
     }
 
     function renderNewsPostHtml(post, member) {
@@ -194,13 +217,9 @@
         const content = document.getElementById('news-feed-content');
 
         try {
-            const url = `https://api-channel.sooplive.com/v1.1/channel/${encodeURIComponent(soopId)}/board?perPage=10&page=${newsCurrentPage}`;
-            const res = await fetch(url);
-            if (!res.ok) throw new Error('요청 실패');
-            const data = await res.json();
-            const posts = data.contents || [];
-            newsTotalPages = (data.meta && data.meta.totalPages) || 1;
-
+            if (reset) newsCurrentPage = 1;
+            const { posts, totalPages } = await fetchMemberFeed(soopId, newsCurrentPage);
+            newsTotalPages = totalPages;
             const postsHtml = posts.map(p => renderNewsPostHtml(p, currentNewsPlayer)).join('');
 
             if (reset) {
@@ -593,10 +612,7 @@
                     <div class="notice-row-snippet">${escapeHTML(snippet)}</div>
                 </div>
             </a>`;
-        }).join('') + `
-            <div class="notice-view-all-wrap">
-                <a class="notice-view-all" onclick="goToNewsFeed(); return false;" href="#">소식 전체보기 ›</a>
-            </div>`;
+        }).join('');
     }
 
     function openMemberProfile(name) {

@@ -161,9 +161,6 @@
         .notice-row-date { font-size: 11px; color: #999; flex-shrink: 0; white-space: nowrap; }
         .notice-row-title { font-weight: 700; font-size: var(--fs-body); color: #222; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .notice-row-snippet { font-size: 12px; color: var(--color-text-sub); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .notice-view-all-wrap { text-align: center; padding: 10px 14px; }
-        .notice-view-all { font-size: var(--fs-body); font-weight: 700; color: var(--color-primary); text-decoration: none; cursor: pointer; }
-        .notice-view-all:hover { text-decoration: underline; }
 
         /* 멤버 소식 피드 */
         .news-post-card { background: #fff; border: 1px solid var(--color-border); border-radius: 12px; padding: 18px; margin-bottom: 14px; box-shadow: 0 2px 6px rgba(0,0,0,0.015); }
