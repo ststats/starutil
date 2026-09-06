@@ -956,7 +956,7 @@
     }
 
     // ===== 시너지표 (ststats 외부 데이터에서 우리 로스터만 추려서 표시) =====
-    const STSTATS_BASE = 'https://ststats.github.io/staruniv';
+    const STSTATS_BASE = 'https://ststats.github.io/synergy';
     let synergyData = null;
     let synergyMetric = 'balloons';
 
