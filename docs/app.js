@@ -162,6 +162,9 @@
         document.getElementById('news-avatar-list').innerHTML = html.join('');
     }
 
+    let allNewsPool = [];
+    let allNewsShownCount = 0;
+
     async function showNewsAll() {
         document.querySelectorAll('#news-avatar-list .avatar-select-item').forEach(el => el.classList.remove('active'));
         document.getElementById('news-side-btn-all').classList.add('active');
@@ -179,23 +182,51 @@
         });
 
         // 멤버별로 최근 몇 개씩 후보를 모아서(공지+일반글 합친 것) 전체를 한 번에
-        // 날짜순으로 다시 정렬 - 활동이 뜸한 멤버 글도 상위 10개 안에 들어올 수 있게.
+        // 날짜순으로 다시 정렬 - "더보기"로 계속 더 볼 수 있게 넉넉히 모아둔다.
         const settled = await Promise.allSettled(
             activeMembers.map(async m => {
                 const { posts } = await fetchMemberFeed(m['SOOP ID'], 1);
-                return posts.slice(0, 5).map(post => ({ member: m, post }));
+                return posts.slice(0, 10).map(post => ({ member: m, post }));
             })
         );
 
-        const withPost = settled
+        allNewsPool = settled
             .filter(r => r.status === 'fulfilled')
             .flatMap(r => r.value)
-            .sort((a, b) => new Date(b.post.regDate) - new Date(a.post.regDate))
-            .slice(0, 10);
+            .sort((a, b) => new Date(b.post.regDate) - new Date(a.post.regDate));
 
-        content.innerHTML = withPost.length
-            ? withPost.map(({ member: m, post }) => renderNewsPostHtml(post, m)).join('')
-            : `<div class="text-center text-muted py-4" style="font-size:var(--fs-body);">작성된 글이 없습니다.</div>`;
+        renderAllNewsFeed(true);
+    }
+
+    function renderAllNewsFeed(reset) {
+        const content = document.getElementById('news-feed-content');
+        if (reset) allNewsShownCount = 0;
+
+        if (allNewsPool.length === 0) {
+            content.innerHTML = `<div class="text-center text-muted py-4" style="font-size:var(--fs-body);">작성된 글이 없습니다.</div>`;
+            return;
+        }
+
+        const nextCount = Math.min(allNewsShownCount + 10, allNewsPool.length);
+        const html = allNewsPool.slice(allNewsShownCount, nextCount)
+            .map(({ member: m, post }) => renderNewsPostHtml(post, m)).join('');
+
+        if (reset) {
+            content.innerHTML = html;
+        } else {
+            const wrap = document.getElementById('news-all-load-more-wrap');
+            if (wrap) wrap.remove();
+            content.insertAdjacentHTML('beforeend', html);
+        }
+        allNewsShownCount = nextCount;
+
+        if (allNewsShownCount < allNewsPool.length) {
+            content.insertAdjacentHTML('beforeend', `<div class="text-center mt-1 mb-2" id="news-all-load-more-wrap"><button class="news-load-more" onclick="loadMoreAllNews()">더보기 <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></button></div>`);
+        }
+    }
+
+    function loadMoreAllNews() {
+        renderAllNewsFeed(false);
     }
 
     function selectNewsPlayer(name) {
@@ -311,7 +342,7 @@
             }
 
             if (newsCurrentPage < newsTotalPages) {
-                content.insertAdjacentHTML('beforeend', `<div class="text-center mt-2 mb-3" id="news-load-more-wrap"><button class="btn-clean" onclick="loadMoreNews()">더보기</button></div>`);
+                content.insertAdjacentHTML('beforeend', `<div class="text-center mt-1 mb-2" id="news-load-more-wrap"><button class="news-load-more" onclick="loadMoreNews()">더보기 <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></button></div>`);
             }
         } catch (e) {
             content.innerHTML = `<div class="text-center text-muted py-4" style="font-size:var(--fs-body);">글을 불러오지 못했습니다.</div>`;
