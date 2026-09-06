@@ -359,6 +359,69 @@
         }).join('')}</div>`;
     }
 
+    // ===== 홈 화면 - 최신 공지 =====
+    // SOOP 채널 게시판 API를 브라우저에서 직접 fetch한다 (방송중 체크와 같은 방식).
+    // 응답의 noticeData가 실제로 '공지' 처리된 글들이고(noticeYn:2), 최신순으로 정렬돼 온다.
+    async function fetchLatestNotice(soopId) {
+        try {
+            const url = `https://api-channel.sooplive.com/v1.1/channel/${soopId}/board?perPage=20`;
+            const res = await fetch(url);
+            if (!res.ok) return null;
+            const data = await res.json();
+            return (data.noticeData && data.noticeData[0]) || null;
+        } catch (e) {
+            return null;
+        }
+    }
+
+    async function renderLatestNotices() {
+        const container = document.getElementById('home-notice-list');
+        const activeMembers = dbMembers.filter(m => {
+            if (!isActiveMember(m)) return false;
+            const soopId = m['SOOP ID'];
+            return soopId && /^[a-zA-Z0-9_-]+$/.test(String(soopId).trim());
+        });
+
+        if (activeMembers.length === 0) {
+            container.innerHTML = `<div class="text-center text-muted py-4" style="font-size:var(--fs-body);">최근 공지가 없습니다.</div>`;
+            return;
+        }
+
+        const settled = await Promise.allSettled(
+            activeMembers.map(m => fetchLatestNotice(m['SOOP ID']).then(notice => ({ member: m, notice })))
+        );
+
+        const withNotice = settled
+            .filter(r => r.status === 'fulfilled' && r.value.notice)
+            .map(r => r.value)
+            .sort((a, b) => new Date(b.notice.regDate) - new Date(a.notice.regDate));
+
+        if (withNotice.length === 0) {
+            container.innerHTML = `<div class="text-center text-muted py-4" style="font-size:var(--fs-body);">최근 공지가 없습니다.</div>`;
+            return;
+        }
+
+        container.innerHTML = withNotice.slice(0, 8).map(({ member: m, notice }) => {
+            const soopId = m['SOOP ID'];
+            const title = notice.titleName || '(제목 없음)';
+            const snippet = (notice.content && (notice.content.textContent || notice.content.summary)) || '';
+            const dateText = (notice.regDate || '').split(' ')[0];
+
+            return `
+            <a class="notice-row" href="https://www.sooplive.com/station/${encodeURIComponent(soopId)}" target="_blank" rel="noopener">
+                ${avatarHtml(soopId, 'notice-row-avatar')}
+                <div class="notice-row-body">
+                    <div class="notice-row-top">
+                        <span class="notice-row-name">${escapeHTML(m['이름'])}</span>
+                        <span class="notice-row-date">${escapeHTML(dateText)}</span>
+                    </div>
+                    <div class="notice-row-title">${escapeHTML(title)}</div>
+                    <div class="notice-row-snippet">${escapeHTML(snippet)}</div>
+                </div>
+            </a>`;
+        }).join('');
+    }
+
     function openMemberProfile(name) {
         const m = dbMembers.find(x => x['이름'] === name);
         if (!m) return;
@@ -700,6 +763,7 @@
         calculateTeamSummaries();
         renderMembersPage();
         renderLiveBroadcasts();
+        renderLatestNotices();
         loadSynergyData();
 
         const activePageId = document.querySelector('.page-section.active').id.replace('page-', '');
